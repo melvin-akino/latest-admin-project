@@ -1,0 +1,126 @@
+// =========================================================
+// * Vuetify Material Dashboard - v2.1.0
+// =========================================================
+//
+// * Product Page: https://www.creative-tim.com/product/vuetify-material-dashboard
+// * Copyright 2019 Creative Tim (https://www.creative-tim.com)
+//
+// * Coded by Creative Tim
+//
+// =========================================================
+//
+// * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+// Creative Tim refine style code
+@import "vuetify-material/sidebar";
+@import "vuetify-material/appbar";
+@import "vuetify-material/buttons";
+@import "vuetify-material/pagination";
+@import "vuetify-material/footer";
+@import "vuetify-material/view";
+@import "vuetify-material/settings";
+@import "vuetify-material/card";
+@import "vuetify-material/table";
+@import "vuetify-material/tab";
+@import "vuetify-material/notification";
+@import "vuetify-material/modal";
+@import "vuetify-material/map";
+@import "vuetify-material/chip";
+
+$font-size-root: 14px;
+$sheet-border-radius: 4px;
+$list-item-title-font-size: 0.929rem;
+$list-item-dense-title-font-size: 0.929rem;
+$list-item-dense-title-font-weight: initial;
+$fab-icon-sizes: ( small: 20 );
+$btn-font-sizes: ( default: 1rem, large: 1rem );
+$btn-sizes: ( default: 41, large: 54 );
+$btn-letter-spacing: 0;
+$btn-font-weight: 400;
+$card-text-font-size: 16px;
+
+$headings: (
+  'h1': (
+    'size': 3.3125rem,
+    'line-height': 1.15em
+  ),
+  'h2': (
+    'size': 2.25rem,
+    'line-height': 1.5em
+  ),
+  'h3': (
+    'size': 1.5625rem,
+    'line-height': 1.4em
+  ),
+  'h4': (
+    'size': 1.125rem,
+    'line-height': 1.4em
+  ),
+  'h5': ( 'size': 1.0625rem ),
+  'h6': ( 'size': .75rem ),
+  'subtitle-2': ( 'size': 1rem ),
+  'overline': ( 'letter-spacing': 0 )
+);
+
+
+
+.v-btn.v-size--default,
+.v-btn.v-size--large {
+  &:not(.v-btn--icon):not(.v-btn--fab) {
+    padding: 0 30px !important;
+  }
+}
+
+.theme--light.v-list-item .v-list-item__action-text,
+.theme--light.v-list-item .v-list-item__subtitle {
+  color: #999;
+}
+
+.theme--light.v-text-field > .v-input__control > .v-input__slot:before {
+  border-color: #d2d2d2;
+}
+
+.v-label.v-label,
+.v-alert.v-alert {
+  font-size: $font-size-root;
+}
+
+.theme--light .v-content {
+  background-color: #eee;
+}
+
+.v-input__append-outer {
+  margin-top: 0 !important;
+}
+
+.v-btn__content {
+  font-weight: 400;
+  letter-spacing: normal; 
+}
+
+.v-size--default .v-btn__content {
+  font-size: 12.25px !important;
+}
+
+.v-size--small .v-btn__content {
+  font-size: 10.5px !important;
+}
+
+.v-application .text-h4 {
+  font-size: 1.125rem !important;
+  line-height: 1.4em;
+}
+
+.v-application .subtitle-1 {
+  font-size:14px !important;
+}
+
+.v-application .display-2 {
+  font-size: 1.5625rem !important;
+  line-height: 1.4em;
+}
+
+.v-toolbar__title {
+  font-size: 17.5px;
+}
+

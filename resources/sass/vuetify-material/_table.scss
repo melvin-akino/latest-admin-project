@@ -1,0 +1,21 @@
+.v-data-table td {
+  font-weight: 400;
+  padding: 0px 8px;
+  font-size: 13px !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.v-data-table table thead tr th {
+  font-weight: 600;
+  font-size: 11px !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+  padding: 0px 8px;
+}
+
+.v-data-table table tbody tr td .v-btn {
+  margin-right: 0px !important;
+}
+
+.v-data-table .v-data-table-header__sort-badge {
+  font-size: 10px;
+}
