@@ -1,0 +1,165 @@
+<template>
+  <v-card class="userForm">
+    <v-toolbar color="primary" dark height="40px">
+      <v-toolbar-title class="text-uppercase subtitle-1"
+        >Wallet</v-toolbar-title
+      >
+      <v-spacer></v-spacer>
+      <v-btn @click="closeDialog" icon>
+        <v-icon dark>mdi-close-circle</v-icon>
+      </v-btn>
+    </v-toolbar>
+      <v-form @submit.prevent="updateUserCredits">
+        <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" md="6" class="formColumn">
+                  <v-select
+                    :items="transactionTypes"
+                    label="Trasanction Type"
+                    outlined
+                    dense
+                    value="Deposit"
+                    v-model="$v.wallet.transactionType.$model"
+                    :error-messages="transactionTypeErrors"
+                    @input="$v.wallet.transactionType.$touch()"
+                    @blur="$v.wallet.transactionType.$touch()"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" md="6" class="formColumn d-flex flex-column align-end text-uppercase">
+                  <span class="subtitle-1">Remaining Credits</span>
+                  <p class="headline">{{ userToUpdate.currency }} {{ userToUpdate.credits }}</p>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="6" class="formColumn">
+                  <v-text-field
+                    label="Credits"
+                    type="text"
+                    outlined
+                    dense
+                    v-model="$v.wallet.credits.$model"
+                    :error-messages="creditsErrors"
+                    @input="$v.wallet.credits.$touch()"
+                    @blur="$v.wallet.credits.$touch()"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6" class="formColumn">
+                  <v-select
+                    :items="currencies"
+                    label="Currency"
+                    outlined
+                    dense
+                    value="CNY"
+                    v-model="$v.wallet.currency.$model"
+                    :error-messages="currencyErrors"
+                    @input="$v.wallet.currency.$touch()"
+                    @blur="$v.wallet.currency.$touch()"
+                  ></v-select>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" md="12" class="formColumn">
+                  <v-textarea
+                    outlined
+                    dense
+                    label="Remarks"
+                    v-model="wallet.remarks"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn dark right class="red darken-2" @click="closeDialog">Cancel</v-btn>
+          <v-btn v-if="userToUpdate" type="submit" dark right class="success">Save</v-btn>
+        </v-card-actions>
+      </v-form>
+  </v-card>
+</template>
+
+<script>
+import { mapState } from "vuex";
+import bus from "../../../../eventBus";
+import { required, decimal, minValue } from "vuelidate/lib/validators"
+
+function creditsWithdraw(value) {
+  if(this.wallet.transactionType == 'Deposit') return true
+  return this.wallet.transactionType == 'Withdraw' && this.userToUpdate.credits >= value
+}
+
+export default {
+  name: "WalletForm",
+  props: ['userToUpdate'],
+  data: () => ({
+    transactionTypes: ["Deposit", "Withdraw"],
+    wallet: {
+      transactionType: 'Deposit',
+      credits: '',
+      currency: 'CNY',
+      remarks: ''
+    },
+  }),
+  validations: {
+    wallet: {
+      transactionType: { required },
+      credits: { required, decimal, minValue: minValue(1), creditsWithdraw },
+      currency: { required }
+    }
+  },
+  computed: {
+    ...mapState("users", ["currencies"]),
+    transactionTypeErrors() {
+      let errors = []
+      if (!this.$v.wallet.transactionType.$dirty) return errors
+      !this.$v.wallet.transactionType.required && errors.push('Transaction type is required.')
+      return errors
+    },
+    creditsErrors() {
+      let errors = []
+      if (!this.$v.wallet.credits.$dirty) return errors
+      !this.$v.wallet.credits.required && errors.push('Credits is required.')
+      !this.$v.wallet.credits.decimal && errors.push('Credits should be numeric.')
+      !this.$v.wallet.credits.minValue && errors.push('Credits should have at least a minimum value of 1.')
+      !this.$v.wallet.credits.creditsWithdraw && errors.push('Unable to withdraw credits greater than current credits.')
+      return errors
+    },
+    currencyErrors() {
+      let errors = []
+      if (!this.$v.wallet.currency.$dirty) return errors
+      !this.$v.wallet.currency.required && errors.push('Currency is required.')
+      return errors
+    }
+  },
+  mounted() {
+    this.initializeUserCurrency()
+  },
+  methods: {
+    closeDialog() {
+      bus.$emit("CLOSE_DIALOG");
+    },
+    initializeUserCurrency() {
+      this.wallet.currency = this.userToUpdate.currency
+    },
+    updateUserCredits() {
+      if(!this.$v.wallet.$invalid) {
+        this.$store.commit('users/UPDATE_USER_WALLET', { id: this.userToUpdate.id, wallet: this.wallet })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "User wallet updated."
+        });
+        this.closeDialog()
+      } else {
+        this.$v.wallet.$touch()
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+  .formColumn {
+    padding: 0px 10px;
+  }
+</style>
