@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
+use App\Models\AdminUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -11,10 +11,10 @@ use Illuminate\Http\Request;
 
 class ApiAuthController extends Controller
 {
-    public function register (Request $request) {
+    public function create (Request $request) {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:admin_users',
             'password' => 'required|string|min:6|confirmed',
         ]);
         if ($validator->fails())
