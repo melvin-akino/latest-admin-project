@@ -56,7 +56,6 @@
           </table-action-dialog>
         </template>
       </v-data-table>
-      <snack-bar></snack-bar>
     </v-container>
   </div>
 </template>
@@ -69,7 +68,6 @@ export default {
   components: {
     ButtonDialog: () => import("../../component/ButtonDialog"),
     TableActionDialog: () => import("../../component/TableActionDialog"),
-    SnackBar: () => import("../../component/Snackbar"),
     ProviderForm: () => import("../../components/forms/ProviderForm")
   },
   data: () => ({

@@ -35,9 +35,8 @@
                   v-model="loginForm.remember_me"
                 ></v-checkbox> -->
                 <v-card-actions>
-                  <span class="caption red--text text--darken-2" v-if="loginError">{{loginError}}</span>
                   <v-spacer></v-spacer>
-                  <v-btn type="submit" dark right class="primary">Login</v-btn>
+                  <v-btn type="submit" dark right class="primary" :disabled="isLoggingIn">Login</v-btn>
                 </v-card-actions>
               </v-form>
             </base-material-card>
@@ -49,65 +48,83 @@
 </template>
 
 <script>
-import { mapState } from "vuex"
-import { required, email } from "vuelidate/lib/validators"
-import Cookies from "js-cookie"
+import { mapState } from "vuex";
+import { required, email } from "vuelidate/lib/validators";
+import Cookies from "js-cookie";
+import bus from "../../eventBus";
 
 export default {
+  name: 'Login',
   data() {
     return {
       loginForm: {
         email: "",
         password: "",
-        remember_me: false
+        remember_me: false,
       },
-      loginError: ''
+      isLoggingIn: false,
     };
   },
   validations: {
     loginForm: {
       email: { required, email },
-      password: { required }
-    }
+      password: { required },
+    },
   },
   computed: {
-    ...mapState('admin', ['admin']),
+    ...mapState("admin", ["admin"]),
     emailErrors() {
-      let errors = []
-      if(!this.$v.loginForm.email.$dirty) return errors
-      !this.$v.loginForm.email.required && errors.push('Please type your email.')
-      !this.$v.loginForm.email.email && errors.push('Please type a valid email.')
-      return errors
+      let errors = [];
+      if (!this.$v.loginForm.email.$dirty) return errors;
+      !this.$v.loginForm.email.required &&
+        errors.push("Please type your email.");
+      !this.$v.loginForm.email.email &&
+        errors.push("Please type a valid email.");
+      return errors;
     },
     passwordErrors() {
-      let errors = []
-      if(!this.$v.loginForm.password.$dirty) return errors
-      !this.$v.loginForm.password.required && errors.push('Please type your password.')
-      return errors
-    }
+      let errors = [];
+      if (!this.$v.loginForm.password.$dirty) return errors;
+      !this.$v.loginForm.password.required &&
+        errors.push("Please type your password.");
+      return errors;
+    },
   },
   methods: {
     login() {
-      if(!this.$v.loginForm.$invalid) {
-        let isUserValid = this.admin.some(admin => admin.email == this.loginForm.email && admin.password == this.loginForm.password)
-        this.$store.commit('SET_AUTHENTICATED', isUserValid)
-        if(isUserValid) {
-          this.loginError = ''
-          Cookies.set('authenticated', true)
-          this.$router.push('/accounts/users')
-        } else {
-          this.loginError = 'Invalid user credentials.'
-        }
+      if (!this.$v.loginForm.$invalid) {
+        this.isLoggingIn = true;
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Logging in, please wait."
+        });
+        axios.post("login", this.loginForm)
+        .then((response) => {
+          this.isLoggingIn = false;
+          Cookies.set("access_token", response.data.token);
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Login successful."
+          });
+          this.$router.push('/accounts/users');
+        })
+        .catch((err) => {
+          this.isLoggingIn = false;
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
+        });
       } else {
-        this.$v.loginForm.$touch()
+        this.$v.loginForm.$touch();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style>
-  .loginHeading {
-      height: 81px;
-  }
+.loginHeading {
+  height: 81px;
+}
 </style>

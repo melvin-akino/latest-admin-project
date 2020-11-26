@@ -37,6 +37,7 @@
 <script>
 import { mapState, mapMutations } from "vuex";
 import Cookies from 'js-cookie'
+import bus from '../../../../eventBus'
 
 export default {
   name: "DashboardCoreAppBar",
@@ -50,9 +51,19 @@ export default {
       setDrawer: "SET_DRAWER"
     }),
     logout() {
-      this.$store.commit('SET_AUTHENTICATED', false)
-      Cookies.remove('authenticated')
-      this.$router.push('/login')
+      let token = Cookies.get('access_token')
+      axios.post('logout', null, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(response => {
+        Cookies.remove('access_token')
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Logged out."
+        });
+        this.$router.push('/login')
+      })
+      .catch(err => {
+        console.log(err)
+      })
     }
   }
 };
