@@ -27,4 +27,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/provider_accounts', 'ProviderAccountsController@index')->name('provider_accounts.api');
     Route::post('/provider_accounts/manage', 'ProviderAccountsController@manage')->name('provider_accounts_manage.api');
+
+    //Routes to get all currencies
+    Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 });
