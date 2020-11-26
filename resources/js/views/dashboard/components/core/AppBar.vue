@@ -57,7 +57,7 @@ export default {
         Cookies.remove('access_token')
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
-          text: "Logged out."
+          text: response.data.message
         });
         this.$router.push('/login')
       })

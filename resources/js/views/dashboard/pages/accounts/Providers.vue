@@ -39,8 +39,10 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="providerAccountsTable"
+        :items="providerAccounts"
         :items-per-page="10"
+        :loading="isLoadingProviderAccounts"
+        loading-text="Loading Provider Accounts"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -48,7 +50,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerStatus" dense v-model="item.status" @change="updateProviderAccountStatus(item.id, item.status)"></v-select>
+          <v-select :items="providerStatus" dense v-model="item.is_enabled" item-text="text" item-value="value" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
@@ -61,7 +63,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
+import bus from '../../../../eventBus'
 
 export default {
   name: "Providers",
@@ -96,39 +99,23 @@ export default {
     providerAccountsTable: []
   }),
   computed: {
-    ...mapState("providers", ["providerAccounts", "providerStatus"]),
+    ...mapState("providers", ["providerAccounts", "isLoadingProviderAccounts", "providerStatus"]),
   },
   mounted() {
-    this.providerAccountsTable = this.providerAccounts
+    this.getProviderAccounts()
   },
   methods: {
-    updateProviderAccountStatus(id, status) {
-      this.$store.commit('providers/UPDATE_PROVIDER_ACCOUNT_STATUS', { id, status })
-    },
-    filterProviderAccounts() {
-      let filterParams = [this.search.provider, this.search.currency]
-      let filteredProviderAccounts = this.providerAccounts.filter(account => {
-        if(filterParams.includes('All')) {
-          if(this.search.provider && this.search.provider != 'All') {
-            if(account.provider == this.search.provider) {
-              return true
-            } else {
-              return false
-            }
-          }
-          if(this.search.currency && this.search.currency != 'All') {
-            if(account.currency == this.search.currency) {
-              return true
-            } else {
-              return false
-            }
-          }
-          return true
-        } else {
-          return this.search.provider == account.provider && this.search.currency == account.currency
-        }
-      })
-      this.providerAccountsTable = filteredProviderAccounts
+    ...mapActions("providers", ["getProviderAccounts", "manageProviderAccount"]),
+    async updateProviderAccountStatus(providerAccount) {
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: "Updating provider account status..."
+      });
+      await this.manageProviderAccount(providerAccount)
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: "Provider status updated."
+      });
     }
   }
 };

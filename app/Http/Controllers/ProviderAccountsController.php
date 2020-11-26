@@ -18,14 +18,14 @@ class ProviderAccountsController extends Controller
         if (!empty($accounts)) {
             foreach($accounts as $account) {
                 $data['data'][] = [
-                    'id'            => $account['id'],
-                    'username'      => $account['username'],
-                    'password'      => $account['password'],
-                    'type'          => $account['type'],
-                    'percentage'    => $account['punter_percentage'],
-                    'credits'       => $account['credits'],
-                    'is_enabled'    => $account['is_enabled'],
-                    'is_idle'       => $account['is_idle']
+                    'id'                => $account['id'],
+                    'username'          => $account['username'],
+                    'password'          => $account['password'],
+                    'type'              => $account['type'],
+                    'punter_percentage' => $account['punter_percentage'],
+                    'credits'           => $account['credits'],
+                    'is_enabled'        => $account['is_enabled'],
+                    'is_idle'           => $account['is_idle']
                 ];
             }
         }
@@ -39,20 +39,20 @@ class ProviderAccountsController extends Controller
         {
             if (!empty($request)) {
                 DB::beginTransaction();                
-                !empty($request->providerAccountId) ? $data['id'] = $request->providerAccountId : null;
+                !empty($request->id) ? $data['id'] = $request->id : null;
                 !empty($request->username) ? $data['username'] = $request->username : null;
                 !empty($request->password) ? $data['password'] = $request->password : null;
                 !empty($request->provider_id) ? $data['provider_id'] = $request->provider_id : 0;
                 !empty($request->type) ? $data['type'] = $request->type : null;
                 !empty($request->punter_percentage) ? $data['punter_percentage'] = $request->punter_percentage : 0;
                 !empty($request->credits) ? $data['credits'] = $request->credits : 0;
-                !empty($request->pa_is_enabled) ? $data['is_enabled'] = true : $data['is_enabled'] = false;
+                !empty($request->is_enabled) ? $data['is_enabled'] = true : $data['is_enabled'] = false;
                 !empty($request->is_idle) ? $data['is_idle'] = true : $data['is_idle'] = false;
                 $data['updated_at'] = Carbon::now();
 
                 //Record is on update process
-                if (!empty($request->providerAccountId))  {
-                    $providerAccount = ProviderAccount::where('id', $request->providerAccountId)->first();
+                if (!empty($request->id))  {
+                    $providerAccount = ProviderAccount::where('id', $request->id)->first();
                 }
                 else {
                     $providerAccount = ProviderAccount::withTrashed()->where('username', $request->username)
@@ -66,25 +66,23 @@ class ProviderAccountsController extends Controller
                 }               
 
                 if (!empty($providerAccount)) {
-
-                    if ($providerAccount->update($data)) {
-
-                        $message = 'success';   
-                    }
-                    
+                  $providerAccount->update($data);
+                  $provider = ProviderAccount::where('id', $providerAccount->id)->first();
+                  $message  = 'success';   
                 }
                 else
                 {    
-                    if (ProviderAccount::create($data)) {
-                        $message = 'success';
-                    }        
+                  $provider = ProviderAccount::create($data);
+                  $provider = ProviderAccount::where('id', $provider->id)->first();
+                  $message = 'success';       
                 }
-                                   
+            
                 DB::commit();
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'data'        => $message
+                    'message'     => $message,
+                    'data'        => $provider
                 ], 200);
             }
             

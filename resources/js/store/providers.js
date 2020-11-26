@@ -1,74 +1,103 @@
 import Vue from 'vue'
+import Cookies from 'js-cookie'
+const token = Cookies.get('access_token')
 
 const state = {
-  providerAccounts: [
+  providerAccounts: [],
+  isLoadingProviderAccounts: false,
+  providerStatus: [
     {
-      id: 1,
-      username: 'CSY513',
-      credits: '1,000.00',
-      pl: '1,000.00',
-      open_orders: '0.00',
-      type: 'BET NORMAL',
-      status: 'Active',
-      last_bet: '2020-11-16 12:30:10',
-      last_scrape: '2020-11-16 12:30:10',
-      last_sync: 'BALANCE',
-      provider: 'HG',
-      currency: 'CNY',
-      punter_percentage: 45,
-      idle: 'No'
+      text: 'Active',
+      value: true
     },
-    {
-      id: 2,
-      username: 'PSJML',
-      credits: '1,000.00',
-      pl: '1,000.00',
-      open_orders: '0.00',
-      type: 'BET VIP',
-      status: 'Active',
-      last_bet: '2020-11-16 12:30:10',
-      last_scrape: '2020-11-16 12:30:10',
-      last_sync: 'SETTLEMENT',
-      provider: 'ISN',
-      currency: 'USD',
-      punter_percentage: 45,
-      idle: 'No'
+    { 
+      text: 'Inactive',
+      value: false
     }
   ],
-  providerStatus: ['Active', 'Inactive'],
-  providerAccountTypes: ['BET NORMAL', 'BET VIP', 'SCRAPER']
+  providerAccountTypes: ['BET_NORMAL', 'BET_VIP', 'SCRAPER', 'SCRAPER_MIN_MAX'],
+  providerIdleOptions: [
+    {
+      text: 'Yes',
+      value: true
+    },
+    {
+      text: 'No',
+      value: false
+    }
+  ]
 }
 
 const mutations = {
-  ADD_PROVIDER_ACCOUNT: (state, payload) => {
-    let id = state.providerAccounts.length + 1
-    Vue.set(payload, 'id', id)
-    Vue.set(payload, 'credits', '1,000.00')
-    Vue.set(payload, 'pl', '1,000.00')
-    Vue.set(payload, 'open_orders', '0.00')
-    Vue.set(payload, 'provider', 'HG')
-    Vue.set(payload, 'currency', 'CNY')
-    state.providerAccounts.unshift(payload)
+  SET_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
+    state.providerAccounts = providerAccounts
   },
-  UPDATE_PROVIDER_ACCOUNT: (state, payload) => {
-    let fieldsToUpdate = ["username", "punter_percentage", "type", "status", "idle"];
-    state.providerAccounts.map(account => {
-      if (account.id == payload.id) {
-        fieldsToUpdate.map(field => {
-          Vue.set(account, field, payload[field]);
-        });
-      }
-    });
+  SET_IS_LOADING_PROVIDER_ACCOUNTS: (state, loadingState) => {
+    state.isLoadingProviderAccounts = loadingState
   },
-  UPDATE_PROVIDER_ACCOUNT_STATUS: (state, payload) => {
+  ADD_PROVIDER_ACCOUNT: (state, providerAccount) => {
+    let newProviderAccount = {
+      id: providerAccount.id,
+      username: providerAccount.username,
+      password: providerAccount.password,
+      type: providerAccount.type,
+      punter_percentage: providerAccount.punter_percentage,
+      credits: providerAccount.credits,
+      is_enabled: providerAccount.is_enabled,
+      is_idle: providerAccount.is_idle
+    }
+    state.providerAccounts.unshift(newProviderAccount)
+  },
+  UPDATE_PROVIDER_ACCOUNT: (state, providerAccount) => {
+    let updatedProviderAccount = {
+      username: providerAccount.username,
+      password: providerAccount.password,
+      type: providerAccount.type,
+      punter_percentage: providerAccount.punter_percentage,
+      is_enabled: providerAccount.is_enabled,
+      is_idle: providerAccount.is_idle
+    }
     state.providerAccounts.map(account => {
-      if (account.id == payload.id) {
-        Vue.set(account, 'status', payload.status)
+      if (account.id == providerAccount.id) {
+          Object.keys(updatedProviderAccount).map(key => {
+            Vue.set(account, key, updatedProviderAccount[key])
+          })
       }
     });
   }
 }
 
+const actions = {
+  getProviderAccounts({commit}) {
+    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
+    axios.get('provider_accounts', { params: { id: 1 }, headers: { 'Authorization': `Bearer ${token}` } })
+    .then(response => {
+      commit('SET_PROVIDER_ACCOUNTS', response.data.data)
+      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  },
+  manageProviderAccount({commit}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(response => {
+        if(payload.id) {
+          commit('UPDATE_PROVIDER_ACCOUNT', response.data.data)
+        } else {
+          commit('ADD_PROVIDER_ACCOUNT', response.data.data)
+        }
+        resolve()
+      })
+      .catch(err => {
+        console.log(err)
+        reject()
+      })
+    })
+  }
+}
+
 export default {
-  state, mutations, namespaced: true
+  state, mutations, actions, namespaced: true
 }
