@@ -25,7 +25,8 @@ class ProviderAccountsController extends Controller
                     'punter_percentage' => $account['punter_percentage'],
                     'credits'           => $account['credits'],
                     'is_enabled'        => $account['is_enabled'],
-                    'is_idle'           => $account['is_idle']
+                    'is_idle'           => $account['is_idle'],
+                    'provider_id'       => $account['provider_id']
                 ];
             }
         }

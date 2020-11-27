@@ -68,7 +68,6 @@
               <v-select
                 :items="providerStatus"
                 label="Status"
-                :value="true"
                 outlined
                 dense
                 v-model="$v.providerAccount.is_enabled.$model"
@@ -81,13 +80,28 @@
               <v-select
                 :items="providerIdleOptions"
                 label="Idle"
-                value="Yes"
                 outlined
                 dense
                 v-model="$v.providerAccount.is_idle.$model"
                 :error-messages="idleErrors"
                 @input="$v.providerAccount.is_idle.$touch()"
                 @blur="$v.providerAccount.is_idle.$touch()"
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-select
+                :items="providers"
+                label="Provider"
+                outlined
+                dense
+                item-text="alias"
+                item-value="id"
+                v-model="$v.providerAccount.provider_id.$model"
+                :error-messages="statusErrors"
+                @input="$v.providerAccount.provider_id.$touch()"
+                @blur="$v.providerAccount.provider_id.$touch()"
               ></v-select>
             </v-col>
           </v-row>
@@ -127,7 +141,8 @@ export default {
       punter_percentage: '',
       type: 'BET_NORMAL',
       is_enabled: true,
-      is_idle: true
+      is_idle: true,
+      provider_id: 1
     }
   }),
   validations: {
@@ -142,11 +157,13 @@ export default {
       punter_percentage: { required, integer },
       type: { required },
       is_enabled: { required },
-      is_idle: { required }
+      is_idle: { required },
+      provider_id: { required }
     }
   },
   computed: {
     ...mapState("providers", ["providerStatus", "providerAccountTypes", "providerIdleOptions"]),
+    ...mapState("resources", ["providers"]),
     usernameErrors() {
       let errors = []
       if(!this.$v.providerAccount.username.$dirty) return errors
@@ -186,6 +203,12 @@ export default {
       !this.$v.providerAccount.is_idle.required && errors.push('Idle is required.')
       return errors
     },
+    providerErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.provider_id.$dirty) return errors
+      !this.$v.providerAccount.provider_id.required && errors.push('Idle is required.')
+      return errors
+    }
 
   },
   mounted() {
@@ -201,8 +224,6 @@ export default {
       if(this.providerAccountToUpdate) {
         let providerForm = { ...this.providerAccountToUpdate }
         this.providerAccount = providerForm
-      } else {
-        this.providerAccount.provider_id = 1
       }
     },
     async addProviderAccount() {

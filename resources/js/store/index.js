@@ -6,6 +6,7 @@ Vue.use(Vuex)
 import users from './users'
 import admin from './admin'
 import providers from './providers'
+import resources from './resources'
 
 export default new Vuex.Store({
   state: {
@@ -19,6 +20,7 @@ export default new Vuex.Store({
   modules: {
     users,
     admin,
-    providers
+    providers,
+    resources
   }
 })

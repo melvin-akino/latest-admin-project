@@ -7,7 +7,7 @@
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'HG', 'ISN', 'PIN', 'SB']"
+                :items="providerFilters"
                 label="Bookmaker"
                 outlined
                 dense
@@ -19,7 +19,7 @@
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'CNY', 'USD']"
+                :items="currencyFilters"
                 label="Currency"
                 outlined
                 dense
@@ -50,7 +50,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerStatus" dense v-model="item.is_enabled" item-text="text" item-value="value" @change="updateProviderAccountStatus(item)"></v-select>
+          <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
 import bus from '../../../../eventBus'
 
 export default {
@@ -93,19 +93,24 @@ export default {
       }
     ],
     search: {
-      provider: 'All',
-      currency: 'All'
+      provider: 'all',
+      currency: 'all'
     },
     providerAccountsTable: []
   }),
   computed: {
     ...mapState("providers", ["providerAccounts", "isLoadingProviderAccounts", "providerStatus"]),
+    ...mapGetters("resources", ["providerFilters", "currencyFilters"])
   },
   mounted() {
+    this.getProviders()
+    this.getCurrencies()
     this.getProviderAccounts()
   },
   methods: {
+    ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS" }),
     ...mapActions("providers", ["getProviderAccounts", "manageProviderAccount"]),
+    ...mapActions("resources", ["getProviders", "getCurrencies"]),
     async updateProviderAccountStatus(providerAccount) {
       bus.$emit("SHOW_SNACKBAR", {
         color: "success",
@@ -117,6 +122,10 @@ export default {
         text: "Provider status updated."
       });
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.setProviderAccounts([])
+    next()
   }
 };
 </script>

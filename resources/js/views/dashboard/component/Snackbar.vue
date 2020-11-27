@@ -1,16 +1,12 @@
 <template>
-  <v-app>
-    <v-content>
-      <v-snackbar v-model="snackbar.show" right dark :color="snackbar.color">
-        <span class="subtitle-1">{{ snackbar.text }}</span>
-        <template v-slot:action="{ attrs }">
-          <v-btn @click="snackbar.show = false" dark icon :bind="attrs">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-          </template>
-      </v-snackbar>
-    </v-content>
-  </v-app>
+  <v-snackbar v-model="snackbar.show" right dark :color="snackbar.color">
+    <span class="subtitle-1">{{ snackbar.text }}</span>
+    <template v-slot:action="{ attrs }">
+      <v-btn @click="snackbar.show = false" dark icon :bind="attrs">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      </template>
+  </v-snackbar>
 </template>
 
 <script>

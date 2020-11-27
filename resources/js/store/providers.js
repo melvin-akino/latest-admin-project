@@ -1,6 +1,5 @@
 import Vue from 'vue'
-import Cookies from 'js-cookie'
-const token = Cookies.get('access_token')
+import { getToken } from '../helpers/token'
 
 const state = {
   providerAccounts: [],
@@ -44,7 +43,8 @@ const mutations = {
       punter_percentage: providerAccount.punter_percentage,
       credits: providerAccount.credits,
       is_enabled: providerAccount.is_enabled,
-      is_idle: providerAccount.is_idle
+      is_idle: providerAccount.is_idle,
+      provider_id: providerAccount.provider_id
     }
     state.providerAccounts.unshift(newProviderAccount)
   },
@@ -55,13 +55,14 @@ const mutations = {
       type: providerAccount.type,
       punter_percentage: providerAccount.punter_percentage,
       is_enabled: providerAccount.is_enabled,
-      is_idle: providerAccount.is_idle
+      is_idle: providerAccount.is_idle,
+      provider_id: providerAccount.provider_id
     }
     state.providerAccounts.map(account => {
       if (account.id == providerAccount.id) {
-          Object.keys(updatedProviderAccount).map(key => {
-            Vue.set(account, key, updatedProviderAccount[key])
-          })
+        Object.keys(updatedProviderAccount).map(key => {
+          Vue.set(account, key, updatedProviderAccount[key])
+        })
       }
     });
   }
@@ -70,7 +71,7 @@ const mutations = {
 const actions = {
   getProviderAccounts({commit}) {
     commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
-    axios.get('provider_accounts', { params: { id: 1 }, headers: { 'Authorization': `Bearer ${token}` } })
+    axios.get('provider_accounts', { params: { id: 1 }, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_PROVIDER_ACCOUNTS', response.data.data)
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
@@ -81,7 +82,7 @@ const actions = {
   },
   manageProviderAccount({commit}, payload) {
     return new Promise((resolve, reject) => {
-      axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${token}` } })
+      axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         if(payload.id) {
           commit('UPDATE_PROVIDER_ACCOUNT', response.data.data)

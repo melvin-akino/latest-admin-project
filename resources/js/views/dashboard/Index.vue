@@ -1,11 +1,11 @@
 <template>
-  <v-app>
+  <div class="wrapper">
     <dashboard-core-app-bar />
 
     <dashboard-core-drawer />
 
     <dashboard-core-view />
-  </v-app>
+  </div>
 </template>
 
 <script>
