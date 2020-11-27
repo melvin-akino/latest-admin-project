@@ -12,9 +12,19 @@ class OrdersController extends Controller
         $orders = Order::getAllOrders($request->id);
         $data = [];
         if (!empty($orders)) {
+            $pl = 0;
+            $openOrders = 0;
+            $lastBetDate = '';
             foreach($orders as $key => $order) {
                 if ($key == 0) {
-                    $lastBetDate = $order['created_at']
+                    $lastBetDate = $order['created_at'];
+                }
+
+                if ($order['settlement_date'] != '') {
+                    $pl += $order['actual_pl'];
+                }
+                else {
+                    $openOrders += $order['actual_stake'];
                 }
                 
             }
