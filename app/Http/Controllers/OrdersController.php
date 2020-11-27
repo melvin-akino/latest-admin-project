@@ -20,8 +20,8 @@ class OrdersController extends Controller
                     $lastBetDate = $order['created_at'];
                 }
 
-                if ($order['settlement_date'] != '') {
-                    $pl += $order['actual_pl'];
+                if ($order['settled_date'] != '') {
+                    $pl += $order['actual_profit_loss'];
                 }
                 else {
                     $openOrders += $order['actual_stake'];
