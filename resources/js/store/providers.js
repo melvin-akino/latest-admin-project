@@ -69,15 +69,46 @@ const mutations = {
 }
 
 const actions = {
-  getProviderAccounts({commit}) {
-    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
-    axios.get('provider_accounts', { params: { id: 1 }, headers: { 'Authorization': `Bearer ${getToken()}` } })
-    .then(response => {
-      commit('SET_PROVIDER_ACCOUNTS', response.data.data)
-      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+  getProviderAccounts() { 
+    return new Promise((resolve, reject) => {
+      axios.get('provider_accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data.data)
+      })
+      .catch(err => {
+        console.log(err)
+        reject()
+      })
     })
-    .catch(err => {
-      console.log(err)
+  },
+  getProviderAccountOrders({}, id) {
+    return new Promise((resolve, reject) => {
+      axios.get('orders', { params: { id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(err => {
+        console.log(err)
+        reject()
+      })
+    })
+  },
+  async getProviderAccountsList({state, commit, dispatch}) {
+    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
+    let providerAccounts = await dispatch('getProviderAccounts')
+    commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
+    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+    state.providerAccounts.map(async account => {
+      let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+      if(providerAccountOrder.length != 0) {
+        Vue.set(account, 'pl', providerAccountOrder.pl)
+        Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
+        Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
+      } else {
+        Vue.set(account, 'pl', '-')
+        Vue.set(account, 'open_orders', '-')
+        Vue.set(account, 'last_bet', '-')
+      }
     })
   },
   manageProviderAccount({commit}, payload) {

@@ -33,11 +33,11 @@ class ProviderAccount extends Model
 
     public static function getProviderAccounts($providerId) 
     {
-        if (!empty($providerId)) {
-            return self::where('provider_id', $providerId)->get()->toArray();
-        }
-    	else {
-            return self::all();
-        }
+      if (!empty($providerId)) {
+        return self::where('provider_id', $providerId)->orderBy('id', 'DESC');
+      }
+      else {
+        return self::orderBy('id', 'DESC');
+      }
     }
 }

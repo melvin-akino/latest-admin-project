@@ -49,8 +49,41 @@
             <p class="subtitle-1">Summary</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.pl`]="{ item }">
+          <span v-if="!item.hasOwnProperty('pl')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="2"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.pl}}</span>    
+        </template>
+        <template v-slot:[`item.open_orders`]="{ item }">
+          <span v-if="!item.hasOwnProperty('open_orders')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="2"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.open_orders}}</span>    
+        </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
+        </template>
+        <template v-slot:[`item.last_bet`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_bet')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="2"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_bet}}</span>    
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
@@ -105,11 +138,11 @@ export default {
   mounted() {
     this.getProviders()
     this.getCurrencies()
-    this.getProviderAccounts()
+    this.getProviderAccountsList()
   },
   methods: {
     ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS" }),
-    ...mapActions("providers", ["getProviderAccounts", "manageProviderAccount"]),
+    ...mapActions("providers", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions("resources", ["getProviders", "getCurrencies"]),
     async updateProviderAccountStatus(providerAccount) {
       bus.$emit("SHOW_SNACKBAR", {
