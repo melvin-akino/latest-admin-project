@@ -28,8 +28,12 @@ Route::middleware('auth:api')->group(function () {
     //Provider accounts routes
     Route::get('/provider_accounts', 'ProviderAccountsController@index')->name('provider_accounts.api');
     Route::post('/provider_accounts/manage', 'ProviderAccountsController@manage')->name('provider_accounts_manage.api');
+
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
+
+    //Orders related routes
+    Route::get('/orders', 'OrdersController@index')->name('orders.api');
 });
