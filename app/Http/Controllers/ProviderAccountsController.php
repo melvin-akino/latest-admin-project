@@ -13,7 +13,11 @@ class ProviderAccountsController extends Controller
 {
     public function index(Request $request)
     {
-        $accounts = ProviderAccount::getProviderAccounts($request->id);
+        $id = null;
+        if (!empty($request->id)) {
+            $id = $request->id;
+        }
+        $accounts = ProviderAccount::getProviderAccounts($id);
         $data = [];
         if (!empty($accounts)) {
             foreach($accounts as $account) {
