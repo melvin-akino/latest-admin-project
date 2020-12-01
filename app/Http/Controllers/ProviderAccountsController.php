@@ -14,7 +14,7 @@ class ProviderAccountsController extends Controller
     public function index(Request $request)
     {
         $id = null;
-        if !empty($request->id) {
+        if (!empty($request->id)) {
             $id = $request->id;
         }
         $accounts = ProviderAccount::getProviderAccounts($id);
