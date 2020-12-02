@@ -17,7 +17,22 @@ class ProviderAccountsController extends Controller
         if (!empty($request->id)) {
             $id = $request->id;
         }
-        $accounts = ProviderAccount::getProviderAccounts($id);
+        $accounts = ProviderAccount::getProviderAccounts($id)
+                      ->join('providers as p', 'p.id', 'provider_id')
+                      ->select([
+                        'provider_accounts.id',
+                        'username',
+                        'password',
+                        'type',
+                        'provider_accounts.punter_percentage',
+                        'credits',
+                        'provider_accounts.is_enabled',
+                        'is_idle',
+                        'provider_id',
+                        'p.currency_id'
+                      ])
+                      ->get()
+                      ->toArray();
         $data = [];
         if (!empty($accounts)) {
             foreach($accounts as $account) {
@@ -30,7 +45,8 @@ class ProviderAccountsController extends Controller
                     'credits'           => $account['credits'],
                     'is_enabled'        => $account['is_enabled'],
                     'is_idle'           => $account['is_idle'],
-                    'provider_id'       => $account['provider_id']
+                    'provider_id'       => $account['provider_id'],
+                    'currency_id'       => $account['currency_id']
                 ];
             }
         }

@@ -13,6 +13,7 @@
                 dense
                 v-model="search.provider"
                 background-color="#fff"
+                @change="setCurrencyFilter(search.provider)"
               ></v-select>
             </v-col>
           </v-row>
@@ -33,13 +34,13 @@
       </div>
       <v-toolbar flat color="transparent">
         <v-spacer></v-spacer>
-        <button-dialog icon="mdi-plus" label="New Account" width="600">
+        <button-dialog icon="mdi-plus" label="New Account" width="600" @clearFilters="clearFilters">
           <provider-form :update="false"></provider-form>
         </button-dialog>
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="providerAccounts"
+        :items="filteredProviderAccounts"
         :items-per-page="10"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
@@ -49,11 +50,44 @@
             <p class="subtitle-1">Summary</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.pl`]="{ item }">
+          <span v-if="!item.hasOwnProperty('pl')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.pl}}</span>    
+        </template>
+        <template v-slot:[`item.open_orders`]="{ item }">
+          <span v-if="!item.hasOwnProperty('open_orders')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.open_orders}}</span>    
+        </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
+        <template v-slot:[`item.last_bet`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_bet')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_bet}}</span>    
+        </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600">
+          <table-action-dialog icon="mdi-pencil" width="600" @clearFilters="clearFilters">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>
           </table-action-dialog>
         </template>
@@ -99,17 +133,18 @@ export default {
     providerAccountsTable: []
   }),
   computed: {
-    ...mapState("providers", ["providerAccounts", "isLoadingProviderAccounts", "providerStatus"]),
+    ...mapState("providers", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerStatus"]),
+    ...mapState("resources", ["providers"]),
     ...mapGetters("resources", ["providerFilters", "currencyFilters"])
   },
   mounted() {
     this.getProviders()
     this.getCurrencies()
-    this.getProviderAccounts()
+    this.getProviderAccountsList()
   },
   methods: {
-    ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS" }),
-    ...mapActions("providers", ["getProviderAccounts", "manageProviderAccount"]),
+    ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS", setFilteredProviderAccounts: "SET_FILTERED_PROVIDER_ACCOUNTS" }),
+    ...mapActions("providers", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions("resources", ["getProviders", "getCurrencies"]),
     async updateProviderAccountStatus(providerAccount) {
       bus.$emit("SHOW_SNACKBAR", {
@@ -121,10 +156,47 @@ export default {
         color: "success",
         text: "Provider status updated."
       });
+    },
+    setCurrencyFilter(provider_id) {
+      let provider = this.providers.filter(provider => provider.id == provider_id)
+      if(provider.length != 0) {
+        this.search.currency = provider[0].currency_id
+      }
+    },
+    filterProviderAccounts() {
+      let filterParams = [this.search.provider, this.search.currency]
+      let filteredProviderAccounts = this.providerAccounts.filter(account => {
+        if(filterParams.includes('all')) {
+          if(this.search.provider && this.search.provider != 'all') {
+            if(account.provider_id == this.search.provider) {
+              return true
+            } else {
+              return false
+            }
+          }
+          if(this.search.currency && this.search.currency != 'all') {
+            if(account.currency_id == this.search.currency) {
+              return true
+            } else {
+              return false
+            }
+          }
+          return true
+        } else {
+          return this.search.provider == account.provider_id && this.search.currency == account.currency_id
+        }
+      })
+      this.setFilteredProviderAccounts(filteredProviderAccounts)
+    },
+    clearFilters() {
+      this.search.provider = 'all'
+      this.search.currency = 'all'
+      this.setFilteredProviderAccounts(this.providerAccounts)
     }
   },
   beforeRouteLeave(to, from, next) {
     this.setProviderAccounts([])
+    this.setFilteredProviderAccounts([])
     next()
   }
 };

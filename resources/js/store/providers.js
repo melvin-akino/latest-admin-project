@@ -3,6 +3,7 @@ import { getToken } from '../helpers/token'
 
 const state = {
   providerAccounts: [],
+  filteredProviderAccounts: [],
   isLoadingProviderAccounts: false,
   providerStatus: [
     {
@@ -31,6 +32,9 @@ const mutations = {
   SET_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
     state.providerAccounts = providerAccounts
   },
+  SET_FILTERED_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
+    state.filteredProviderAccounts = providerAccounts
+  },
   SET_IS_LOADING_PROVIDER_ACCOUNTS: (state, loadingState) => {
     state.isLoadingProviderAccounts = loadingState
   },
@@ -44,7 +48,11 @@ const mutations = {
       credits: providerAccount.credits,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id
+      provider_id: providerAccount.provider_id,
+      currency_id: providerAccount.currency_id,
+      pl: '-',
+      open_orders: '-',
+      last_bet: '-',
     }
     state.providerAccounts.unshift(newProviderAccount)
   },
@@ -56,7 +64,8 @@ const mutations = {
       punter_percentage: providerAccount.punter_percentage,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id
+      provider_id: providerAccount.provider_id,
+      currency_id: providerAccount.currency_id
     }
     state.providerAccounts.map(account => {
       if (account.id == providerAccount.id) {
@@ -69,21 +78,55 @@ const mutations = {
 }
 
 const actions = {
-  getProviderAccounts({commit}) {
-    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
-    axios.get('provider_accounts', { params: { id: 1 }, headers: { 'Authorization': `Bearer ${getToken()}` } })
-    .then(response => {
-      commit('SET_PROVIDER_ACCOUNTS', response.data.data)
-      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
-    })
-    .catch(err => {
-      console.log(err)
+  getProviderAccounts() { 
+    return new Promise((resolve, reject) => {
+      axios.get('provider_accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data.data)
+      })
+      .catch(err => {
+        console.log(err)
+        reject()
+      })
     })
   },
-  manageProviderAccount({commit}, payload) {
+  getProviderAccountOrders({}, id) {
+    return new Promise((resolve, reject) => {
+      axios.get('orders', { params: { id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data)
+      })
+      .catch(err => {
+        console.log(err)
+        reject()
+      })
+    })
+  },
+  async getProviderAccountsList({state, commit, dispatch}) {
+    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
+    let providerAccounts = await dispatch('getProviderAccounts')
+    commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
+    commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
+    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+    state.providerAccounts.map(async account => {
+      let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+      if(providerAccountOrder.length != 0) {
+        Vue.set(account, 'pl', providerAccountOrder.pl)
+        Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
+        Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
+      } else {
+        Vue.set(account, 'pl', '-')
+        Vue.set(account, 'open_orders', '-')
+        Vue.set(account, 'last_bet', '-')
+      }
+    })
+  },
+  manageProviderAccount({commit, rootState}, payload) {
     return new Promise((resolve, reject) => {
       axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
+        let currency = rootState.resources.providers.filter(provider => provider.id == response.data.data.provider_id).map(provider => provider.currency_id)
+        Vue.set(response.data.data, 'currency_id', currency[0])
         if(payload.id) {
           commit('UPDATE_PROVIDER_ACCOUNT', response.data.data)
         } else {

@@ -15,6 +15,7 @@ class ProvidersController extends Controller
                 $data['data'][] = [
                     'id'                => $provider['id'],
                     'alias'             => $provider['alias'],
+                    'currency_id'       => $provider['currency_id']
                 ];
             }
         }      
