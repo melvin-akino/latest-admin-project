@@ -31,4 +31,6 @@ Route::middleware('auth:api')->group(function () {
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
+    //Routes to get all currencies
+    Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 });
