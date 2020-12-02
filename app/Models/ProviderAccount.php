@@ -37,7 +37,7 @@ class ProviderAccount extends Model
             return self::where('provider_id', $providerId)->get()->toArray();
         }
     	else {
-            return self::all();
+            return self::all()->toArray();
         }
     }
 }
