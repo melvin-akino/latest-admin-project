@@ -7,7 +7,7 @@
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'HG', 'ISN', 'PIN', 'SB']"
+                :items="providerFilters"
                 label="Bookmaker"
                 outlined
                 dense
@@ -19,7 +19,7 @@
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'CNY', 'USD']"
+                :items="currencyFilters"
                 label="Currency"
                 outlined
                 dense
@@ -39,8 +39,10 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="providerAccountsTable"
+        :items="providerAccounts"
         :items-per-page="10"
+        :loading="isLoadingProviderAccounts"
+        loading-text="Loading Provider Accounts"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -48,7 +50,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerStatus" dense v-model="item.status" @change="updateProviderAccountStatus(item.id, item.status)"></v-select>
+          <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
@@ -61,7 +63,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import bus from '../../../../eventBus'
 
 export default {
   name: "Providers",
@@ -90,46 +93,39 @@ export default {
       }
     ],
     search: {
-      provider: 'All',
-      currency: 'All'
+      provider: 'all',
+      currency: 'all'
     },
     providerAccountsTable: []
   }),
   computed: {
-    ...mapState("providers", ["providerAccounts", "providerStatus"]),
+    ...mapState("providers", ["providerAccounts", "isLoadingProviderAccounts", "providerStatus"]),
+    ...mapGetters("resources", ["providerFilters", "currencyFilters"])
   },
   mounted() {
-    this.providerAccountsTable = this.providerAccounts
+    this.getProviders()
+    this.getCurrencies()
+    this.getProviderAccounts()
   },
   methods: {
-    updateProviderAccountStatus(id, status) {
-      this.$store.commit('providers/UPDATE_PROVIDER_ACCOUNT_STATUS', { id, status })
-    },
-    filterProviderAccounts() {
-      let filterParams = [this.search.provider, this.search.currency]
-      let filteredProviderAccounts = this.providerAccounts.filter(account => {
-        if(filterParams.includes('All')) {
-          if(this.search.provider && this.search.provider != 'All') {
-            if(account.provider == this.search.provider) {
-              return true
-            } else {
-              return false
-            }
-          }
-          if(this.search.currency && this.search.currency != 'All') {
-            if(account.currency == this.search.currency) {
-              return true
-            } else {
-              return false
-            }
-          }
-          return true
-        } else {
-          return this.search.provider == account.provider && this.search.currency == account.currency
-        }
-      })
-      this.providerAccountsTable = filteredProviderAccounts
+    ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS" }),
+    ...mapActions("providers", ["getProviderAccounts", "manageProviderAccount"]),
+    ...mapActions("resources", ["getProviders", "getCurrencies"]),
+    async updateProviderAccountStatus(providerAccount) {
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: "Updating provider account status..."
+      });
+      await this.manageProviderAccount(providerAccount)
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: "Provider status updated."
+      });
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.setProviderAccounts([])
+    next()
   }
 };
 </script>

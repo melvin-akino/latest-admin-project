@@ -1,50 +1,46 @@
 <template>
-  <v-app>
-    <v-content>
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
-          <v-col cols="12" sm="8" md="4">
-            <base-material-card>
-              <template v-slot:heading class="loginHeading">
-                <div class="display-2 font-weight-light">
-                  Multiline Login
-                </div>
-              </template>
+  <v-container class="fill-height" fluid>
+    <v-row align="center" justify="center">
+      <v-col cols="12" sm="8" md="4">
+        <base-material-card>
+          <template v-slot:heading class="loginHeading">
+            <div class="display-2 font-weight-light">
+              Multiline Login
+            </div>
+          </template>
 
-              <v-form @submit.prevent="login">
-                <v-text-field
-                  label="Email"
-                  type="text"
-                  prepend-inner-icon="mdi-account"
-                  v-model="$v.loginForm.email.$model"
-                  :error-messages="emailErrors"
-                  @input="$v.loginForm.email.$touch()"
-                  @blur="$v.loginForm.email.$touch()"
-                ></v-text-field>
-                <v-text-field
-                  label="Password"
-                  type="password"
-                  prepend-inner-icon="mdi-lock"
-                  v-model="$v.loginForm.password.$model"
-                  :error-messages="passwordErrors"
-                  @input="$v.loginForm.password.$touch()"
-                  @blur="$v.loginForm.password.$touch()"
-                ></v-text-field>
-                <!-- <v-checkbox
-                  label="Remember Me"
-                  v-model="loginForm.remember_me"
-                ></v-checkbox> -->
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn type="submit" dark right class="primary" :disabled="isLoggingIn">Login</v-btn>
-                </v-card-actions>
-              </v-form>
-            </base-material-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-content>
-  </v-app>
+          <v-form @submit.prevent="login">
+            <v-text-field
+              label="Email"
+              type="text"
+              prepend-inner-icon="mdi-account"
+              v-model="$v.loginForm.email.$model"
+              :error-messages="emailErrors"
+              @input="$v.loginForm.email.$touch()"
+              @blur="$v.loginForm.email.$touch()"
+            ></v-text-field>
+            <v-text-field
+              label="Password"
+              type="password"
+              prepend-inner-icon="mdi-lock"
+              v-model="$v.loginForm.password.$model"
+              :error-messages="passwordErrors"
+              @input="$v.loginForm.password.$touch()"
+              @blur="$v.loginForm.password.$touch()"
+            ></v-text-field>
+            <!-- <v-checkbox
+              label="Remember Me"
+              v-model="loginForm.remember_me"
+            ></v-checkbox> -->
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn type="submit" dark right class="primary" :disabled="isLoggingIn">Login</v-btn>
+            </v-card-actions>
+          </v-form>
+        </base-material-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

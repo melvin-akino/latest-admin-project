@@ -3,7 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-import Cookies from 'js-cookie'
+import { getToken } from './helpers/token'
 
 const router = new Router({
   mode: 'hash',
@@ -106,8 +106,7 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
   const authRoutes = ['/login']
-  const token = Cookies.get('access_token')
-  if (token) {
+  if (getToken()) {
     if(authRoutes.includes(to.matched[0].path)) {
         next('/accounts/users')
     } else {

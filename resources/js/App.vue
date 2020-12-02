@@ -1,8 +1,10 @@
 <template>
-  <div class="wrapper">
-    <router-view />
-    <snack-bar></snack-bar>
-  </div>
+  <v-app>
+    <v-content>
+        <router-view />
+        <snack-bar></snack-bar>
+    </v-content>
+  </v-app>
 </template>
 
 <script>

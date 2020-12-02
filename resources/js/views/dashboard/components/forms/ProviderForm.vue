@@ -28,7 +28,6 @@
             <v-col cols="12" md="6" class="formColumn">
               <v-text-field
                 label="Password"
-                type="password"
                 outlined
                 dense
                 v-model="$v.providerAccount.password.$model"
@@ -55,7 +54,6 @@
               <v-select
                 :items="providerAccountTypes"
                 label="Type"
-                value="BET NORMAL"
                 outlined
                 dense
                 v-model="$v.providerAccount.type.$model"
@@ -70,26 +68,40 @@
               <v-select
                 :items="providerStatus"
                 label="Status"
-                value="Active"
                 outlined
                 dense
-                v-model="$v.providerAccount.status.$model"
+                v-model="$v.providerAccount.is_enabled.$model"
                 :error-messages="statusErrors"
-                @input="$v.providerAccount.status.$touch()"
-                @blur="$v.providerAccount.status.$touch()"
+                @input="$v.providerAccount.is_enabled.$touch()"
+                @blur="$v.providerAccount.is_enabled.$touch()"
               ></v-select>
             </v-col>
             <v-col cols="12" md="6" class="formColumn">
               <v-select
-                :items="['Yes', 'No']"
+                :items="providerIdleOptions"
                 label="Idle"
-                value="Yes"
                 outlined
                 dense
-                v-model="$v.providerAccount.idle.$model"
+                v-model="$v.providerAccount.is_idle.$model"
                 :error-messages="idleErrors"
-                @input="$v.providerAccount.idle.$touch()"
-                @blur="$v.providerAccount.idle.$touch()"
+                @input="$v.providerAccount.is_idle.$touch()"
+                @blur="$v.providerAccount.is_idle.$touch()"
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-select
+                :items="providers"
+                label="Provider"
+                outlined
+                dense
+                item-text="alias"
+                item-value="id"
+                v-model="$v.providerAccount.provider_id.$model"
+                :error-messages="statusErrors"
+                @input="$v.providerAccount.provider_id.$touch()"
+                @blur="$v.providerAccount.provider_id.$touch()"
               ></v-select>
             </v-col>
           </v-row>
@@ -115,7 +127,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
 import { required, requiredIf, alphaNum, integer, minLength } from 'vuelidate/lib/validators'
 
@@ -123,15 +135,14 @@ export default {
   props: ["update", "providerAccountToUpdate"],
   data: () => ({
     providerAccount: {
+      id: null,
       username: '',
       password: '',
       punter_percentage: '',
-      type: 'BET NORMAL',
-      status: 'Active',
-      idle: 'Yes',
-      last_bet: '-',
-      last_scrape: '-',
-      last_sync: '-',
+      type: 'BET_NORMAL',
+      is_enabled: true,
+      is_idle: true,
+      provider_id: 1
     }
   }),
   validations: {
@@ -145,12 +156,14 @@ export default {
       },
       punter_percentage: { required, integer },
       type: { required },
-      status: { required },
-      idle: { required }
+      is_enabled: { required },
+      is_idle: { required },
+      provider_id: { required }
     }
   },
   computed: {
-    ...mapState("providers", ["providerStatus", "providerAccountTypes"]),
+    ...mapState("providers", ["providerStatus", "providerAccountTypes", "providerIdleOptions"]),
+    ...mapState("resources", ["providers"]),
     usernameErrors() {
       let errors = []
       if(!this.$v.providerAccount.username.$dirty) return errors
@@ -180,53 +193,75 @@ export default {
     },
     statusErrors() {
       let errors = []
-      if(!this.$v.providerAccount.status.$dirty) return errors
-      !this.$v.providerAccount.status.required && errors.push('Status is required.')
+      if(!this.$v.providerAccount.is_enabled.$dirty) return errors
+      !this.$v.providerAccount.is_enabled.required && errors.push('Status is required.')
       return errors
     },
     idleErrors() {
       let errors = []
-      if(!this.$v.providerAccount.idle.$dirty) return errors
-      !this.$v.providerAccount.idle.required && errors.push('Idle is required.')
+      if(!this.$v.providerAccount.is_idle.$dirty) return errors
+      !this.$v.providerAccount.is_idle.required && errors.push('Idle is required.')
       return errors
     },
+    providerErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.provider_id.$dirty) return errors
+      !this.$v.providerAccount.provider_id.required && errors.push('Idle is required.')
+      return errors
+    }
 
   },
   mounted() {
     this.initializeProviderAccount()
   },
   methods: {
+    ...mapActions('providers', ['manageProviderAccount']),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG");
     },
     initializeProviderAccount() {
       this.resetFields()
       if(this.providerAccountToUpdate) {
-        let providerAccountForm = { ...this.providerAccountToUpdate }
-        this.$set(providerAccountForm, 'password', '')
-        this.providerAccount = providerAccountForm
+        let providerForm = { ...this.providerAccountToUpdate }
+        this.providerAccount = providerForm
       }
     },
-    addProviderAccount() {
+    async addProviderAccount() {
       if(!this.$v.providerAccount.$invalid) {
-        this.$store.commit('providers/ADD_PROVIDER_ACCOUNT', this.providerAccount)
-        this.closeDialog()
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "A provider account has been added."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Adding provider account..."
+          });
+          await this.manageProviderAccount(this.providerAccount)
+          this.closeDialog()
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "A provider account has been added."
+          });
+        } catch(err) {
+          console.log(err)
+        }
       } else {
         this.$v.providerAccount.$touch()
       }
     },
-    updateProviderAccount() {
+    async updateProviderAccount() {
       if(!this.$v.providerAccount.$invalid) {
-        this.$store.commit('providers/UPDATE_PROVIDER_ACCOUNT', this.providerAccount)
-        this.closeDialog()
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "Provider account details were updated."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Updating provider account..."
+          });
+          await this.manageProviderAccount(this.providerAccount)
+          this.closeDialog()
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Provider account details were updated."
+          });
+        } catch(err) {
+          console.log(err)
+        }
       } else {
         this.$v.providerAccount.$touch()
       }
@@ -249,9 +284,6 @@ export default {
           this.providerAccount[key] = "";
         }
       });
-      this.providerAccount.type = 'BET NORMAL'
-      this.providerAccount.status = 'Active'
-      this.providerAccount.idle = 'Yes'
     }
   }
 }

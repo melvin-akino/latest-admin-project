@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar id="app-bar" absolute app color="primary" flat height="75" dark>
+  <v-app-bar id="app-bar" app color="primary" flat height="75" dark>
     <v-btn
       class="mr-3"
       icon
@@ -37,6 +37,7 @@
 <script>
 import { mapState, mapMutations } from "vuex";
 import Cookies from 'js-cookie'
+import { getToken } from '../../../../helpers/token'
 import bus from '../../../../eventBus'
 
 export default {
@@ -51,13 +52,16 @@ export default {
       setDrawer: "SET_DRAWER"
     }),
     logout() {
-      let token = Cookies.get('access_token')
-      axios.post('logout', null, { headers: { 'Authorization': `Bearer ${token}` } })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: "Logging out..."
+      });
+      axios.post('logout', null, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         Cookies.remove('access_token')
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
-          text: "Logged out."
+          text: response.data.message
         });
         this.$router.push('/login')
       })
