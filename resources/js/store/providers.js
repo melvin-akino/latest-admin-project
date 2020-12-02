@@ -3,6 +3,7 @@ import { getToken } from '../helpers/token'
 
 const state = {
   providerAccounts: [],
+  filteredProviderAccounts: [],
   isLoadingProviderAccounts: false,
   providerStatus: [
     {
@@ -31,6 +32,9 @@ const mutations = {
   SET_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
     state.providerAccounts = providerAccounts
   },
+  SET_FILTERED_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
+    state.filteredProviderAccounts = providerAccounts
+  },
   SET_IS_LOADING_PROVIDER_ACCOUNTS: (state, loadingState) => {
     state.isLoadingProviderAccounts = loadingState
   },
@@ -44,7 +48,11 @@ const mutations = {
       credits: providerAccount.credits,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id
+      provider_id: providerAccount.provider_id,
+      currency_id: providerAccount.currency_id,
+      pl: '-',
+      open_orders: '-',
+      last_bet: '-',
     }
     state.providerAccounts.unshift(newProviderAccount)
   },
@@ -56,7 +64,8 @@ const mutations = {
       punter_percentage: providerAccount.punter_percentage,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id
+      provider_id: providerAccount.provider_id,
+      currency_id: providerAccount.currency_id
     }
     state.providerAccounts.map(account => {
       if (account.id == providerAccount.id) {
@@ -97,6 +106,7 @@ const actions = {
     commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
     let providerAccounts = await dispatch('getProviderAccounts')
     commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
+    commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
     commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
     state.providerAccounts.map(async account => {
       let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
@@ -111,10 +121,12 @@ const actions = {
       }
     })
   },
-  manageProviderAccount({commit}, payload) {
+  manageProviderAccount({commit, rootState}, payload) {
     return new Promise((resolve, reject) => {
       axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
+        let currency = rootState.resources.providers.filter(provider => provider.id == response.data.data.provider_id).map(provider => provider.currency_id)
+        Vue.set(response.data.data, 'currency_id', currency[0])
         if(payload.id) {
           commit('UPDATE_PROVIDER_ACCOUNT', response.data.data)
         } else {

@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" :width="width">
     <template v-slot:activator="{ on }">
-      <v-btn icon v-on="on">
+      <v-btn icon v-on="on" @click="clearFilters">
           <v-icon small>{{ icon }}</v-icon>
       </v-btn>
     </template>
@@ -22,6 +22,11 @@ export default {
     bus.$on('CLOSE_DIALOG', () => {
       this.dialog = false
     })
+  },
+  methods: {
+    clearFilters() {
+      this.$emit('clearFilters')
+    }
   }
 }
 </script>
