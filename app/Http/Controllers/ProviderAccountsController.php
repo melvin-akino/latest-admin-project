@@ -114,7 +114,7 @@ class ProviderAccountsController extends Controller
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,
-                'errors'     => $e->getMessages()
+                'errors'     => $e->getMessage()
             ], 500);
         }
     }
