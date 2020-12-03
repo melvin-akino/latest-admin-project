@@ -127,3 +127,12 @@ $headings: (
 .theme--dark.v-btn.v-btn--disabled:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
   background-color: #e9954b !important;
 }
+
+.v-data-table table thead tr th {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.text-start .v-input {
+  font-size: 13px !important;
+}
