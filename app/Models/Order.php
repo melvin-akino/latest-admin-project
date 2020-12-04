@@ -16,13 +16,15 @@ class Order extends Model
         return self::where('provider_account_id', $providerAccountId)
             ->whereNotNull('orders.bet_id')
             ->join('order_logs', 'orders.id', 'order_logs.order_id')
+            ->join('provider_accounts', 'orders.provider_account_id', 'provider_accounts.id')
             ->join('provider_account_orders', 'order_logs.id', 'provider_account_orders.order_log_id')
             ->select(
                 'provider_account_id',
                 'actual_stake',
                 'actual_profit_loss',
                 'orders.created_at',
-                'orders.settled_date'
+                'orders.settled_date',
+                'provider_accounts.updated_at'
             )
             ->orderBy('created_at', 'desc')
             ->get()
