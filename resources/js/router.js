@@ -62,6 +62,11 @@ const router = new Router({
           ]
         },
         {
+          name: 'System Configurations',
+          path: 'system_configurations',
+          component: () => import('./views/dashboard/pages/SystemConfigurations')
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),

@@ -7,6 +7,7 @@ import users from './users'
 import admin from './admin'
 import providers from './providers'
 import resources from './resources'
+import systemConfigurations from './systemConfigurations'
 
 export default new Vuex.Store({
   state: {
@@ -21,6 +22,7 @@ export default new Vuex.Store({
     users,
     admin,
     providers,
-    resources
+    resources,
+    systemConfigurations
   }
 })

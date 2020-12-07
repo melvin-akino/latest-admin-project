@@ -169,15 +169,19 @@ export default {
     ...mapActions("providers", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions("resources", ["getProviders", "getCurrencies"]),
     async updateProviderAccountStatus(providerAccount) {
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: "Updating provider account status..."
-      });
-      await this.manageProviderAccount(providerAccount)
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: "Provider status updated."
-      });
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Updating provider account status..."
+        });
+        await this.manageProviderAccount(providerAccount)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Provider status updated."
+        });
+      } catch(err) {
+        console.log(err)
+      }
     },
     setCurrencyFilter(provider_id) {
       let provider = this.providers.filter(provider => provider.id == provider_id)
