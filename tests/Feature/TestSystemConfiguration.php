@@ -34,7 +34,7 @@ class TestSystemConfiguration extends AdminAccountTest
     }
 
     public function testSystemConfigurationManageWithoutToken() {
-        $response = $this->get('/api/system_configurations/manage', [
+        $response = $this->post('/api/system_configurations/manage', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
