@@ -114,10 +114,14 @@ const actions = {
         Vue.set(account, 'pl', providerAccountOrder.pl)
         Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
         Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
+        Vue.set(account, 'last_scrape', providerAccountOrder.last_scrape)
+        Vue.set(account, 'last_sync', providerAccountOrder.last_sync)
       } else {
         Vue.set(account, 'pl', '-')
         Vue.set(account, 'open_orders', '-')
         Vue.set(account, 'last_bet', '-')
+        Vue.set(account, 'last_scrape', '-')
+        Vue.set(account, 'last_sync', '-')
       }
     })
   },
