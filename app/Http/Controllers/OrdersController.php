@@ -12,11 +12,13 @@ class OrdersController extends Controller
     {
         $orders = Order::getAllOrders($request->id);
         $data = [];
+
         if (!empty($orders)) {
-            $pl = 0;
-            $openOrders = 0;
-            $lastBetDate = '';
-            $providerAccountLastUpdate = '';
+            $pl                         = 0;
+            $openOrders                 = 0;
+            $lastBetDate                = '';
+            $providerAccountLastUpdate  = '';
+
             foreach($orders as $key => $order) {
                 if ($key == 0) {
                     $lastBetDate = $order['created_at'];
@@ -40,12 +42,12 @@ class OrdersController extends Controller
             }
 
             $data = [
-                'provider_account_id' => $request->id,
-                'pl' => $pl,
-                'open_orders' => $openOrders,
-                'last_bet' => $lastBetDate,
-                'last_scrape' => $providerAccountLastUpdate,
-                'last_sync' => $lastAction
+                'provider_account_id'   => $request->id,
+                'pl'                    => $pl,
+                'open_orders'           => $openOrders,
+                'last_bet'              => $lastBetDate,
+                'last_scrape'           => $providerAccountLastUpdate,
+                'last_sync'             => $lastAction
             ];
         }
 

@@ -13,38 +13,29 @@ class SystemConfigurationsController extends Controller
 
     public function index() 
     {
-        $configs = SystemConfiguration::orderBy('id','asc')->get();
-        foreach ($configs as $config) {
-            $data['data'][] = [
-                'id'                => $config['id'],
-                'type'              => $config['type'],
-                'value'             => $config['value'],
-                'module'            => $config['module']
-            ];
-        }
+        $data = SystemConfiguration::getAll();
 
-        return response()->json(!empty($data) ? $data : null);
+        return response()->json($data);
     }
 
     public function manage(SystemConfigurationRequest $request)
     {
+        DB::beginTransaction();
         try 
         {
-            if (!empty($request)) {
+            if (!empty($request)) 
+            {
 
                 $data = $request->toArray();
                 $config = SystemConfiguration::where('id', $data['id'])->first();
                 
-                DB::beginTransaction();
-                if ($config->update($data)) 
+                if (!empty($config) && $config->update($data)) 
                 {
                     DB::commit();
-                    $message = 'success';
-
                     return response()->json([
                         'status'      => true,
                         'status_code' => 200,
-                        'data'        => $message
+                        'data'        => 'success'
                     ], 200);
                 }
             }
