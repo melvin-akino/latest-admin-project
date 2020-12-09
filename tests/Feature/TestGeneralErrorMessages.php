@@ -15,7 +15,7 @@ class TestGeneralErrorMessages extends AdminAccountTest
     public function testGeneralErrorListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/general_errors', [
+        $response = $this->get('/api/general-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -25,7 +25,7 @@ class TestGeneralErrorMessages extends AdminAccountTest
     }
 
     public function testGeneralErrorListWithoutToken() {
-        $response = $this->get('/api/general_errors', [
+        $response = $this->get('/api/general-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -39,7 +39,7 @@ class TestGeneralErrorMessages extends AdminAccountTest
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX' 
-        ])->json('POST', '/api/general_errors/manage', 
+        ])->json('POST', '/api/general-errors/manage', 
                 [
                     'id' => 1,
                     'username'   => 'Bet was not placed. Please try again.'
@@ -56,7 +56,7 @@ class TestGeneralErrorMessages extends AdminAccountTest
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/general_errors/manage', 
+        ])->json('POST', '/api/general-errors/manage', 
                 [
                     'id'   => '',
                     'error' => ''
@@ -73,7 +73,7 @@ class TestGeneralErrorMessages extends AdminAccountTest
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/general_errors/manage', 
+        ])->json('POST', '/api/general-errors/manage', 
                 [
                     'id' => 1,
                     'error'   => 'Bet was not placed. Please try again.'

@@ -39,6 +39,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
 
     //General Errors related routes
-    Route::get('/general_errors', 'GeneralErrorMessagesController@index')->name('general-errors.api');
-    Route::post('/general_errors/manage', 'GeneralErrorMessagesController@manage')->name('general-errors-manage.api');
+    Route::get('/general-errors', 'GeneralErrorMessagesController@index')->name('general-errors.api');
+    Route::post('/general-errors/manage', 'GeneralErrorMessagesController@manage')->name('general-errors-manage.api');
 });
