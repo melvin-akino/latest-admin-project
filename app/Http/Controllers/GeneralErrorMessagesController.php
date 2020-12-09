@@ -11,37 +11,26 @@ class GeneralErrorMessagesController extends Controller
 {
     public function index()
     {
-        $errorMessages = GeneralErrorMessage::all()->toArray();
-        if (!empty($errorMessages)) {
-            foreach ($errorMessages as $error) {
-                $data['data'][] = [
-                    'id'                => $error['id'],
-                    'error'             => $error['error']
-                ];
-            }
-        }      
+        $errorMessages = GeneralErrorMessage::getAll();      
 
-        return response()->json(!empty($data) ? $data : []);
+        return response()->json($errorMessages);
     }
 
     public function manage(GeneralErrorMessageRequest $request) 
     {
+        DB::beginTransaction();
         try {
             if (!empty($request)) {
-                DB::beginTransaction();
-                $data = $request->toArray();
+                if (!empty($request->id)) {
+                    $error = GeneralErrorMessage::where('id', $request->id)->first();
+                    $error->error = $request->error;               
 
-                if (!empty($data['id'])) {
-                    $error = GeneralErrorMessage::where('id', $data['id'])->first();
-                    $error->id = $data['id'];
-                    !empty($data['error']) ? $error->error = $data['error'] : null;               
-
-                    if ($error->update($data)) {
+                    if ($error->update()) {
                         $message = 'success';
                     }
                 }
                 else {
-                    if (GeneralErrorMessage::create($data)) {
+                    if (GeneralErrorMessage::create($request->toArray())) {
                         $message = 'success';
                     }                    
                 }

@@ -26,8 +26,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
 
     //Provider accounts routes
-    Route::get('/provider_accounts', 'ProviderAccountsController@index')->name('provider_accounts.api');
-    Route::post('/provider_accounts/manage', 'ProviderAccountsController@manage')->name('provider_accounts_manage.api');
+    Route::get('/provider_accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
+    Route::post('/provider_accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
 
 
     //Providers routes
@@ -39,6 +39,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
 
     //General Errors related routes
-    Route::get('/general_errors', 'GeneralErrorMessagesController@index')->name('general_errors.api');
-    Route::post('/general_errors/manage', 'GeneralErrorMessagesController@manage')->name('general_errors_manage.api');
+    Route::get('/general_errors', 'GeneralErrorMessagesController@index')->name('general-errors.api');
+    Route::post('/general_errors/manage', 'GeneralErrorMessagesController@manage')->name('general-errors-manage.api');
 });
