@@ -180,7 +180,10 @@ export default {
           text: "Provider status updated."
         });
       } catch(err) {
-        console.log(err)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
       }
     },
     setCurrencyFilter(provider_id) {

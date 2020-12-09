@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { getToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   systemConfigurations: [],
@@ -24,7 +25,7 @@ const mutations = {
 }
 
 const actions = {
-  getSystemConfigurations({commit}) {
+  getSystemConfigurations({commit, dispatch}) {
     commit('SET_LOADING_SYSTEM_CONFIGURATIONS', true)
     axios.get('system_configurations', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
@@ -32,10 +33,15 @@ const actions = {
       commit('SET_LOADING_SYSTEM_CONFIGURATIONS', false)
     })
     .catch(err => {
-      console.log(err)
+      commit('SET_SYSTEM_CONFIGURATIONS', [])
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
     })
   },
-  manageSystemConfiguration({commit}, systemConfiguration) {
+  manageSystemConfiguration({commit, dispatch}, systemConfiguration) {
     return new Promise((resolve, reject) => {
       axios.post('system_configurations/manage', systemConfiguration, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(() => {
@@ -43,8 +49,8 @@ const actions = {
         resolve()
       })
       .catch(err => {
-        console.log(err)
-        reject()
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
   }

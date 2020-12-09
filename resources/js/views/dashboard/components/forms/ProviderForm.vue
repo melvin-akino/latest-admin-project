@@ -240,7 +240,10 @@ export default {
             text: "A provider account has been added."
           });
         } catch(err) {
-          console.log(err)
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
         }
       } else {
         this.$v.providerAccount.$touch()
@@ -260,7 +263,10 @@ export default {
             text: "Provider account details were updated."
           });
         } catch(err) {
-          console.log(err)
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
         }
       } else {
         this.$v.providerAccount.$touch()

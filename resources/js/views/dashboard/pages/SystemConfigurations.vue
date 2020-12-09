@@ -30,6 +30,9 @@
           <template v-slot:[`item.value`]="{ item }">
             <v-text-field
               v-model="systemConfiguration.value"
+              :error-messages="valueErrors"
+              @input="$v.systemConfiguration.value.$touch()"
+              @blur="$v.systemConfiguration.value.$touch()"
               label="Value"
               v-if="toEditRow == item.id"
             ></v-text-field>
@@ -63,6 +66,7 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
 import bus from '../../../eventBus'
+import { required } from 'vuelidate/lib/validators'
 
 export default {
   data: () => ({
@@ -81,16 +85,28 @@ export default {
       module: ''
     }
   }),
+  validations: {
+    systemConfiguration: {
+      value: { required }
+    }
+  },
   computed: {
     ...mapState('systemConfigurations', ['systemConfigurations', 'isLoadingSystemConfigurations']),
     configToUpdate() {
       return this.systemConfigurations.filter(config => config.id == this.toEditRow)[0]
+    },
+    valueErrors() {
+      let errors = []
+      if(!this.$v.systemConfiguration.value.$dirty) return errors
+      !this.$v.systemConfiguration.value.required && errors.push('Value is required.')
+      return errors
     }
   },
   mounted() {
     this.getSystemConfigurations()
   },
   methods: {
+    ...mapMutations('systemConfigurations', { setSystemConfigurations: 'SET_SYSTEM_CONFIGURATIONS' }),
     ...mapActions('systemConfigurations', ['getSystemConfigurations', 'manageSystemConfiguration']),
     setSystemConfigurationValues() {
       if(this.configToUpdate) {
@@ -112,21 +128,32 @@ export default {
       this.setSystemConfigurationValues()
     },
     async updateSystemConfiguration() {
-      try {
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "Updating system configuration..."
-        });
-        await this.manageSystemConfiguration(this.systemConfiguration)
-        this.toEditRow = null
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "Updating system configuration!"
-        });
-      } catch(err) {
-        console.log(err)
+      if(!this.$v.systemConfiguration.$invalid) {
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Updating system configuration..."
+          });
+          await this.manageSystemConfiguration(this.systemConfiguration)
+          this.toEditRow = null
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Updated system configuration!"
+          });
+        } catch(err) {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
+        }
+      } else {
+        this.$v.systemConfiguration.$touch()
       }
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.setSystemConfigurations([])
+    next()
   }
 }
 </script>

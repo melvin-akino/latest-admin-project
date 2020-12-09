@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { getToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   providerAccounts: [],
@@ -78,54 +79,63 @@ const mutations = {
 }
 
 const actions = {
-  getProviderAccounts() { 
+  getProviderAccounts({dispatch}) { 
     return new Promise((resolve, reject) => {
       axios.get('provider_accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         resolve(response.data.data)
       })
       .catch(err => {
-        console.log(err)
-        reject()
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
   },
-  getProviderAccountOrders({}, id) {
+  getProviderAccountOrders({dispatch}, id) {
     return new Promise((resolve, reject) => {
       axios.get('orders', { params: { id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         resolve(response.data)
       })
       .catch(err => {
-        console.log(err)
-        reject()
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
   },
   async getProviderAccountsList({state, commit, dispatch}) {
-    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
-    let providerAccounts = await dispatch('getProviderAccounts')
-    commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
-    commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
-    commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
-    state.providerAccounts.map(async account => {
-      let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
-      if(providerAccountOrder.length != 0) {
-        Vue.set(account, 'pl', providerAccountOrder.pl)
-        Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
-        Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
-        Vue.set(account, 'last_scrape', providerAccountOrder.last_scrape)
-        Vue.set(account, 'last_sync', providerAccountOrder.last_sync)
-      } else {
-        Vue.set(account, 'pl', '-')
-        Vue.set(account, 'open_orders', '-')
-        Vue.set(account, 'last_bet', '-')
-        Vue.set(account, 'last_scrape', '-')
-        Vue.set(account, 'last_sync', '-')
-      }
-    })
+    try {
+      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
+      let providerAccounts = await dispatch('getProviderAccounts')
+      commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
+      commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
+      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+      state.providerAccounts.map(async account => {
+        let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+        if(providerAccountOrder.length != 0) {
+          Vue.set(account, 'pl', providerAccountOrder.pl)
+          Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
+          Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
+          Vue.set(account, 'last_scrape', providerAccountOrder.last_scrape)
+          Vue.set(account, 'last_sync', providerAccountOrder.last_sync)
+        } else {
+          Vue.set(account, 'pl', '-')
+          Vue.set(account, 'open_orders', '-')
+          Vue.set(account, 'last_bet', '-')
+          Vue.set(account, 'last_scrape', '-')
+          Vue.set(account, 'last_sync', '-')
+        }
+      })
+    } catch(err) {
+      commit('SET_PROVIDER_ACCOUNTS', [])
+      commit('SET_FILTERED_PROVIDER_ACCOUNTS', [])
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
+    }
   },
-  manageProviderAccount({commit, rootState}, payload) {
+  manageProviderAccount({commit, dispatch, rootState}, payload) {
     return new Promise((resolve, reject) => {
       axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
@@ -139,8 +149,8 @@ const actions = {
         resolve()
       })
       .catch(err => {
-        console.log(err)
-        reject()
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
   }
