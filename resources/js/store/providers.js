@@ -80,7 +80,7 @@ const mutations = {
 const actions = {
   getProviderAccounts() { 
     return new Promise((resolve, reject) => {
-      axios.get('provider_accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.get('provider-accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         resolve(response.data.data)
       })
@@ -127,7 +127,7 @@ const actions = {
   },
   manageProviderAccount({commit, rootState}, payload) {
     return new Promise((resolve, reject) => {
-      axios.post('provider_accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.post('provider-accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         let currency = rootState.resources.providers.filter(provider => provider.id == response.data.data.provider_id).map(provider => provider.currency_id)
         Vue.set(response.data.data, 'currency_id', currency[0])
