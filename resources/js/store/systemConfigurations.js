@@ -27,7 +27,7 @@ const mutations = {
 const actions = {
   getSystemConfigurations({commit, dispatch}) {
     commit('SET_LOADING_SYSTEM_CONFIGURATIONS', true)
-    axios.get('system_configurations', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    axios.get('system-configurations', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_SYSTEM_CONFIGURATIONS', response.data.data)
       commit('SET_LOADING_SYSTEM_CONFIGURATIONS', false)
@@ -43,7 +43,7 @@ const actions = {
   },
   manageSystemConfiguration({commit, dispatch}, systemConfiguration) {
     return new Promise((resolve, reject) => {
-      axios.post('system_configurations/manage', systemConfiguration, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.post('system-configurations/manage', systemConfiguration, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(() => {
         commit('UPDATE_SYSTEM_CONFIGURATION', systemConfiguration)
         resolve()
