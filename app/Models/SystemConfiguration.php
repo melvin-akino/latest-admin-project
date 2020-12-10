@@ -18,4 +18,19 @@ class SystemConfiguration extends Model
         'created_at',
         'updated_at',
     ];
+
+    public static function getAll() 
+    {
+        $configs = self::orderBy('id','asc')->get();
+        foreach ($configs as $config) {
+            $data['data'][] = [
+                'id'                => $config['id'],
+                'type'              => $config['type'],
+                'value'             => $config['value'],
+                'module'            => $config['module']
+            ];
+        }
+
+        return !empty($data) ? $data : [];
+    }
 }

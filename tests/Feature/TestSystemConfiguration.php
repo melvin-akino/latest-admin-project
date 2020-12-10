@@ -15,7 +15,7 @@ class TestSystemConfiguration extends AdminAccountTest
     public function testSystemConfigurationListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/system_configurations', [
+        $response = $this->get('/api/system-configurations', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -25,7 +25,7 @@ class TestSystemConfiguration extends AdminAccountTest
     }
 
     public function testSystemConfigurationListWithoutToken() {
-        $response = $this->get('/api/system_configurations', [
+        $response = $this->get('/api/system-configurations', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -34,7 +34,7 @@ class TestSystemConfiguration extends AdminAccountTest
     }
 
     public function testSystemConfigurationManageWithoutToken() {
-        $response = $this->post('/api/system_configurations/manage', [
+        $response = $this->post('/api/system-configurations/manage', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -49,7 +49,7 @@ class TestSystemConfiguration extends AdminAccountTest
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-            ])->json('POST', '/api/system_configurations/manage', 
+            ])->json('POST', '/api/system-configurations/manage', 
                 [
                     'id'   => null,
                     'type' => null,
@@ -67,7 +67,7 @@ class TestSystemConfiguration extends AdminAccountTest
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/system_configurations/manage', 
+        ])->json('POST', '/api/system-configurations/manage', 
             [
                 'id'   => 1,
                 'type' => 'SCHEDULE_INPLAY_TIMER',
