@@ -17,49 +17,17 @@ class ProviderAccountsController extends Controller
         if (!empty($request->id)) {
             $id = $request->id;
         }
-        $accounts = ProviderAccount::getProviderAccounts($id)
-                      ->join('providers as p', 'p.id', 'provider_id')
-                      ->select([
-                        'provider_accounts.id',
-                        'username',
-                        'password',
-                        'type',
-                        'provider_accounts.punter_percentage',
-                        'credits',
-                        'provider_accounts.is_enabled',
-                        'is_idle',
-                        'provider_id',
-                        'p.currency_id'
-                      ])
-                      ->get()
-                      ->toArray();
-        $data = [];
-        if (!empty($accounts)) {
-            foreach($accounts as $account) {
-                $data['data'][] = [
-                    'id'                => $account['id'],
-                    'username'          => $account['username'],
-                    'password'          => $account['password'],
-                    'type'              => $account['type'],
-                    'punter_percentage' => $account['punter_percentage'],
-                    'credits'           => $account['credits'],
-                    'is_enabled'        => $account['is_enabled'],
-                    'is_idle'           => $account['is_idle'],
-                    'provider_id'       => $account['provider_id'],
-                    'currency_id'       => $account['currency_id']
-                ];
-            }
-        }
+        $accounts = ProviderAccount::getProviderAccounts($id);
 
-        return response()->json($data);
+        return response()->json($accounts);
     }
 
     public function manage(ProviderAccountRequest $request) 
     {
+        DB::beginTransaction();
         try 
         {
-            if (!empty($request)) {
-                DB::beginTransaction();                
+            if (!empty($request)) {                
                 !empty($request->id) ? $data['id'] = $request->id : null;
                 !empty($request->username) ? $data['username'] = $request->username : null;
                 !empty($request->password) ? $data['password'] = $request->password : null;
@@ -87,15 +55,15 @@ class ProviderAccountsController extends Controller
                 }               
 
                 if (!empty($providerAccount)) {
-                  $providerAccount->update($data);
-                  $provider = ProviderAccount::where('id', $providerAccount->id)->first();
-                  $message  = 'success';   
+                    $providerAccount->update($data);
+                    $provider = ProviderAccount::where('id', $providerAccount->id)->first();
+                    $message  = 'success';   
                 }
                 else
                 {    
-                  $provider = ProviderAccount::create($data);
-                  $provider = ProviderAccount::where('id', $provider->id)->first();
-                  $message = 'success';       
+                    $provider = ProviderAccount::create($data);
+                    $provider = ProviderAccount::where('id', $provider->id)->first();
+                    $message = 'success';       
                 }
             
                 DB::commit();

@@ -9,17 +9,8 @@ class ProvidersController extends Controller
 {
     public function index()
     {
-        $providers = Provider::getAllProviders();
-        if (!empty($providers)) {
-            foreach ($providers as $provider) {
-                $data['data'][] = [
-                    'id'                => $provider['id'],
-                    'alias'             => $provider['alias'],
-                    'currency_id'       => $provider['currency_id']
-                ];
-            }
-        }      
+        $providers = Provider::getAllProviders();              
 
-        return response()->json(!empty($data) ? $data : []);
+        return response()->json($providers);
     }
 }

@@ -33,11 +33,45 @@ class ProviderAccount extends Model
 
     public static function getProviderAccounts($providerId) 
     {
+      $where = null;        
       if (!empty($providerId)) {
-        return self::where('provider_id', $providerId)->orderBy('id', 'DESC');
+        $where = ['provider_id' => $providerId];
       }
-      else {
-        return self::orderBy('id', 'DESC');
-      }
+        $accounts = self::where($where)
+          ->join('providers as p', 'p.id', 'provider_id')
+          ->select([
+            'provider_accounts.id',
+            'username',
+            'password',
+            'type',
+            'provider_accounts.punter_percentage',
+            'credits',
+            'provider_accounts.is_enabled',
+            'is_idle',
+            'provider_id',
+            'p.currency_id'
+          ])                                    
+          ->orderBy('id', 'DESC')
+          ->get()
+          ->toArray();
+
+      $data = [];
+        if (!empty($accounts)) {
+            foreach($accounts as $account) {
+                $data['data'][] = [
+                    'id'                => $account['id'],
+                    'username'          => $account['username'],
+                    'password'          => $account['password'],
+                    'type'              => $account['type'],
+                    'punter_percentage' => $account['punter_percentage'],
+                    'credits'           => $account['credits'],
+                    'is_enabled'        => $account['is_enabled'],
+                    'is_idle'           => $account['is_idle'],
+                    'provider_id'       => $account['provider_id'],
+                    'currency_id'       => $account['currency_id']
+                ];
+            }
+        }
+      return $data;
     }
 }
