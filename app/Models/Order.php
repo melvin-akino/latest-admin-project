@@ -13,7 +13,7 @@ class Order extends Model
     }
 
     public static function getAllOrders($providerAccountId) {
-        return self::where('provider_account_id', $providerAccountId)
+        $orders = self::where('provider_account_id', $providerAccountId)
             ->whereNotNull('orders.bet_id')
             ->join('order_logs', 'orders.id', 'order_logs.order_id')
             ->join('provider_accounts', 'orders.provider_account_id', 'provider_accounts.id')
@@ -29,5 +29,45 @@ class Order extends Model
             ->orderBy('created_at', 'desc')
             ->get()
             ->toArray();
+        
+        $data = [];
+        if (!empty($orders)) {
+            $pl = 0;
+            $openOrders = 0;
+            $lastBetDate = '';
+            $providerAccountLastUpdate = '';
+            foreach($orders as $key => $order) {
+                if ($key == 0) {
+                    $lastBetDate = $order['created_at'];
+                    $providerAccountLastUpdate = $order['updated_at'];
+                    $lastAction = 'Check Balance';
+                }
+
+                if ($order['settled_date'] != '') {
+                    $pl += $order['actual_profit_loss'];
+
+                    if (Carbon::createFromFormat("Y-m-d H:i:s", $providerAccountLastUpdate, 'Etc/UTC') <= Carbon::createFromFormat("Y-m-d H:i:s", $order['settled_date'], 'Etc/UTC')) {
+                        $providerAccountLastUpdate = $order['settled_date'];
+                        $lastAction = 'Settlement';
+                    }
+                }
+                else {
+                    $openOrders += $order['actual_stake'];
+                    
+                }
+                
+            }
+
+            $data = [
+                'provider_account_id' => $providerAccountId,
+                'pl' => $pl,
+                'open_orders' => $openOrders,
+                'last_bet' => $lastBetDate,
+                'last_scrape' => $providerAccountLastUpdate,
+                'last_sync' => $lastAction
+            ];
+        }
+
+        return $data;
     }
 }
