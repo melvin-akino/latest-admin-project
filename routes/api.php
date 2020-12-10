@@ -26,8 +26,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
 
     //Provider accounts routes
-    Route::get('/provider_accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
-    Route::post('/provider_accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
+    Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
+    Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
 
 
     //Providers routes
