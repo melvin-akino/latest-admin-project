@@ -23,7 +23,19 @@ class Provider extends Model
 
     public static function getAllProviders()
     {
-        return self::orderBy('priority', 'asc')->orderBy('id', 'asc')->get()->toArray();
+        $providers = self::orderBy('priority', 'asc')->orderBy('id', 'asc')->get()->toArray();
+
+        if (!empty($providers)) {
+            foreach ($providers as $provider) {
+                $data['data'][] = [
+                    'id'            => $provider['id'],
+                    'alias'         => $provider['alias'],
+                    'currency_id'   => $provider['currency_id']
+                ];
+            }
+        }
+
+        return !empty($data) ? $data : [];
     }
 
     public static function getIdFromAlias($alias)

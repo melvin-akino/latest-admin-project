@@ -86,6 +86,28 @@
           </span>    
           <span v-else>{{item.last_bet}}</span>    
         </template>
+        <template v-slot:[`item.last_scrape`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_scrape')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_scrape}}</span>    
+        </template>
+        <template v-slot:[`item.last_sync`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_sync')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_sync}}</span>    
+        </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600" @clearFilters="clearFilters">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>

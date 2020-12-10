@@ -9,14 +9,8 @@ class CurrenciesController extends Controller
 {
     public function index()
     {
-        $currencies = Currency::all();
-        foreach ($currencies as $currency) {
-            $data['data'][] = [
-                'id'                => $currency['id'],
-                'code'              => $currency['code'],
-            ];
-        }
+        $currencies = Currency::getAll();
 
-        return response()->json(!empty($data) ? $data : []);
+        return response()->json($currencies);
     }
 }

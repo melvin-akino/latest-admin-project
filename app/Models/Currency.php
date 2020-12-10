@@ -20,6 +20,19 @@ class Currency extends Model
         'updated_at',
     ];
 
+    public static function getAll()
+    {
+        $currencies = self::all();
+        foreach ($currencies as $currency) {
+            $data['data'][] = [
+                'id'    => $currency['id'],
+                'code'  => $currency['code'],
+            ];
+        }
+
+        return !empty($data) ? $data : [];
+    }
+
     public static function getIdByCode(string $code)
     {
         $query = self::where('code', $code);
