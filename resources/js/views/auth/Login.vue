@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapActions } from "vuex";
 import { required, email } from "vuelidate/lib/validators";
 import Cookies from "js-cookie";
 import bus from "../../eventBus";
@@ -68,7 +68,6 @@ export default {
     },
   },
   computed: {
-    ...mapState("admin", ["admin"]),
     emailErrors() {
       let errors = [];
       if (!this.$v.loginForm.email.$dirty) return errors;
@@ -87,30 +86,30 @@ export default {
     },
   },
   methods: {
-    login() {
+    ...mapActions('auth', { adminLogin: 'login' }),
+    async login() {
       if (!this.$v.loginForm.$invalid) {
-        this.isLoggingIn = true;
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "Logging in, please wait."
-        });
-        axios.post("login", this.loginForm)
-        .then((response) => {
+        try {
+          this.isLoggingIn = true;
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Logging in, please wait."
+          });
+          let response = await this.adminLogin(this.loginForm)
           this.isLoggingIn = false;
-          Cookies.set("access_token", response.data.token);
+          Cookies.set("access_token", response);
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
             text: "Login successful."
           });
           this.$router.push('/accounts/users');
-        })
-        .catch((err) => {
+        } catch(err) {
           this.isLoggingIn = false;
           bus.$emit("SHOW_SNACKBAR", {
             color: "error",
             text: err.response.data.message
           });
-        });
+        }
       } else {
         this.$v.loginForm.$touch();
       }
