@@ -14,4 +14,11 @@ class OrdersController extends Controller
 
         return response()->json($orders);
     }
+
+    public function getUserTransactions(Request $request)
+    {
+        $orders = Order::getUserTransactions($request);
+
+        return response()->json($orders);
+    }
 }
