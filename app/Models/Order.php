@@ -71,4 +71,13 @@ class Order extends Model
 
         return $data;
     }
+
+    public static function getOpenOrders($userId)
+    {
+        return self::where('user_id', $userId)
+            ->whereNull('settled_date')
+            ->selectRaw('sum(stake) as open_orders')
+            ->groupBy('user_id')
+            ->get();
+    }
 }
