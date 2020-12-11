@@ -29,7 +29,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
     Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
 
-
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
     //Routes to get all currencies
@@ -37,4 +36,16 @@ Route::middleware('auth:api')->group(function () {
 
     //Orders related routes
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
+
+    //System configurations related routes
+    Route::get('/system-configurations', 'SystemConfigurationsController@index')->name('system-configurations.api');
+    Route::post('/system-configurations/manage', 'SystemConfigurationsController@manage')->name('system-configurations-manage.api');
+
+    //General Errors related routes
+    Route::get('/general-errors', 'GeneralErrorMessagesController@index')->name('general-errors.api');
+    Route::post('/general-errors/manage', 'GeneralErrorMessagesController@manage')->name('general-errors-manage.api');
+
+    //Provider Errors related routes
+    Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
+    Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
 });

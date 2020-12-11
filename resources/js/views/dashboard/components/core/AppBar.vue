@@ -35,9 +35,8 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
 import Cookies from 'js-cookie'
-import { getToken } from '../../../../helpers/token'
 import bus from '../../../../eventBus'
 
 export default {
@@ -51,23 +50,26 @@ export default {
     ...mapMutations({
       setDrawer: "SET_DRAWER"
     }),
-    logout() {
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: "Logging out..."
-      });
-      axios.post('logout', null, { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
+    ...mapActions('auth', { adminLogout: 'logout' }),
+    async logout() {
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Logging out..."
+        });
+        let response = await this.adminLogout()
         Cookies.remove('access_token')
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
-          text: response.data.message
+          text: response
         });
         this.$router.push('/login')
-      })
-      .catch(err => {
-        console.log(err)
-      })
+      } catch(err) {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     }
   }
 };
