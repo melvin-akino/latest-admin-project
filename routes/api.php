@@ -48,4 +48,8 @@ Route::middleware('auth:api')->group(function () {
     //Provider Errors related routes
     Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
     Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
+
+    //Customer related routes
+    Route::get('/users', 'UsersController@index')->name('users.api');
+    Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
 });
