@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { getToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   generalErrors: [],
@@ -32,7 +33,7 @@ const mutations = {
 }
 
 const actions = {
-  getGeneralErrors({commit}) {
+  getGeneralErrors({commit, dispatch}) {
     commit('SET_IS_LOADING_GENERAL_ERRORS', true)
     axios.get('general-errors', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
@@ -41,10 +42,14 @@ const actions = {
     })
     .catch(err => {
       commit('SET_GENERAL_ERRORS', [])
-      console.log(err)
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
     })
   },
-  manageGeneralErrors({commit}, payload) {
+  manageGeneralErrors({commit, dispatch}, payload) {
     return new Promise((resolve, reject) => {
       axios.post('general-errors/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
@@ -57,7 +62,7 @@ const actions = {
       })
       .catch(err => {
         reject(err)
-        console.log(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
   }

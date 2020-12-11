@@ -109,7 +109,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.errors.error[0]
+          text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.error[0] : err.response.data.message
         });
       }
     },
@@ -132,7 +132,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.errors.error[0]
+          text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.error[0] : err.response.data.message
         });
       }
     },
