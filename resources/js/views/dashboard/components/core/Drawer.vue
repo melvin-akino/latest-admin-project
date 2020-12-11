@@ -83,6 +83,11 @@ export default {
         title: "System Configurations",
         to: "/system_configurations"
       },
+      {
+        icon: "mdi-alert-circle",
+        title: "General Errors",
+        to: "/errors/general"
+      },
       // {
       //   title: "icons",
       //   icon: "mdi-chart-bubble",
