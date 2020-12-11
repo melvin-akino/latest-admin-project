@@ -26,15 +26,14 @@ class ProviderErrorMessagesController extends Controller
                     $error = ProviderErrorMessage::where('id', $request->id)->first();
                     $error->message = $request->message;               
                     $error->error_message_id = $request->error_message_id;
-
-                    if ($error->update()) {
-                        $message = 'success';
-                    }
+                    $error->update();
+                    $data    = $error;
+                    $message = 'success';
                 }
                 else {
-                    if (ProviderErrorMessage::create($request->toArray())) {
-                        $message = 'success';
-                    }                    
+                    $error   = ProviderErrorMessage::create($request->toArray());
+                    $data    = ProviderErrorMessage::where('id', $error->id)->first();
+                    $message = 'success';                 
                 }
 
                 DB::commit();
@@ -42,7 +41,8 @@ class ProviderErrorMessagesController extends Controller
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'data'        => $message
+                    'messsage'    => $message,
+                    'data'        => $data
                 ], 200);
             }            
         }  
