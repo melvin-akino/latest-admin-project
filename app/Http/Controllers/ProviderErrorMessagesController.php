@@ -26,7 +26,7 @@ class ProviderErrorMessagesController extends Controller
                     $error = ProviderErrorMessage::where('id', $request->id)->first();
                     $error->message = $request->message;               
                     $error->error_message_id = $request->error_message_id;
-                    $error->update();
+                    $error->save();
                     $data    = $error;
                     $message = 'success';
                 }
