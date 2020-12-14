@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\RequiredIf;
 
 class UserRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class UserRequest extends FormRequest
             'email'     => 'required|max:255'.$uniqueEmail,
             'firstname' => 'required',
             'lastname'  => 'required',
-            'password'  => 'required'
+            'password'  =>  new RequiredIf(!$this->input('id'))
         ];
 
     }

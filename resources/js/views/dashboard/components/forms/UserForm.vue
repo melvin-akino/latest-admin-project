@@ -51,10 +51,10 @@
                 type="text"
                 outlined
                 dense
-                v-model="$v.user.first_name.$model"
+                v-model="$v.user.firstname.$model"
                 :error-messages="firstNameErrors"
-                @input="$v.user.first_name.$touch()"
-                @blur="$v.user.first_name.$touch()"
+                @input="$v.user.firstname.$touch()"
+                @blur="$v.user.firstname.$touch()"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6" class="formColumn">
@@ -63,10 +63,10 @@
                 type="text"
                 outlined
                 dense
-                v-model="$v.user.last_name.$model"
+                v-model="$v.user.lastname.$model"
                 :error-messages="lastNameErrors"
-                @input="$v.user.last_name.$touch()"
-                @blur="$v.user.last_name.$touch()"
+                @input="$v.user.lastname.$touch()"
+                @blur="$v.user.lastname.$touch()"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -75,7 +75,6 @@
               <v-select
                 :items="userStatus"
                 label="Status"
-                value="Active"
                 outlined
                 dense
                 v-model="$v.user.status.$model"
@@ -87,7 +86,7 @@
           </v-row>
         </v-container>
       </v-card-text>
-      <v-toolbar color="primary" dark height="40px" v-if="!update">
+      <!-- <v-toolbar color="primary" dark height="40px" v-if="!update">
         <v-toolbar-title class="text-uppercase subtitle-1"
           >Wallet Information</v-toolbar-title
         >
@@ -124,7 +123,7 @@
             </v-col>
           </v-row>
         </v-container>
-      </v-card-text>
+      </v-card-text> -->
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn dark right class="red darken-2" @click="closeDialog"
@@ -145,10 +144,9 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import bus from "../../../../eventBus";
 import { required, requiredIf, email, minLength, decimal } from 'vuelidate/lib/validators'
-import moment from 'moment'
 import randomstring from 'randomstring'
 
 function creditsValue(value) {
@@ -161,17 +159,14 @@ export default {
   props: ["update", "userToUpdate"],
   data: () => ({
     user: {
+      id: null,
       email: "",
       password: "",
-      first_name: "",
-      last_name: "",
-      status: "Active",
-      credits: "",
-      currency: "CNY",
-      open_bets: "-",
-      last_bet: "-",
-      last_login: "-",
-      created_date: moment().format('YYYY-MM-DD HH:mm:ss')
+      firstname: "",
+      lastname: "",
+      status: 1,
+      // credits: "",
+      // currency: "CNY"
     }
   }),
   validations: {
@@ -183,15 +178,15 @@ export default {
         }),
         minLength: minLength(6)
       },
-      first_name: { required },
-      last_name: { required },
+      firstname: { required },
+      lastname: { required },
       status: { required },
-      credits: { required, creditsValue, decimal },
-      currency: { required }
+      // credits: { required, creditsValue, decimal },
+      // currency: { required }
     }
   },
   computed: {
-    ...mapState("users", ["userStatus", "currencies"]),
+    ...mapState("users", ["userStatus"]),
     emailErrors() {
       let errors = []
       if (!this.$v.user.email.$dirty) return errors
@@ -208,14 +203,14 @@ export default {
     },
     firstNameErrors() {
       let errors = []
-      if (!this.$v.user.first_name.$dirty) return errors
-      !this.$v.user.first_name.required && errors.push('First name is required.')
+      if (!this.$v.user.firstname.$dirty) return errors
+      !this.$v.user.firstname.required && errors.push('First name is required.')
       return errors
     },
     lastNameErrors() {
       let errors = []
-      if (!this.$v.user.last_name.$dirty) return errors
-      !this.$v.user.last_name.required && errors.push('Last name is required.')
+      if (!this.$v.user.lastname.$dirty) return errors
+      !this.$v.user.lastname.required && errors.push('Last name is required.')
       return errors
     },
     statusErrors() {
@@ -224,25 +219,26 @@ export default {
       !this.$v.user.status.required && errors.push('Status is required.')
       return errors
     },
-    creditsErrors() {
-      let errors = []
-      if (!this.$v.user.credits.$dirty) return errors
-      !this.$v.user.credits.required && errors.push('Credits is required.')
-      !this.$v.user.credits.decimal && errors.push('Credits should be numeric.')
-      !this.$v.user.credits.creditsValue && errors.push('Credits should have at least a minimum value of 1.')
-      return errors
-    },
-    currencyErrors() {
-      let errors = []
-      if (!this.$v.user.currency.$dirty) return errors
-      !this.$v.user.currency.required && errors.push('Currency is required.')
-      return errors
-    }
+    // creditsErrors() {
+    //   let errors = []
+    //   if (!this.$v.user.credits.$dirty) return errors
+    //   !this.$v.user.credits.required && errors.push('Credits is required.')
+    //   !this.$v.user.credits.decimal && errors.push('Credits should be numeric.')
+    //   !this.$v.user.credits.creditsValue && errors.push('Credits should have at least a minimum value of 1.')
+    //   return errors
+    // },
+    // currencyErrors() {
+    //   let errors = []
+    //   if (!this.$v.user.currency.$dirty) return errors
+    //   !this.$v.user.currency.required && errors.push('Currency is required.')
+    //   return errors
+    // }
   },
   mounted() {
     this.initializeUser();
   },
   methods: {
+    ...mapActions('users', ['manageUser']),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG");
     },
@@ -254,26 +250,48 @@ export default {
         this.user = userForm;
       }
     },
-    addUser() {
+    async addUser() {
       if(!this.$v.user.$invalid) {
-        this.$store.commit("users/ADD_USER", this.user);
-        this.closeDialog();
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "A new user has been created."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Creating a new account..."
+          });
+          await this.manageUser(this.user)
+          this.closeDialog();
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "A new user has been created."
+          });
+        } catch(err) {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.email[0] : err.response.data.message
+          });
+        }
       } else {
         this.$v.user.$touch()
       }
     },
-    updateUser() {
+    async updateUser() {
       if(!this.$v.user.$invalid) {
-        this.$store.commit("users/UPDATE_USER", this.user);
-        this.closeDialog();
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "User account details were updated."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Updating user account..."
+          });
+          await this.manageUser(this.user)
+          this.closeDialog();
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "User account details were updated."
+          });
+        } catch(err) {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.email[0] : err.response.data.message
+          });
+        }
       } else {
         this.$v.user.$touch()
       }
@@ -289,17 +307,17 @@ export default {
       let fieldsToEmpty = [
         "email",
         "password",
-        "first_name",
-        "last_name",
-        "credits"
+        "firstname",
+        "lastname",
+        // "credits"
       ];
       Object.keys(this.user).map(key => {
         if (fieldsToEmpty.includes(key)) {
           this.user[key] = "";
         }
       });
-      this.user.status = 'Active'
-      this.user.currency = 'CNY'
+      this.user.status = 1
+      // this.user.currency = 'CNY'
     },
     randomizePassword() {
       this.user.password = randomstring.generate(6)

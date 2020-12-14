@@ -44,6 +44,8 @@ class UsersController extends Controller
 
             if ($user->save())
             {
+                $data = User::where('id', $user->id)->first(['id', 'email', 'firstname', 'lastname', 'status', 'created_at']);
+
                 if (!empty($request->id))
                 {
                     //Make user wallet and deposit amount in it
@@ -57,6 +59,7 @@ class UsersController extends Controller
                 'status'                => true,
                 'status_code'           => 200,
                 'message'               => 'success',
+                'data'                  => $data
             ], 200);
         } catch (Exception $e) {
             DB::rollback;
