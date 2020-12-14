@@ -33,15 +33,20 @@ class User extends Model
 
     public static function getAll()
     {
-        return self::select([
-            'id',
+        return self::join('wallet', 'wallet.user_id', 'users.id')
+          ->join('currency', 'currency.id', 'users.currency_id')
+          ->select([
+            'users.id',
             'email',
             'firstname',
             'lastname',
+            'wallet.balance as credits',
+            'currency.code as currency',
             'status',
-            'created_at',
-            'updated_at'
+            'users.created_at',
+            'users.updated_at'
         ])
+        ->orderBy('created_at', 'DESC')
         ->get()
         ->toArray();
     }
