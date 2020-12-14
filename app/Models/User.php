@@ -43,6 +43,7 @@ class User extends Model
           'created_at',
           'updated_at'
       ])
+      ->orderBy('created_at', 'DESC')
       ->get()
       ->toArray();
     }
