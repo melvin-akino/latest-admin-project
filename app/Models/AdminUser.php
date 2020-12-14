@@ -20,8 +20,15 @@ class AdminUser extends Authenticatable
         'password',
     ];
 
-    public function sendPasswordResetNotification($token)
+    public static function getAll()
     {
-        $this->notify(new \App\Notifications\MailResetPasswordNotification($token));
+        return self::select([
+            'id',
+            'name',
+            'email',
+            'status'
+        ])
+        ->get()
+        ->toArray();
     }
 }
