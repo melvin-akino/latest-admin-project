@@ -4,9 +4,11 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Laratrust\Traits\LaratrustUserTrait;
 
 class AdminUser extends Authenticatable
 {
+    use LaratrustUserTrait;
     use HasApiTokens, Notifiable;
     protected $table = 'admin_users';
     /**
