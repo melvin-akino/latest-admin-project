@@ -29,9 +29,6 @@
             <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
           </v-toolbar>
         </template>
-        <template v-slot:[`item.credits`]="{ item }">
-          <span>{{Number(item.credits).toFixed(2)}}</span>
-        </template>
         <template v-slot:[`item.open_bets`]="{ item }">
           <span v-if="!item.hasOwnProperty('open_bets')">
             <v-progress-circular
