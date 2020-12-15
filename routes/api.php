@@ -37,6 +37,7 @@ Route::middleware('auth:api')->group(function () {
     //Orders related routes
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
     Route::get('/orders/open', 'OrdersController@getUserOpenOrders')->name('open-orders.api');
+    Route::get('/orders/user', 'OrdersController@getUserTransactions')->name('orders-user.api');
 
     //System configurations related routes
     Route::get('/system-configurations', 'SystemConfigurationsController@index')->name('system-configurations.api');
