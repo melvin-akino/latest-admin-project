@@ -88,6 +88,11 @@ export default {
         title: "General Errors",
         to: "/errors/general"
       },
+      {
+        icon: "mdi-badge-account-alert",
+        title: "Provider Errors",
+        to: "/errors/provider"
+      },
       // {
       //   title: "icons",
       //   icon: "mdi-chart-bubble",

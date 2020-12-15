@@ -75,6 +75,11 @@ const router = new Router({
               name: 'General Errors',
               path: 'general',
               component: () => import('./views/dashboard/pages/errors/GeneralErrors')
+            },
+            {
+              name: 'Provider Errors',
+              path: 'provider',
+              component: () => import('./views/dashboard/pages/errors/ProviderErrors')
             }
           ]
         },
