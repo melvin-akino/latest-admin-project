@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Order extends Model
 {
@@ -46,7 +47,7 @@ class Order extends Model
                 if ($order['settled_date'] != '') {
                     $pl += $order['actual_profit_loss'];
 
-                    if (Carbon::createFromFormat("Y-m-d H:i:s", $providerAccountLastUpdate, 'Etc/UTC') <= Carbon::createFromFormat("Y-m-d H:i:s", $order['settled_date'], 'Etc/UTC')) {
+                    if (Carbon::create($providerAccountLastUpdate)->lte(Carbon::create($order['settled_date']))) {
                         $providerAccountLastUpdate = $order['settled_date'];
                         $lastAction = 'Settlement';
                     }

@@ -78,6 +78,11 @@ export default {
         title: "Admin Roles",
         to: "/accounts/roles"
       },
+      {
+        icon: "mdi-alert-circle",
+        title: "General Errors",
+        to: "/errors/general"
+      },
       // {
       //   title: "icons",
       //   icon: "mdi-chart-bubble",

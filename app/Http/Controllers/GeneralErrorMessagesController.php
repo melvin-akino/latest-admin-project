@@ -22,17 +22,16 @@ class GeneralErrorMessagesController extends Controller
         try {
             if (!empty($request)) {
                 if (!empty($request->id)) {
-                    $error = GeneralErrorMessage::where('id', $request->id)->first();
+                    $error        = GeneralErrorMessage::where('id', $request->id)->first();
                     $error->error = $request->error;               
-
-                    if ($error->update()) {
-                        $message = 'success';
-                    }
+                    $error->update();
+                    $data    = $error;
+                    $message = 'success';
                 }
                 else {
-                    if (GeneralErrorMessage::create($request->toArray())) {
-                        $message = 'success';
-                    }                    
+                    $error   = GeneralErrorMessage::create($request->toArray());
+                    $data    = GeneralErrorMessage::where('id', $error->id)->first();
+                    $message = 'success';
                 }
 
                 DB::commit();
@@ -40,7 +39,8 @@ class GeneralErrorMessagesController extends Controller
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'data'        => $message
+                    'message'     => $message,
+                    'data'        => $data
                 ], 200);
             }            
         }  

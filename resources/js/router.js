@@ -62,6 +62,18 @@ const router = new Router({
           ]
         },
         {
+          name: 'Errors',
+          path: 'errors',
+          component: () => import('./views/dashboard/pages/Errors'),
+          children: [
+            {
+              name: 'General Errors',
+              path: 'general',
+              component: () => import('./views/dashboard/pages/errors/GeneralErrors')
+            }
+          ]
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),
