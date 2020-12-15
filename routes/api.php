@@ -36,6 +36,7 @@ Route::middleware('auth:api')->group(function () {
 
     //Orders related routes
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
+    Route::get('/orders/open', 'OrdersController@getUserOpenOrders')->name('open-orders.api');
 
     //System configurations related routes
     Route::get('/system-configurations', 'SystemConfigurationsController@index')->name('system-configurations.api');
@@ -48,4 +49,8 @@ Route::middleware('auth:api')->group(function () {
     //Provider Errors related routes
     Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
     Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
+
+    //Customer related routes
+    Route::get('/users', 'UsersController@index')->name('users.api');
+    Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
 });
