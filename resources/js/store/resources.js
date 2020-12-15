@@ -1,4 +1,5 @@
 import { getToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   providers: [],
@@ -36,22 +37,32 @@ const mutations = {
 } 
 
 const actions = {
-  getProviders({commit}) {
+  getProviders({commit, dispatch}) {
     axios.get('providers', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_PROVIDERS', response.data.data)
     })
     .catch(err => {
-      console.log(err)
+      commit('SET_PROVIDERS', [])
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
     })
   },
-  getCurrencies({commit}) {
+  getCurrencies({commit, dispatch}) {
     axios.get('currencies', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_CURRENCIES', response.data.data)
     })
     .catch(err => {
-      console.log(err)
+      commit('SET_CURRENCIES', [])
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
     })
   }
 }
