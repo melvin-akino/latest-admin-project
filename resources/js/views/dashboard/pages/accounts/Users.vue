@@ -21,14 +21,27 @@
         :items="usersTable"
         :search="search"
         :items-per-page="10"
+        :loading="isLoadingUsers"
+        loading-text="Loading Users"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ users.length }}</p>
+            <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.open_bets`]="{ item }">
+          <span v-if="!item.hasOwnProperty('open_bets')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.open_bets}}</span>    
+        </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item.id, item.status)"></v-select>
+          <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
@@ -47,7 +60,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
 
 export default {
   name: "Users",
@@ -67,7 +80,7 @@ export default {
       { text: "LAST BET", value: "last_bet" },
       { text: "LAST LOGIN", value: "last_login" },
       { text: "STATUS", value: "status" },
-      { text: "CREATED DATE", value: "created_date" },
+      { text: "CREATED DATE", value: "created_at" },
       {
         text: "OPTIONS",
         value: "actions",
@@ -79,22 +92,22 @@ export default {
     search: ""
   }),
   computed: {
-    ...mapState("users", ["users", "userStatus"]),
-    usersTable() {
-      let usersTable = []
-      this.users.map(user => {
-        let full_name = `${user.first_name} ${user.last_name}`
-        let userObject = { ...user }
-        this.$set(userObject, 'full_name', full_name)
-        usersTable.push(userObject)
-      })
-      return usersTable
-    }
+    ...mapState("users", ["userStatus", "isLoadingUsers"]),
+    ...mapGetters("users", ["usersTable"]),
+  },
+  mounted() {
+    this.getUsersList()
   },
   methods: {
+    ...mapMutations('users', { setUsers: 'SET_USERS' }),
+    ...mapActions('users', ['getUsersList']),
     updateUserStatus(id, status) {
       this.$store.commit('users/UPDATE_USER_STATUS', { id, status })
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.setUsers([])
+    next()
   }
 };
 </script>

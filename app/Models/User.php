@@ -33,16 +33,17 @@ class User extends Model
 
     public static function getAll()
     {
-        return self::select([
-            'id',
-            'email',
-            'firstname',
-            'lastname',
-            'status',
-            'created_at',
-            'updated_at'
-        ])
-        ->get()
-        ->toArray();
+      return self::select([
+          'id',
+          'email',
+          'firstname',
+          'lastname',
+          'status',
+          'created_at',
+          'updated_at'
+      ])
+      ->orderBy('created_at', 'DESC')
+      ->get()
+      ->toArray();
     }
 }
