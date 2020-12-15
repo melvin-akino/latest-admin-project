@@ -54,4 +54,5 @@ Route::middleware('auth:api')->group(function () {
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');
     Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
+    Route::get('/user/{id}', 'UsersController@getUser')->name('users.api');
 });

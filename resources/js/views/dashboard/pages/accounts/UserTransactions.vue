@@ -1,9 +1,12 @@
 <template>
   <div class="userTransactions pa-6">
     <v-container>
-      <p class="text-h4 text-uppercase">Transaction Report for {{userEmail}}</p>
+      <p class="text-h4 text-uppercase" v-if="userEmail">
+        Transaction Report for {{userEmail}}
+        <span v-if="search.date_from && search.date_to">({{search.date_from}} to {{search.date_to}})</span>
+      </p>
       <div class="my-6">
-        <v-form @submit.prevent="filterUserTransactions">
+        <v-form @submit.prevent="getUserTransactions">
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-text-field
@@ -12,10 +15,10 @@
                 outlined
                 dense
                 background-color="#fff"
-                v-model="$v.search.fromDate.$model"
+                v-model="$v.search.date_from.$model"
                 :error-messages="fromDateErrors"
-                @input="$v.search.fromDate.$touch()"
-                @blur="$v.search.fromDate.$touch()"
+                @input="$v.search.date_from.$touch()"
+                @blur="$v.search.date_from.$touch()"
                 @change="resetPeriod"
                 @focus="resetPeriod"
                 @keydown.prevent
@@ -30,10 +33,10 @@
                 outlined
                 dense
                 background-color="#fff"
-                v-model="$v.search.toDate.$model"
+                v-model="$v.search.date_to.$model"
                 :error-messages="toDateErrors"
-                @input="$v.search.toDate.$touch()"
-                @blur="$v.search.toDate.$touch()"
+                @input="$v.search.date_to.$touch()"
+                @blur="$v.search.date_to.$touch()"
                 @change="resetPeriod"
                 @focus="resetPeriod"
                 @keydown.prevent
@@ -46,7 +49,7 @@
                 :items="periods"
                 item-text="text"
                 item-value="value"
-                label="Period"
+                label="Select Period"
                 outlined
                 dense
                 background-color="#fff"
@@ -58,24 +61,28 @@
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'HG', 'ISN', 'PIN', 'SB']"
-                label="Bookmaker"
+                :items="providers"
+                item-text="alias"
+                item-value="id"
+                label="Select Bookmaker"
                 outlined
                 dense
                 background-color="#fff"
-                v-model="search.provider"
+                v-model="search.provider_id"
               ></v-select>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-select
-                :items="['All', 'CNY', 'USD']"
-                label="Currency"
+                :items="currencies"
+                item-text="code"
+                item-value="id"
+                label="Select Currency"
                 outlined
                 dense
                 background-color="#fff"
-                v-model="search.currency"
+                v-model="search.currency_id"
               ></v-select>
             </v-col>
           </v-row>
@@ -84,16 +91,21 @@
       </div>
       <v-data-table
         :headers="headers"
-        :items="filteredTransactionsTable"
+        :items="userTransactions"
         :items-per-page="10"
+        :loading="isLoadingUserTransactions"
+        loading-text="Loading user transactions"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Bets: {{filteredTransactionsTable.length}}</p>
+            <p class="subtitle-1">Total Bets: {{userTransactions.length}}</p>
           </v-toolbar>
         </template>
         <template v-slot:[`item.bet_selection`]="{ item }">
           <span v-html="item.bet_selection"></span>
+        </template>
+        <template v-slot:[`item.valid_stake`]="{ item }">
+          <span>{{Math.abs(Number(item.profit_loss))}}</span>
         </template>
       </v-data-table>
     </v-container>
@@ -101,173 +113,162 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import moment from 'moment'
 import { required, requiredIf } from 'vuelidate/lib/validators'
+import { getToken } from '../../../../helpers/token'
+import bus from '../../../../eventBus'
 
 function toDateValidation(value) {
-  return value >= this.search.fromDate
+  return value >= this.search.date_from
 }
 
 export default {
   name: 'UserTransactions',
-  data:() => ({
-    headers: [
-      { text: 'BET ID', value: 'bet_id' },
-      { text: 'POST DATE', value: 'post_date' },
-      { text: 'BET SELECTION', value: 'bet_selection', width: "20%" },
-      { text: 'USERNAME', value: 'username', width: "10%" },
-      { text: 'STAKE', value: 'stake' },
-      { text: 'PRICE', value: 'price' },
-      { text: 'TO WIN', value: 'towin' },
-      { text: 'STATUS', value: 'status' },
-      { text: 'VALID STAKE', value: 'valid_stake' },
-      { text: 'P/L', value: 'pl' },
-      { text: 'REMARKS', value: 'remarks' },
-    ],
-    search: {
-      fromDate: '',
-      toDate: '',
-      period: 'all',
-      provider: 'All',
-      currency: 'All'
-    },
-    userEmail: '',
-    userTransactions: [],
-    filteredTransactionsTable: [],
-    periods: [
-      { text: 'All', value: 'all' },
-      { text: 'Today', value: 'today' },
-      { text: 'Yesterday', value: 'yesterday' },
-      { text: 'This Week', value: 'this_week' },
-      { text: 'Last Week', value: 'last_week' },
-      { text: 'This Period', value: 'this_period' },
-      { text: 'Last Period', value: 'last_period' },
-    ]
-  }),
+  data() {
+    return {
+      headers: [
+        { text: 'BET ID', value: 'bet_id' },
+        { text: 'POST DATE', value: 'created_at' },
+        { text: 'BET SELECTION', value: 'bet_selection', width: "20%" },
+        { text: 'USERNAME', value: 'username', width: "10%" },
+        { text: 'STAKE', value: 'stake' },
+        { text: 'PRICE', value: 'odds' },
+        { text: 'TO WIN', value: 'to_win' },
+        { text: 'STATUS', value: 'status' },
+        { text: 'VALID STAKE', value: 'valid_stake' },
+        { text: 'P/L', value: 'profit_loss' },
+        { text: 'REMARKS', value: 'reason' },
+      ],
+      search: {
+        user_id: this.$route.params.id,
+        date_from: moment().startOf('isoweek').format('YYYY-MM-DD'),
+        date_to: moment().add(1, 'week').startOf('isoweek').format('YYYY-MM-DD'),
+        period: null,
+        provider_id: null,
+        currency_id: null
+      },
+      userEmail: '',
+      userTransactions: [],
+      isLoadingUserTransactions: false,
+      periods: [
+        { text: 'All', value: 'all' },
+        { text: 'Today', value: 'today' },
+        { text: 'Yesterday', value: 'yesterday' },
+        { text: 'This Week', value: 'this_week' },
+        { text: 'Last Week', value: 'last_week' },
+        { text: 'This Period', value: 'this_period' },
+        { text: 'Last Period', value: 'last_period' },
+      ]
+    }
+  },
   validations: {
     search: {
-      fromDate: {
+      date_from: {
         required: requiredIf(function() {
-          return this.search.toDate
+          return this.search.date_to
         })
       },
-      toDate: {
+      date_to: {
         required: requiredIf(function() {
-          return this.search.fromDate
+          return this.search.date_from
         }),
         toDateValidation
       }
     }
   },
   computed: {
-    ...mapState('users', ['users']),
+    ...mapState('resources', ['providers', 'currencies']),
     fromDateErrors() {
       let errors = []
-      !this.$v.search.fromDate.required && errors.push('From date is required.')
+      !this.$v.search.date_from.required && errors.push('From date is required.')
       return errors
     },
     toDateErrors() {
       let errors = []
-      !this.$v.search.toDate.required && errors.push('To date is required.')
-      !this.$v.search.toDate.toDateValidation && errors.push('To date value must be a later date.')
+      !this.$v.search.date_to.required && errors.push('To date is required.')
+      !this.$v.search.date_to.toDateValidation && errors.push('To date value must be a later date.')
       return errors
     }
   },
   mounted() {
-    this.getUserDetails()
+    this.getProviders()
+    this.getCurrencies()
+    this.getUser()
+    this.getUserTransactions()
   },
   methods: {
-    getUserDetails() {
-      let user = this.users.filter(user => user.id == this.$route.params.id)[0]
-      this.userEmail = user.email
-      let userTransactionsTable = []
-      user.bets.map(transaction => {
-        let transactionObject = { ...transaction }
-        let formatPostDate = moment(transaction.post_date).format('YYYY-MM-DD')
-        this.$set(transactionObject, 'date', new Date(formatPostDate))
-        userTransactionsTable.push(transactionObject)
+    ...mapActions('resources', ['getProviders', 'getCurrencies']),
+    ...mapActions('auth', ['logoutOnError']),
+    getUser() {
+      axios.get(`user/${this.$route.params.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        this.userEmail = response.data.email
       })
-      this.userTransactions = userTransactionsTable
-      this.filteredTransactionsTable = userTransactionsTable
+      .catch(err => {
+        this.logoutOnError(err.response.status)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      })
+    },
+    getUserTransactions() {
+      this.userTransactions = []
+      this.isLoadingUserTransactions = true
+      axios.get('orders/user', { params: this.search, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        this.userTransactions = response.data
+        this.isLoadingUserTransactions = false
+      })
+      .catch(err => {
+        this.logoutOnError(err.response.status)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      })
     },
     setFilterDates() {
       let fromToDate = {
         all: {
-          fromDate: '',
-          toDate: ''
+          date_from: null,
+          date_to: null
         },
         today: {
-          fromDate: moment().format('YYYY-MM-DD'),
-          toDate: moment().format('YYYY-MM-DD')
+          date_from: moment().format('YYYY-MM-DD'),
+          date_to: moment().format('YYYY-MM-DD')
         },
         yesterday: {
-          fromDate: moment().subtract(1, 'days').format('YYYY-MM-DD'),
-          toDate: moment().subtract(1, 'days').format('YYYY-MM-DD')
+          date_from: moment().subtract(1, 'days').format('YYYY-MM-DD'),
+          date_to: moment().subtract(1, 'days').format('YYYY-MM-DD')
         },
         this_week: {
-          fromDate: moment().startOf('week').format('YYYY-MM-DD'),
-          toDate: moment().endOf('week').format('YYYY-MM-DD')
+          date_from: moment().startOf('week').format('YYYY-MM-DD'),
+          date_to: moment().endOf('week').format('YYYY-MM-DD')
         },
         last_week: {
-          fromDate: moment().subtract(1, 'week').startOf('week').format('YYYY-MM-DD'),
-          toDate: moment().subtract(1, 'week').endOf('week').format('YYYY-MM-DD')
+          date_from: moment().subtract(1, 'week').startOf('week').format('YYYY-MM-DD'),
+          date_to: moment().subtract(1, 'week').endOf('week').format('YYYY-MM-DD')
         },
         this_period: {
-          fromDate: moment().startOf('month').format('YYYY-MM-DD'),
-          toDate: moment().endOf('month').format('YYYY-MM-DD')
+          date_from: moment().startOf('month').format('YYYY-MM-DD'),
+          date_to: moment().endOf('month').format('YYYY-MM-DD')
         },
         last_period: {
-          fromDate: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
-          toDate: moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
+          date_from: moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
+          date_to: moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')
         }
       }
       Object.keys(fromToDate).map(key => {
         if(this.search.period == key) {
-          this.search.fromDate = fromToDate[key].fromDate
-          this.search.toDate = fromToDate[key].toDate
+          this.search.date_from = fromToDate[key].date_from
+          this.search.date_to = fromToDate[key].date_to
         }
       })
     },
     resetPeriod() {
-      this.search.period = ''
-    },
-    filterUserTransactions() {
-      let fromDate = this.search.fromDate ? new Date(this.search.fromDate) : ''
-      let toDate = this.search.toDate ? new Date(this.search.toDate) : ''
-      let filteredByDate = this.userTransactions.filter(transaction => {
-        if(this.search.fromDate && fromDate > transaction.date) {
-          return false
-        }
-        if(this.search.toDate && toDate < transaction.date) {
-          return false
-        }
-        return true
-      })
-      let filteredByCurrencyAndProvider = filteredByDate.filter(transaction => {
-        let filterParams = [this.search.provider, this.search.currency]
-        if(filterParams.includes('All')) {
-          if(this.search.provider && this.search.provider != 'All') {
-            if(this.search.provider == transaction.provider) {
-              return true
-            } else {
-              return false
-            }
-          }
-          if(this.search.currency && this.search.currency != 'All') {
-              if(this.search.currency == transaction.currency) {
-                return true
-              } else {
-                return false
-              }
-              return true
-          }
-          return true
-        } else {
-          return this.search.provider == transaction.provider && this.search.currency == transaction.currency
-        }
-      })
-      this.filteredTransactionsTable = filteredByCurrencyAndProvider
+      this.search.period = null
     }
   }
 }

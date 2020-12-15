@@ -87,11 +87,11 @@ class Order extends Model
         $dateTo = Carbon::parse('monday next week')->addHours(11)->addMinutes(59)->addSeconds(59);
         if ($request->date_from) 
         {
-            $dateFrom = Carbon::createFromFormat("Y-m-d H:i:s", $request->date_from, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            $dateFrom = Carbon::createFromFormat("Y-m-d", $request->date_from, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
         }
         if ($request->date_to) 
         {
-            $dateTo = Carbon::createFromFormat("Y-m-d H:i:s", $request->date_to, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            $dateTo = Carbon::createFromFormat("Y-m-d", $request->date_to, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
         }
         if ($request->user_id) 
         {
@@ -110,9 +110,11 @@ class Order extends Model
                  ->leftJoin('event_scores as es', 'es.master_event_unique_id', 'orders.master_event_unique_id')
                  ->leftJoin('provider_error_messages As pe','pe.id','orders.provider_error_message_id')
                  ->leftJoin('error_messages as em', 'em.id','pe.error_message_id')
+                 ->leftJoin('users', 'users.id','orders.user_id')
                  ->select(
                      [
                          'orders.id',
+                         'users.name as username',
                          'orders.bet_id',
                          'orders.bet_selection',
                          'orders.odds',
@@ -138,8 +140,9 @@ class Order extends Model
                      ]
                  )
                  ->where($where)
-                 ->where('status', '!=', 'FAILED')
-                 ->whereBetween('orders.created_at', [$dateFrom, $dateTo])
+                 ->where('orders.status', '!=', 'FAILED')
+                 ->whereDate('orders.created_at', '>=', $dateFrom)
+                 ->whereDate('orders.created_at', '<=', $dateTo)
                  ->orderBy('orders.created_at', 'desc')
                  ->get()
                  ->toArray();

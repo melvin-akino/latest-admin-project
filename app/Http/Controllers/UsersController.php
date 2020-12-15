@@ -13,4 +13,11 @@ class UsersController extends Controller
 
         return response()->json($users);
     }
+
+    public function getUser($userId)
+    {
+      $user = User::getUser($userId);
+
+      return response()->json($user);
+    }
 }
