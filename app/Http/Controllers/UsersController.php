@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{User, Wallet, WalletLedger, Source};
+use App\Models\{User, Wallet, WalletLedger, Source, Currency};
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Hash};
@@ -78,7 +78,17 @@ class UsersController extends Controller
                 'status'                => true,
                 'status_code'           => 200,
                 'message'               => 'success',
-                'data'                  => $user
+                'data'                  => [
+                    'id'            => $user->id,
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'firstname'     => $user->firstname,
+                    'lastname'      => $user->lastname,
+                    'currency'      => Currency::getCodeById($wallet->currency_id),
+                    'credits'       => $wallet->balance,
+                    'created_at'    => $user->created_at,
+                    'updated_at'    => $user->updated_at
+                ]
             ], 200);
         } catch (Exception $e) {
             DB::rollback;
