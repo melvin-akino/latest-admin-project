@@ -48,4 +48,9 @@ class User extends Model
       ->get()
       ->toArray();
     }
+
+    public static function getUser($userId)
+    {
+      return self::where('id', $userId)->first();
+    }
 }
