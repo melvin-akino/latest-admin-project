@@ -38,8 +38,8 @@ class UserRequest extends FormRequest
             'email'         => 'required|max:255|unique:users,email'.$uniqueEmail,
             'firstname'     => 'required',
             'lastname'      => 'required',
-            'currency_id'   => new RequiredIf(!$this->input('currency_id')),
-            'balance'       => new RequiredIf(!$this->input('balance')),
+            'currency_id'   => new RequiredIf(!$this->input('id')),
+            'balance'       => new RequiredIf(!$this->input('id')),
             'password'      => new RequiredIf(!$this->input('id'))
         ];
     }

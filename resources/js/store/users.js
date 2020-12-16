@@ -46,6 +46,8 @@ const mutations = {
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
+      credits: user.credits,
+      currency: user.currency,
       status: user.status,
       created_at: user.created_at,
       open_bets: '-'

@@ -19,7 +19,8 @@ class User extends Model
         'password',
         'firstname',
         'lastname',
-        'currency_id'
+        'currency_id',
+        'status'
     ];
 
     /**
