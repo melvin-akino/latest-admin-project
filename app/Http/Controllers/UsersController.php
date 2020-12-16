@@ -99,12 +99,11 @@ class UsersController extends Controller
             ], 500);
         }
     }
-    
+
     public function getUser($userId)
     {
         $user = User::getUser($userId);
 
         return response()->json($user);
-
     }
 }
