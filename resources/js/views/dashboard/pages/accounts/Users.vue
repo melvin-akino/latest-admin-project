@@ -47,9 +47,9 @@
           <table-action-dialog icon="mdi-pencil" width="600">
             <user-form :update="true" :user-to-update="item"></user-form>
           </table-action-dialog>
-          <table-action-dialog icon="mdi-currency-gbp" width="600">
+          <!-- <table-action-dialog icon="mdi-currency-gbp" width="600">
             <wallet-form :user-to-update="item"></wallet-form>
-          </table-action-dialog>
+          </table-action-dialog> -->
           <v-btn icon :to="`users/transactions/${item.id}`" target="_blank">
             <v-icon small>mdi-format-list-bulleted</v-icon>
           </v-btn>
@@ -61,6 +61,7 @@
 
 <script>
 import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import bus from '../../../../eventBus'
 
 export default {
   name: "Users",
@@ -100,9 +101,24 @@ export default {
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsersList']),
-    updateUserStatus(id, status) {
-      this.$store.commit('users/UPDATE_USER_STATUS', { id, status })
+    ...mapActions('users', ['getUsersList', 'manageUser']),
+    async updateUserStatus(user) {
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Updating user account status..."
+        });
+        await this.manageUser(user)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "User account status updated."
+        });
+      } catch(err) {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

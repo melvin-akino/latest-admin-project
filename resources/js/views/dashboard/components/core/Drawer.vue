@@ -53,11 +53,11 @@ export default {
   data: () => ({
     logo: logo,
     items: [
-      {
-        icon: "mdi-view-dashboard",
-        title: "dashboard",
-        to: "/"
-      },
+      // {
+      //   icon: "mdi-view-dashboard",
+      //   title: "dashboard",
+      //   to: "/"
+      // },
       {
         icon: "mdi-account",
         title: "Accounts",
