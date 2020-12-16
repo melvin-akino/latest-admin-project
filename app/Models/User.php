@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\{UserWallet, Currency};
+use App\Models\{UserWallet, Currency, OAuthToken};
 use Illuminate\Support\Arr;
 
 class User extends Model
@@ -35,18 +35,34 @@ class User extends Model
 
     public static function getAll()
     {
-      return self::select([
-          'id',
-          'email',
-          'firstname',
-          'lastname',
-          'status',
-          'currency_id',
-          'created_at',
-          'updated_at'
-      ])
-      ->orderBy('created_at', 'DESC')
-      ->get()
-      ->toArray();
+      $users = self::select([
+            'id',
+            'email',
+            'firstname',
+            'lastname',
+            'status',
+            'currency_id',
+            'created_at',
+            'updated_at'
+        ])
+        ->orderBy('created_at', 'DESC')
+        ->get()
+        ->toArray();
+
+        if ($users) 
+        {   
+            foreach($users as $key => $value)
+            {
+                $oauth = OAuthToken::getLastLogin($value['id']);
+                $users[$key]['last_login'] = $oauth['last_login_date'];
+            }
+        }
+
+        return !empty($users) ? $users : [];
+    }
+
+    public static function getUser($userId)
+    {
+        return self::where('id', $userId)->first();
     }
 }

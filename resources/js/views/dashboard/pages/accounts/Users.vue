@@ -29,6 +29,28 @@
             <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.credits`]="{ item }">
+          <span v-if="!item.hasOwnProperty('credits')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.credits}}</span>    
+        </template>
+        <template v-slot:[`item.currency`]="{ item }">
+          <span v-if="!item.hasOwnProperty('currency')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.currency}}</span>    
+        </template>
         <template v-slot:[`item.open_bets`]="{ item }">
           <span v-if="!item.hasOwnProperty('open_bets')">
             <v-progress-circular
@@ -39,6 +61,17 @@
             ></v-progress-circular>
           </span>    
           <span v-else>{{item.open_bets}}</span>    
+        </template>
+        <template v-slot:[`item.last_bet`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_bet')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_bet}}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
