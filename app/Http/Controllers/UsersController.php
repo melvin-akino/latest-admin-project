@@ -6,7 +6,7 @@ use App\Models\{User, Wallet, WalletLedger, Source, Currency};
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Hash};
-
+use Carbon\Carbon;
 class UsersController extends Controller
 {
     public function index()
@@ -84,10 +84,11 @@ class UsersController extends Controller
                     'email'         => $user->email,
                     'firstname'     => $user->firstname,
                     'lastname'      => $user->lastname,
-                    'currency'      => Currency::getCodeById($wallet->currency_id),
-                    'credits'       => $wallet->balance,
-                    'created_at'    => $user->created_at,
-                    'updated_at'    => $user->updated_at
+                    'currency'      => empty($request->id) ? Currency::getCodeById($wallet->currency_id) : "",
+                    'credits'       => empty($request->id) ? $wallet->balance : "",
+                    'status'        => $user->status,
+                    'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+                    'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
                 ]
             ], 200);
         } catch (Exception $e) {

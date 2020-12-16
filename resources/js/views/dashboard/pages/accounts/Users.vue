@@ -13,7 +13,7 @@
           style="max-width: 200px;"
         ></v-text-field>
         <button-dialog icon="mdi-plus" label="New Account" width="600">
-          <user-form :update="false"></user-form>
+          <user-form :update="false" :currencies="currencies"></user-form>
         </button-dialog>
       </v-toolbar>
       <v-data-table
@@ -78,7 +78,7 @@
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
-            <user-form :update="true" :user-to-update="item"></user-form>
+            <user-form :update="true" :user-to-update="item" :currencies="currencies"></user-form>
           </table-action-dialog>
           <!-- <table-action-dialog icon="mdi-currency-gbp" width="600">
             <wallet-form :user-to-update="item"></wallet-form>
@@ -126,15 +126,18 @@ export default {
     search: ""
   }),
   computed: {
-    ...mapState("users", ["userStatus", "isLoadingUsers"]),
-    ...mapGetters("users", ["usersTable"]),
+    ...mapState('users', ['userStatus', 'isLoadingUsers']),
+    ...mapState('resources', ['currencies']),
+    ...mapGetters('users', ['usersTable']),
   },
   mounted() {
     this.getUsersList()
+    this.getCurrencies()
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
     ...mapActions('users', ['getUsersList', 'manageUser']),
+    ...mapActions('resources', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
         bus.$emit("SHOW_SNACKBAR", {

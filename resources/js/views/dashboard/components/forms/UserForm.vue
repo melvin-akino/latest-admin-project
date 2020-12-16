@@ -86,7 +86,7 @@
           </v-row>
         </v-container>
       </v-card-text>
-      <!-- <v-toolbar color="primary" dark height="40px" v-if="!update">
+      <v-toolbar color="primary" dark height="40px" v-if="!update">
         <v-toolbar-title class="text-uppercase subtitle-1"
           >Wallet Information</v-toolbar-title
         >
@@ -102,28 +102,30 @@
                 outlined
                 dense
                 :disabled="update"
-                v-model="$v.user.credits.$model"
-                :error-messages="creditsErrors"
-                @input="$v.user.credits.$touch()"
-                @blur="$v.user.credits.$touch()"
+                v-model="$v.user.balance.$model"
+                :error-messages="balanceErrors"
+                @input="$v.user.balance.$touch()"
+                @blur="$v.user.balance.$touch()"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6" class="formColumn">
               <v-select
                 :items="currencies"
+                item-text="code"
+                item-value="id"
                 label="Currency"
                 outlined
                 dense
                 value="CNY"
-                v-model="$v.user.currency.$model"
+                v-model="$v.user.currency_id.$model"
                 :error-messages="currencyErrors"
-                @input="$v.user.currency.$touch()"
-                @blur="$v.user.currency.$touch()"
+                @input="$v.user.currency_id.$touch()"
+                @blur="$v.user.currency_id.$touch()"
               ></v-select>
             </v-col>
           </v-row>
         </v-container>
-      </v-card-text> -->
+      </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn dark right class="red darken-2" @click="closeDialog"
@@ -156,7 +158,7 @@ function creditsValue(value) {
 
 export default {
   name: "UserForm",
-  props: ["update", "userToUpdate"],
+  props: ["update", "userToUpdate", "currencies"],
   data: () => ({
     user: {
       id: null,
@@ -165,8 +167,8 @@ export default {
       firstname: "",
       lastname: "",
       status: 1,
-      // credits: "",
-      // currency: "CNY"
+      balance: "",
+      currency_id: 1
     }
   }),
   validations: {
@@ -181,8 +183,18 @@ export default {
       firstname: { required },
       lastname: { required },
       status: { required },
-      // credits: { required, creditsValue, decimal },
-      // currency: { required }
+      balance: { 
+        required: requiredIf(function() {
+          return !this.update
+        }),
+        creditsValue, 
+        decimal 
+      },
+      currency_id: { 
+        required: requiredIf(function() {
+          return !this.update
+        })
+      }
     }
   },
   computed: {
@@ -219,20 +231,20 @@ export default {
       !this.$v.user.status.required && errors.push('Status is required.')
       return errors
     },
-    // creditsErrors() {
-    //   let errors = []
-    //   if (!this.$v.user.credits.$dirty) return errors
-    //   !this.$v.user.credits.required && errors.push('Credits is required.')
-    //   !this.$v.user.credits.decimal && errors.push('Credits should be numeric.')
-    //   !this.$v.user.credits.creditsValue && errors.push('Credits should have at least a minimum value of 1.')
-    //   return errors
-    // },
-    // currencyErrors() {
-    //   let errors = []
-    //   if (!this.$v.user.currency.$dirty) return errors
-    //   !this.$v.user.currency.required && errors.push('Currency is required.')
-    //   return errors
-    // }
+    balanceErrors() {
+      let errors = []
+      if (!this.$v.user.balance.$dirty) return errors
+      !this.$v.user.balance.required && errors.push('Credits is required.')
+      !this.$v.user.balance.decimal && errors.push('Credits should be numeric.')
+      !this.$v.user.balance.creditsValue && errors.push('Credits should have at least a minimum value of 1.')
+      return errors
+    },
+    currencyErrors() {
+      let errors = []
+      if (!this.$v.user.currency_id.$dirty) return errors
+      !this.$v.user.currency_id.required && errors.push('Currency is required.')
+      return errors
+    }
   },
   mounted() {
     this.initializeUser();
@@ -309,7 +321,7 @@ export default {
         "password",
         "firstname",
         "lastname",
-        // "credits"
+        "balance"
       ];
       Object.keys(this.user).map(key => {
         if (fieldsToEmpty.includes(key)) {
@@ -317,7 +329,7 @@ export default {
         }
       });
       this.user.status = 1
-      // this.user.currency = 'CNY'
+      this.user.currency_id = 1
     },
     randomizePassword() {
       this.user.password = randomstring.generate(6)
