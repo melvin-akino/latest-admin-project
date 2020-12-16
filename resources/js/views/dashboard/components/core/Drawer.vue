@@ -53,11 +53,11 @@ export default {
   data: () => ({
     logo: logo,
     items: [
-      {
-        icon: "mdi-view-dashboard",
-        title: "dashboard",
-        to: "/"
-      },
+      // {
+      //   icon: "mdi-view-dashboard",
+      //   title: "dashboard",
+      //   to: "/"
+      // },
       {
         icon: "mdi-account",
         title: "Accounts",
@@ -68,16 +68,16 @@ export default {
         title: "Provider Accounts",
         to: "/accounts/providers"
       },
-      {
-        icon: "mdi-account-star",
-        title: "Admin Users",
-        to: "/accounts/admin"
-      },
-      {
-        icon: "mdi-account-details",
-        title: "Admin Roles",
-        to: "/accounts/roles"
-      },
+      // {
+      //   icon: "mdi-account-star",
+      //   title: "Admin Users",
+      //   to: "/accounts/admin"
+      // },
+      // {
+      //   icon: "mdi-account-details",
+      //   title: "Admin Roles",
+      //   to: "/accounts/roles"
+      // },
       {
         icon: "mdi-cog-box",
         title: "System Configurations",

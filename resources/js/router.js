@@ -19,9 +19,10 @@ const router = new Router({
       children: [
         // Dashboard
         {
-          name: 'Dashboard',
+          // name: 'Dashboard',
           path: '',
-          component: () => import('./views/dashboard/Dashboard'),
+          redirect: 'accounts/users'
+          // component: () => import('./views/dashboard/Dashboard'),
         },
         // Pages
         {
