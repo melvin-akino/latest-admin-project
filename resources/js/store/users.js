@@ -40,49 +40,54 @@ const mutations = {
   SET_IS_LOADING_USERS: (state, loadingState) => {
     state.isLoadingUsers = loadingState
   },
-  ADD_USER: (state, payload) => {
-    let id = state.users.length + 1
-    Vue.set(payload, 'id', id)
-    Vue.set(payload, 'bets', [])
-    state.users.unshift(payload);
+  ADD_USER: (state, user) => {
+    let newUser = {
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      credits: user.credits,
+      currency: user.currency,
+      status: user.status,
+      created_at: user.created_at,
+      open_bets: '-'
+    }
+    state.users.unshift(newUser)
   },
-  UPDATE_USER: (state, payload) => {
-    let fieldsToUpdate = ["first_name", "last_name", "status", "currency"];
-    state.users.map(user => {
-      if (user.id == payload.id) {
-        fieldsToUpdate.map(field => {
-          Vue.set(user, field, payload[field]);
+  UPDATE_USER: (state, user) => {
+    let updatedUser = {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      status: user.status
+    }
+    state.users.map(account => {
+      if (account.id == user.id) {
+        Object.keys(updatedUser).map(key => {
+          Vue.set(account, key, updatedUser[key]);
         });
       }
     });
   },
-  UPDATE_USER_STATUS: (state, payload) => {
-    state.users.map(user => {
-      if (user.id == payload.id) {
-        Vue.set(user, "status", payload.status);
-      }
-    });
-  },
-  UPDATE_USER_WALLET: (state, payload) => {
-    state.users.map(user => {
-      if (user.id == payload.id) {
-        if (payload.wallet.transactionType == "Deposit") {
-          Vue.set(
-            user,
-            "credits",
-            Number(user.credits) + Number(payload.wallet.credits)
-          );
-        } else {
-          Vue.set(
-            user,
-            "credits",
-            Number(user.credits) - Number(payload.wallet.credits)
-          );
-        }
-        Vue.set(user, "currency", payload.wallet.currency);
-      }
-    });
-  }
+  // UPDATE_USER_WALLET: (state, payload) => {
+  //   state.users.map(user => {
+  //     if (user.id == payload.id) {
+  //       if (payload.wallet.transactionType == "Deposit") {
+  //         Vue.set(
+  //           user,
+  //           "credits",
+  //           Number(user.credits) + Number(payload.wallet.credits)
+  //         );
+  //       } else {
+  //         Vue.set(
+  //           user,
+  //           "credits",
+  //           Number(user.credits) - Number(payload.wallet.credits)
+  //         );
+  //       }
+  //       Vue.set(user, "currency", payload.wallet.currency);
+  //     }
+  //   });
+  // }
 };
 
 const actions = {
@@ -131,6 +136,23 @@ const actions = {
         text: err.response.data.message
       });
     }
+  },
+  manageUser({commit, dispatch}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('users/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        if(payload.id) {
+          commit('UPDATE_USER', response.data.data)
+        } else {
+          commit('ADD_USER', response.data.data)
+        }
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
   }
 }
 

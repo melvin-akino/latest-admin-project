@@ -19,6 +19,8 @@ class User extends Model
         'password',
         'firstname',
         'lastname',
+        'currency_id',
+        'status'
     ];
 
     /**
@@ -39,6 +41,7 @@ class User extends Model
           'firstname',
           'lastname',
           'status',
+          'currency_id',
           'created_at',
           'updated_at'
       ])
