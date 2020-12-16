@@ -74,10 +74,33 @@ class Order extends Model
 
     public static function getOpenOrders($userId)
     {
-        return self::where('user_id', $userId)
-            ->whereNull('settled_date')
-            ->selectRaw('sum(stake) as open_orders')
-            ->groupBy('user_id')
-            ->get();
+        $lastBetDate = '-';
+        $openOrdersSum = 0;
+
+        $openOrders = self::where('user_id', $userId)
+            ->whereNotNull('bet_id')
+            ->select('stake', 'settled_date', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+
+        if ($openOrders)
+        {
+            foreach($openOrders as $key=>$order) 
+            {
+                if ($key == 0) {
+                    $lastBetDate = $order['created_at'];
+                }
+                if (empty($order['settled_date']))
+                {
+                    $openOrdersSum += $order['stake'];
+                }
+            }
+        }
+
+        return [
+            'open_orders'   => $openOrdersSum,
+            'last_bet'      => $lastBetDate
+        ];
     }
 }
