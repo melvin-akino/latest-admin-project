@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\{User, Wallet, WalletLedger, Source};
+use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{DB, Hash};
 
 class UsersController extends Controller
 {
@@ -21,12 +23,13 @@ class UsersController extends Controller
             if (empty($request->id)) 
             {
                 $user = new User([
-                    'name'      => explode('@', $request->email)[0],
-                    'email'     => $request->email,
-                    'password'  => Hash::make($request->password),
-                    'firstname' => $request->firstname,
-                    'lastname'  => $request->lastname,
-                    'status'    => $request->status
+                    'name'          => explode('@', $request->email)[0],
+                    'email'         => $request->email,
+                    'password'      => Hash::make($request->password),
+                    'firstname'     => $request->firstname,
+                    'lastname'      => $request->lastname,
+                    'status'        => $request->status,
+                    'currency_id'   => $request->currency_id
                 ]);
             }
             else {
@@ -42,9 +45,29 @@ class UsersController extends Controller
 
             if ($user->save())
             {
-                if (!empty($request->id))
+                if (empty($request->id))
                 {
                     //Make user wallet and deposit amount in it
+                    $wallet = new Wallet([
+                        'user_id'       => $user->id,
+                        'currency_id'   => $request->currency_id,
+                        'balance'       => $request->balance
+                    ]);
+
+                    $wallet->save();
+                    
+                    $sourceId = Source::getIdByName('REGISTRATION');
+
+                    //Create a wallet ledger here
+                    $walletLedger = new WalletLedger([
+                        'wallet_id'     => $wallet->id,
+                        'balance'       => $request->balance,
+                        'credit'        => $request->balance,
+                        'debit'         => 0,
+                        'source_id'     => $sourceId
+                    ]);
+
+                    $walletLedger->save();
                     //This will be discussed on tuesday
                 }
             }

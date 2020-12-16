@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use App\Models\{User, Currency, Source, WalletLedger};
-use App\Models\CRM\WalletLedger;
-
-use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Exception;
 
 class Wallet extends Model
 {
@@ -21,11 +19,6 @@ class Wallet extends Model
     const TYPE_DISCHARGE        = 'Debit';
     const ERR_WALLET_DEDUCT     = 'Wallet Deduction Exceeded';
     const ERR_NEW_WALLET_DEDUCT = 'Currency not Set';
-
-    public function Order()
-    {
-        return $this->hasMany('App\Models\Order','user_id','user_id');
-    }
 
     public function user()
     {
