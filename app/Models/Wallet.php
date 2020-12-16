@@ -40,4 +40,14 @@ class Wallet extends Model
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
+
+    public static function getUserBalance($params)
+    {
+        return self::where('user_id', $params->user_id)
+            ->where('currency_id', $params->currency_id)
+            ->select(['balance', 'currency.code'])
+            ->join('currency', 'currency.id', 'currency_id')
+            ->get()
+            ->toArray();
+    }
 }
