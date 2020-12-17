@@ -19,9 +19,10 @@ const router = new Router({
       children: [
         // Dashboard
         {
-          name: 'Dashboard',
+          // name: 'Dashboard',
           path: '',
-          component: () => import('./views/dashboard/Dashboard'),
+          redirect: 'accounts/users'
+          // component: () => import('./views/dashboard/Dashboard'),
         },
         // Pages
         {
@@ -75,6 +76,11 @@ const router = new Router({
               name: 'General Errors',
               path: 'general',
               component: () => import('./views/dashboard/pages/errors/GeneralErrors')
+            },
+            {
+              name: 'Provider Errors',
+              path: 'provider',
+              component: () => import('./views/dashboard/pages/errors/ProviderErrors')
             }
           ]
         },

@@ -13,7 +13,7 @@
           style="max-width: 200px;"
         ></v-text-field>
         <button-dialog icon="mdi-plus" label="New Account" width="600">
-          <user-form :update="false"></user-form>
+          <user-form :update="false" :currencies="currencies"></user-form>
         </button-dialog>
       </v-toolbar>
       <v-data-table
@@ -21,22 +21,68 @@
         :items="usersTable"
         :search="search"
         :items-per-page="10"
+        :loading="isLoadingUsers"
+        loading-text="Loading Users"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ users.length }}</p>
+            <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.credits`]="{ item }">
+          <span v-if="!item.hasOwnProperty('credits')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.credits}}</span>    
+        </template>
+        <template v-slot:[`item.currency`]="{ item }">
+          <span v-if="!item.hasOwnProperty('currency')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.currency}}</span>    
+        </template>
+        <template v-slot:[`item.open_bets`]="{ item }">
+          <span v-if="!item.hasOwnProperty('open_bets')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.open_bets}}</span>    
+        </template>
+        <template v-slot:[`item.last_bet`]="{ item }">
+          <span v-if="!item.hasOwnProperty('last_bet')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.last_bet}}</span>    
+        </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item.id, item.status)"></v-select>
+          <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600">
-            <user-form :update="true" :user-to-update="item"></user-form>
+            <user-form :update="true" :user-to-update="item" :currencies="currencies"></user-form>
           </table-action-dialog>
-          <table-action-dialog icon="mdi-currency-gbp" width="600">
+          <!-- <table-action-dialog icon="mdi-currency-gbp" width="600">
             <wallet-form :user-to-update="item"></wallet-form>
-          </table-action-dialog>
+          </table-action-dialog> -->
           <v-btn icon :to="`users/transactions/${item.id}`" target="_blank">
             <v-icon small>mdi-format-list-bulleted</v-icon>
           </v-btn>
@@ -47,7 +93,8 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import bus from '../../../../eventBus'
 
 export default {
   name: "Users",
@@ -67,7 +114,7 @@ export default {
       { text: "LAST BET", value: "last_bet" },
       { text: "LAST LOGIN", value: "last_login" },
       { text: "STATUS", value: "status" },
-      { text: "CREATED DATE", value: "created_date" },
+      { text: "CREATED DATE", value: "created_at" },
       {
         text: "OPTIONS",
         value: "actions",
@@ -79,22 +126,40 @@ export default {
     search: ""
   }),
   computed: {
-    ...mapState("users", ["users", "userStatus"]),
-    usersTable() {
-      let usersTable = []
-      this.users.map(user => {
-        let full_name = `${user.first_name} ${user.last_name}`
-        let userObject = { ...user }
-        this.$set(userObject, 'full_name', full_name)
-        usersTable.push(userObject)
-      })
-      return usersTable
-    }
+    ...mapState('users', ['userStatus', 'isLoadingUsers']),
+    ...mapState('resources', ['currencies']),
+    ...mapGetters('users', ['usersTable']),
+  },
+  mounted() {
+    this.getUsersList()
+    this.getCurrencies()
   },
   methods: {
-    updateUserStatus(id, status) {
-      this.$store.commit('users/UPDATE_USER_STATUS', { id, status })
+    ...mapMutations('users', { setUsers: 'SET_USERS' }),
+    ...mapActions('users', ['getUsersList', 'manageUser']),
+    ...mapActions('resources', ['getCurrencies']),
+    async updateUserStatus(user) {
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Updating user account status..."
+        });
+        await this.manageUser(user)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "User account status updated."
+        });
+      } catch(err) {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.setUsers([])
+    next()
   }
 };
 </script>

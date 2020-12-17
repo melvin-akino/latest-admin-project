@@ -44,6 +44,17 @@ class Currency extends Model
         return $query->first()->id;
     }
 
+    public static function getCodeById(int $id)
+    {
+        $query = self::where('id', $id);
+
+        if ($query->count() == 0) {
+            return false;
+        }
+
+        return $query->first()->code;
+    }
+
     public function exchange_rate()
     {
         return $this->hasMany(ExchangeRate::class);

@@ -10,6 +10,7 @@ import providers from './providers'
 import resources from './resources'
 import systemConfigurations from './systemConfigurations'
 import generalErrors from './generalErrors'
+import providerErrors from './providerErrors'
 
 export default new Vuex.Store({
   state: {
@@ -27,6 +28,7 @@ export default new Vuex.Store({
     providers,
     resources,
     systemConfigurations,
-    generalErrors
+    generalErrors,
+    providerErrors
   }
 })
