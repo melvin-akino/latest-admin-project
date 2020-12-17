@@ -50,7 +50,8 @@ const mutations = {
       currency: user.currency,
       status: user.status,
       created_at: user.created_at,
-      open_bets: '-'
+      open_bets: '-',
+      last_bet: '-'
     }
     state.users.unshift(newUser)
   },
