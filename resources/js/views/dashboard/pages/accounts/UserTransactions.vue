@@ -102,7 +102,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.bet_selection`]="{ item }">
-          <span v-html="item.bet_selection"></span>
+          <span class="betSelection">{{item.bet_selection}}</span>
         </template>
         <template v-slot:[`item.valid_stake`]="{ item }">
           <span>{{Math.abs(Number(item.profit_loss))}}</span>
@@ -289,5 +289,9 @@ export default {
 
 .formColumn {
   padding: 0px 10px;
+}
+
+.betSelection {
+  white-space: pre-line;
 }
 </style>
