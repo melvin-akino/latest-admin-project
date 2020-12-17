@@ -38,7 +38,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.credits}}</span>    
+          <span v-else>{{Number(item.credits).toFixed(2)}}</span>    
         </template>
         <template v-slot:[`item.currency`]="{ item }">
           <span v-if="!item.hasOwnProperty('currency')">
@@ -72,6 +72,10 @@
             ></v-progress-circular>
           </span>    
           <span v-else>{{item.last_bet}}</span>    
+        </template>
+        <template v-slot:[`item.last_login`]="{ item }">
+          <span v-if="!item.last_login">-</span>
+          <span v-else>{{item.last_login}}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
