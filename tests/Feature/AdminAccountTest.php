@@ -50,12 +50,10 @@ class AdminAccountTest extends TestCase
     /** Faker generated data */
     protected function data()
     {
-        $password = $this->faker->text(16);
-
         return [
             'email'                     => $this->faker->email,
-            'password'                  => $password,
-            'password_confirmation'     => $password,
+            'password'                  => 'secret',
+            'password_confirmation'     => 'secret',
             'name'                      => $this->faker->lexify('??????????'),
         ];
     }
