@@ -12,7 +12,7 @@
           class="subtitle-1"
           style="max-width: 200px;"
         ></v-text-field>
-        <button-dialog icon="mdi-plus" label="New Account" width="600">
+        <button-dialog icon="mdi-plus" label="New Account" width="600" @clearFilters="clearFilters">
           <user-form :update="false" :currencies="currencies"></user-form>
         </button-dialog>
       </v-toolbar>
@@ -23,6 +23,8 @@
         :items-per-page="10"
         :loading="isLoadingUsers"
         loading-text="Loading Users"
+        :page="page"
+        @pagination="getPage"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -127,7 +129,8 @@ export default {
         sortable: false
       }
     ],
-    search: ""
+    search: '',
+    page: null
   }),
   computed: {
     ...mapState('users', ['userStatus', 'isLoadingUsers']),
@@ -159,6 +162,13 @@ export default {
           text: err.response.data.message
         });
       }
+    },
+    clearFilters() {
+      this.search = ''
+      this.page = 1
+    },
+    getPage(pagination) {
+      this.page = pagination.page
     }
   },
   beforeRouteLeave(to, from, next) {
