@@ -12,7 +12,7 @@
           class="subtitle-1"
           style="max-width: 200px;"
         ></v-text-field>
-        <button-dialog icon="mdi-plus" label="New Error" width="600">
+        <button-dialog icon="mdi-plus" label="New Error" width="600" @clearFilters="clearFilters">
           <provider-error-form :update="false" :general-errors="generalErrors"></provider-error-form>
         </button-dialog>
       </v-toolbar>
@@ -23,6 +23,8 @@
         :items-per-page="10"
         :loading="isLoadingProviderErrors"
         loading-text="Loading Provider Errors"
+        :page="page"
+        @pagination="getPage"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -55,7 +57,8 @@ export default {
       { text: 'ERROR MESSAGE', value: 'error' },
       { text: 'ACTIONS', value: 'actions' },
     ],
-    search: ''
+    search: '',
+    page: null
   }),
   computed: {
     ...mapState('providerErrors', ['isLoadingProviderErrors']),
@@ -71,6 +74,13 @@ export default {
     ...mapMutations('generalErrors', { setGeneralErrors: 'SET_GENERAL_ERRORS' }),
     ...mapActions('providerErrors', ['getProviderErrors']),
     ...mapActions('generalErrors', ['getGeneralErrors']),
+    clearFilters() {
+      this.search = ''
+      this.page = 1
+    },
+    getPage(pagination) {
+      this.page = pagination.page
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.setProviderErrors([])

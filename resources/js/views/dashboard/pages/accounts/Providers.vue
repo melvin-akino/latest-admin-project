@@ -44,6 +44,8 @@
         :items-per-page="10"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
+        :page="page"
+        @pagination="getPage"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -109,7 +111,7 @@
           <span v-else>{{item.last_sync}}</span>    
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600" @clearFilters="clearFilters">
+          <table-action-dialog icon="mdi-pencil" width="600">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>
           </table-action-dialog>
         </template>
@@ -152,7 +154,8 @@ export default {
       provider: 'all',
       currency: 'all'
     },
-    providerAccountsTable: []
+    providerAccountsTable: [],
+    page: null
   }),
   computed: {
     ...mapState("providers", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerStatus"]),
@@ -193,6 +196,7 @@ export default {
       }
     },
     filterProviderAccounts() {
+      this.page = 1
       let filterParams = [this.search.provider, this.search.currency]
       let filteredProviderAccounts = this.providerAccounts.filter(account => {
         if(filterParams.includes('all')) {
@@ -220,8 +224,12 @@ export default {
     clearFilters() {
       this.search.provider = 'all'
       this.search.currency = 'all'
+      this.page = 1
       this.setFilteredProviderAccounts(this.providerAccounts)
-    }
+    },
+    getPage(pagination) {
+      this.page = pagination.page
+    },
   },
   beforeRouteLeave(to, from, next) {
     this.setProviderAccounts([])

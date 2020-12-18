@@ -12,7 +12,7 @@
           class="subtitle-1"
           style="max-width: 200px;"
         ></v-text-field>
-        <button-dialog icon="mdi-plus" label="New Error" width="600">
+        <button-dialog icon="mdi-plus" label="New Error" width="600" @clearFilters="clearFilters">
           <general-error-form :update="false"></general-error-form>
         </button-dialog>
       </v-toolbar>
@@ -23,6 +23,8 @@
         :items-per-page="10"
         :loading="isLoadingGeneralErrors"
         loading-text="Loading General Errors"
+        :page="page"
+        @pagination="getPage"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
@@ -54,7 +56,8 @@ export default {
       { text: 'ERROR MESSAGES', value: 'error' },
       { text: '', value: 'actions' }
     ],
-    search: ''
+    search: '',
+    page: null
   }),
   computed:{
     ...mapState('generalErrors', ['isLoadingGeneralErrors']),
@@ -65,7 +68,14 @@ export default {
   },
   methods: {
     ...mapMutations('generalErrors', { setGeneralErrors: 'SET_GENERAL_ERRORS' }),
-    ...mapActions('generalErrors', ['getGeneralErrors'])
+    ...mapActions('generalErrors', ['getGeneralErrors']),
+    clearFilters() {
+      this.search = ''
+      this.page = 1
+    },
+    getPage(pagination) {
+      this.page = pagination.page
+    }
   },
   beforeRouteLeave(to, from, next) {
     this.setGeneralErrors([])
