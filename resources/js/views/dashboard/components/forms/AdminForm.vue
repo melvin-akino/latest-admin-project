@@ -1,5 +1,5 @@
 <template>
-    <v-card class="userForm">
+    <v-card class="adminForm">
     <v-toolbar color="primary" dark height="40px">
       <v-toolbar-title class="text-uppercase subtitle-1"
         >Manage Admin User</v-toolbar-title
@@ -42,31 +42,31 @@
           <v-row>
             <v-col cols="12" md="6" class="formColumn">
               <v-text-field
-                label="First Name"
+                label="Name"
                 type="text"
                 outlined
                 dense
-                v-model="$v.admin.first_name.$model"
-                :error-messages="firstNameErrors"
-                @input="$v.admin.first_name.$touch()"
-                @blur="$v.admin.first_name.$touch()"
+                v-model="$v.admin.name.$model"
+                :error-messages="nameErrors"
+                @input="$v.admin.name.$touch()"
+                @blur="$v.admin.name.$touch()"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6" class="formColumn">
-              <v-text-field
-                label="Last Name"
-                type="text"
+              <v-select
+                :items="adminStatus"
+                label="Status"
                 outlined
                 dense
-                v-model="$v.admin.last_name.$model"
-                :error-messages="lastNameErrors"
-                @input="$v.admin.last_name.$touch()"
-                @blur="$v.admin.last_name.$touch()"
-              ></v-text-field>
+                v-model="$v.admin.status.$model"
+                :error-messages="statusErrors"
+                @input="$v.admin.status.$touch()"
+                @blur="$v.admin.status.$touch()"
+              ></v-select>
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="12" md="6" class="formColumn">
+            <!--<v-col cols="12" md="6" class="formColumn">
               <v-select
                 :items="adminRoles"
                 label="Role"
@@ -80,20 +80,7 @@
                 @input="$v.admin.role.$touch()"
                 @blur="$v.admin.role.$touch()"
               ></v-select>
-            </v-col>
-            <v-col cols="12" md="6" class="formColumn">
-              <v-select
-                :items="adminStatus"
-                label="Status"
-                value="Active"
-                outlined
-                dense
-                v-model="$v.admin.status.$model"
-                :error-messages="statusErrors"
-                @input="$v.admin.status.$touch()"
-                @blur="$v.admin.status.$touch()"
-              ></v-select>
-            </v-col>
+            </v-col> -->
           </v-row>
         </v-container>
       </v-card-text>
@@ -117,7 +104,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
 import moment from 'moment'
 import { required, requiredIf, email, minLength } from 'vuelidate/lib/validators'
@@ -126,14 +113,12 @@ export default {
   props: ["update", "adminToUpdate"],
   data: () => ({
     admin: {
+      id: null,
       email: '',
       password: '',
-      first_name: '',
-      last_name: '',
-      role: 'admin',
-      status: 'Active',
-      created_date: moment().format('YYYY-MM-DD HH:mm:ss'),
-      last_access_date: '-'
+      name: '',
+      // role: 'admin',
+      status: 1,
     }
   }),
   validations: {
@@ -145,14 +130,20 @@ export default {
         }),
         minLength: minLength(6)
       },
-      first_name: { required },
-      last_name: { required },
-      role: { required },
+      name: { required },
+      // role: { required },
       status: { required }
     }
   },
   computed: {
     ...mapState("admin", ["adminRoles", "adminStatus"]),
+    adminUser() {
+      let admin = { ...this.admin }
+      if(this.adminToUpdate && !this.admin.password) {
+        this.$delete(admin, 'password')
+      }
+      return admin
+    },
     emailErrors() {
       let errors = []
       if(!this.$v.admin.email.$dirty) return errors
@@ -167,24 +158,18 @@ export default {
       !this.$v.admin.password.minLength && errors.push('Password should have at least 6 characters.')
       return errors
     },
-    firstNameErrors() {
+    nameErrors() {
       let errors = []
-      if (!this.$v.admin.first_name.$dirty) return errors
-      !this.$v.admin.first_name.required && errors.push('First name is required.')
+      if (!this.$v.admin.name.$dirty) return errors
+      !this.$v.admin.name.required && errors.push('Name is required.')
       return errors
     },
-    lastNameErrors() {
-      let errors = []
-      if (!this.$v.admin.last_name.$dirty) return errors
-      !this.$v.admin.last_name.required && errors.push('Last name is required.')
-      return errors
-    },
-    roleErrors() {
-      let errors = []
-      if (!this.$v.admin.role.$dirty) return errors
-      !this.$v.admin.role.required && errors.push('Role is required.')
-      return errors
-    },
+    // roleErrors() {
+    //   let errors = []
+    //   if (!this.$v.admin.role.$dirty) return errors
+    //   !this.$v.admin.role.required && errors.push('Role is required.')
+    //   return errors
+    // },
     statusErrors() {
       let errors = []
       if (!this.$v.admin.status.$dirty) return errors
@@ -196,6 +181,7 @@ export default {
     this.initializeAdmin()
   },
   methods: {
+    ...mapActions("admin", ["manageAdminUser"]),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG");
     },
@@ -207,26 +193,48 @@ export default {
         this.admin = adminForm
       }
     },
-    addAdmin() {
+    async addAdmin() {
       if(!this.$v.admin.$invalid) {
-        this.$store.commit('admin/ADD_ADMIN', this.admin)
-        this.closeDialog()
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "A new admin has been created."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Creating a new admin account..."
+          });
+          await this.manageAdminUser(this.adminUser)
+          this.closeDialog()
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "A new admin account has been created."
+          });
+        } catch(err) {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.email[0] : err.response.data.message
+          });
+        }
       } else {
         this.$v.admin.$touch()
       }
     },
-    updateAdmin() {
+    async updateAdmin() {
       if(!this.$v.admin.$invalid) {
-        this.$store.commit('admin/UPDATE_ADMIN', this.admin)
-        this.closeDialog()
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "success",
-          text: "Admin details were updated."
-        });
+        try {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Updating admin user account..."
+          });
+          await this.manageAdminUser(this.adminUser)
+          this.closeDialog()
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: "Admin details were updated."
+          });
+        } catch(err) {
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors.email[0] : err.response.data.message
+          });
+        }
       } else {
         this.$v.admin.$touch()
       }
@@ -242,16 +250,13 @@ export default {
       let fieldsToEmpty = [
         "email",
         "password",
-        "first_name",
-        "last_name",
+        "name"
       ];
       Object.keys(this.admin).map(key => {
         if (fieldsToEmpty.includes(key)) {
           this.admin[key] = "";
         }
       });
-      this.admin.role = 'Admin'
-      this.admin.status = 'Active'
     }
   }
 }

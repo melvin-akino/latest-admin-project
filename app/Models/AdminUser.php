@@ -18,6 +18,12 @@ class AdminUser extends Authenticatable
         'name',
         'email',
         'password',
+        'status'
+    ];
+
+    protected $hidden = [
+      'password',
+      'remember_token'
     ];
 
     public static function getAll()
@@ -26,8 +32,10 @@ class AdminUser extends Authenticatable
             'id',
             'name',
             'email',
-            'status'
+            'status',
+            'created_at'
         ])
+        ->orderBy('created_at', 'DESC')
         ->get()
         ->toArray();
     }
