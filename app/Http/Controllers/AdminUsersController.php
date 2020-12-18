@@ -22,8 +22,8 @@ class AdminUsersController extends Controller
             if ($request->id) 
             {
                 $adminUser = AdminUser::where('id', $request->id)->first();
-                !empty($request->name) ? $adminUser->name = $request->name : null;
-                !empty($request->status) ? $adminUser->status = $request->status : null;
+                $adminUser->name = $request->name;
+                $adminUser->status = $request->status;
                 !empty($request->password) ? $adminUser->password = Hash::make($request->password) : null;
             }
             else 
@@ -42,7 +42,8 @@ class AdminUsersController extends Controller
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'message'     => 'success'
+                    'message'     => 'success',
+                    'data'        => $adminUser
                 ], 200);
             }
         }

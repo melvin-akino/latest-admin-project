@@ -1,62 +1,9 @@
 import Vue from "vue"
+import { getToken } from '../helpers/token'
 
 const state = {
-  admin: [
-    {
-      id: 1,
-      email: 'admin1@npt.com',
-      password: '123123',
-      first_name: 'Admin',
-      last_name: 'User',
-      role: 'admin',
-      status: 'Active',
-      created_date: '2020-11-09 08:00:00',
-      last_access_date: '2020-11-09 08:00:00',
-      activity_logs: [
-        {
-          module:'Account',
-          action: 'Add',
-          description: 'Registered giorodriguez021@gmail.com',
-          ip_address: '10.10.10.10',
-          created_date: '2020-11-09 08:00:00'
-        },
-        {
-          module:'Providers',
-          action: 'Edit',
-          description: 'Edited provider888 (status: active to inactive)',
-          ip_address: '10.10.10.10',
-          created_date: '2020-11-16 08:00:00'
-        },
-      ]
-    },
-    {
-      id: 2,
-      email: 'acct1@npt.com',
-      password: '123123',
-      first_name: 'Accounting',
-      last_name: 'User',
-      role: 'accounting',
-      status: 'Active',
-      created_date: '2020-11-09 08:00:00',
-      last_access_date: '2020-11-09 08:00:00',
-      activity_logs: [
-        {
-          module:'Account',
-          action: 'Add',
-          description: 'Registered kawow@nba.com',
-          ip_address: '69.69.69.69',
-          created_date: '2020-11-11 08:00:00'
-        },
-        {
-          module:'Account',
-          action: 'Edit',
-          description: 'Edited user id: 2 (status: active to view only)',
-          ip_address: '69.69.69.69',
-          created_date: '2020-11-16 09:00:00'
-        }
-      ]
-    }
-  ],
+  adminUsers: [],
+  isLoadingAdminUsers: false,
   adminRoles:  [
     {
       text: 'Admin',
@@ -71,7 +18,16 @@ const state = {
       value: 'support'
     }
   ],
-  adminStatus: ['Active', 'Suspended'],
+  adminStatus: [
+    {
+      text: 'Active',
+      value: 1
+    },
+    {
+      text: 'Suspended',
+      value: 0
+    }
+  ],
   rolesSettings: {
     admin: {
       accounts: { create: true, modify: true, view: true, delete: true  },
@@ -92,18 +48,31 @@ const state = {
 }
 
 const mutations = {
-  ADD_ADMIN: (state, payload) => {
-    let id = state.admin.length + 1
-    Vue.set(payload, 'id', id)
-    Vue.set(payload, 'activity_logs', [])
-    state.admin.unshift(payload)
+  SET_ADMIN_USERS: (state, adminUsers) => {
+    state.adminUsers = adminUsers
   },
-  UPDATE_ADMIN: (state, payload) => {
-    let fieldsToUpdate = ['first_name', 'last_name', 'role', 'status']
-    state.admin.map(admin => {
-      if(admin.id == payload.id) {
-        fieldsToUpdate.map(field => {
-          Vue.set(admin, field, payload[field])
+  SET_IS_LOADING_ADMIN_USERS: (state, loadingState) => {
+    state.isLoadingAdminUsers = loadingState
+  },
+  ADD_ADMIN_USER: (state, adminUser) => {
+    let newAdminUser = {
+      id: adminUser.id,
+      name: adminUser.name, 
+      email: adminUser.email, 
+      status: adminUser.status,
+      created_at: adminUser.created_at
+    }
+    state.adminUsers.unshift(newAdminUser)
+  },
+  UPDATE_ADMIN_USER: (state, adminUser) => {
+    let updatedAdminUser = {
+      name: adminUser.name,
+      status: adminUser.status 
+    }
+    state.adminUsers.map(admin => {
+      if(admin.id == adminUser.id) {
+        Object.keys(updatedAdminUser).map(key => {
+          Vue.set(admin, key, updatedAdminUser[key])
         })
       }
     })
@@ -112,13 +81,6 @@ const mutations = {
     state.admin.map(admin => {
       if(admin.id == payload.id) {
         Vue.set(admin, 'role', payload.role)
-      }
-    })
-  },
-  UPDATE_ADMIN_STATUS: (state, payload) => {
-    state.admin.map(admin => {
-      if(admin.id == payload.id) {
-        Vue.set(admin, 'status', payload.status)
       }
     })
   },
@@ -153,8 +115,45 @@ const mutations = {
   }
 }
 
+const actions = {
+  getAdminUsers({commit, dispatch}) {
+    commit('SET_IS_LOADING_ADMIN_USERS', true)
+    axios.get('admin-users', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_ADMIN_USERS', response.data)
+      commit('SET_IS_LOADING_ADMIN_USERS', false)
+    })
+    .catch(err => {
+      commit('SET_ADMIN_USERS', [])
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: err.response.data.message
+      });
+    })
+  },
+  manageAdminUser({commit, dispatch}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('admin-users/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        if(payload.id) {
+          commit('UPDATE_ADMIN_USER', response.data.data)
+        } else {
+          commit('ADD_ADMIN_USER', response.data.data)
+        }
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  }
+}
+
 export default {
   state,
   mutations,
+  actions,
   namespaced: true
 }

@@ -68,11 +68,11 @@ export default {
         title: "Provider Accounts",
         to: "/accounts/providers"
       },
-      // {
-      //   icon: "mdi-account-star",
-      //   title: "Admin Users",
-      //   to: "/accounts/admin"
-      // },
+      {
+        icon: "mdi-account-star",
+        title: "Admin Users",
+        to: "/accounts/admin"
+      },
       // {
       //   icon: "mdi-account-details",
       //   title: "Admin Roles",

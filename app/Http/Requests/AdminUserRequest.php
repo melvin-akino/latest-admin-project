@@ -33,10 +33,15 @@ class AdminUserRequest extends FormRequest
             $update = ",$adminUser->id"; 
         }
 
+        $required = '';
+        if(!$this->input('id')) {
+          $required = 'required';
+        }
+
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:admin_users,email'.$update,
-            'password' => 'required|string|min:6',
+            'password' => 'string|min:6|'.$required
         ];
     }
 
