@@ -106,8 +106,9 @@ class Order extends Model
 
     public static function getUserTransactions($request)
     {
-        $dateFrom = Carbon::parse('monday this week')->addHours(12);
-        $dateTo = Carbon::parse('monday next week')->addHours(11)->addMinutes(59)->addSeconds(59);
+        $dateFrom = null;
+        $dateTo   = null;
+        $where    = [];
         if ($request->date_from) 
         {
             $dateFrom = Carbon::createFromFormat("Y-m-d", $request->date_from, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
@@ -164,8 +165,12 @@ class Order extends Model
                  )
                  ->where($where)
                  ->where('orders.status', '!=', 'FAILED')
-                 ->whereDate('orders.created_at', '>=', $dateFrom)
-                 ->whereDate('orders.created_at', '<=', $dateTo)
+                 ->when($dateFrom, function($query, $dateFrom) {
+                   return $query->whereDate('orders.created_at', '>=', $dateFrom);
+                 })
+                 ->when($dateTo, function($query, $dateTo) {
+                  return $query->whereDate('orders.created_at', '<=', $dateTo);
+                 })
                  ->orderBy('orders.created_at', 'desc')
                  ->get()
                  ->toArray();

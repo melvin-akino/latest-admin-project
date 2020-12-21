@@ -4,7 +4,7 @@
     v-model="drawer"
     :expand-on-hover="expandOnHover"
     :right="$vuetify.rtl"
-    mobile-break-point="960"
+    mobile-breakpoint="960"
     app
     width="260"
     v-bind="$attrs"
@@ -125,7 +125,7 @@ export default {
       return {
         ...item,
         children: item.children ? item.children.map(this.mapItem) : undefined,
-        title: this.$t(item.title)
+        title: item.title
       };
     }
   }
