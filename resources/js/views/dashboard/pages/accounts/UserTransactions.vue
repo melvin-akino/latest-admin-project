@@ -1,8 +1,8 @@
 <template>
   <div class="userTransactions pa-6">
     <v-container>
-      <p class="text-h4 text-uppercase" v-if="userEmail">
-        Transaction Report for {{userEmail}}
+      <p class="text-h4 text-uppercase" v-if="user">
+        Transaction Report for {{user}}
         <span v-if="search.date_from && search.date_to">({{search.date_from}} to {{search.date_to}})</span>
       </p>
       <div class="my-6">
@@ -148,7 +148,7 @@ export default {
         provider_id: null,
         currency_id: null
       },
-      userEmail: '',
+      user: '',
       userTransactions: [],
       isLoadingUserTransactions: false,
       periods: [
@@ -203,7 +203,7 @@ export default {
     getUser() {
       axios.get(`user/${this.$route.params.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        this.userEmail = response.data.email
+        this.user = `${response.data.firstname} ${response.data.lastname}`
       })
       .catch(err => {
         this.logoutOnError(err.response.status)

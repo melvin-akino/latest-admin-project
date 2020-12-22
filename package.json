@@ -25,6 +25,8 @@
         "@mdi/font": "^5.8.55",
         "axios": "^0.19",
         "babel-core": "7.0.0-bridge.0",
+        "babel-plugin-dynamic-import-webpack": "^1.1.0",
+        "babel-plugin-syntax-dynamic-import": "^6.18.0",
         "bootstrap": "^4.0.0",
         "cross-env": "^7.0",
         "jquery": "^3.2",
@@ -36,8 +38,6 @@
         "sass-loader": "7.*",
         "vue": "^2.5.17",
         "vue-chartist": "^2.2.1",
-        "vue-cli-plugin-i18n": "^0.6.0",
-        "vue-cli-plugin-vuetify": "^2.0.3",
         "vue-template-compiler": "^2.6.10",
         "vue-world-map": "^0.1.1",
         "vuetify-loader": "^1.4.3"

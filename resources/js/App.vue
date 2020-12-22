@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <v-content>
-        <router-view />
-        <snack-bar></snack-bar>
-    </v-content>
+    <v-main>
+      <router-view />
+      <snack-bar></snack-bar>
+    </v-main>
   </v-app>
 </template>
 
