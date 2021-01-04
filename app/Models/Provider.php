@@ -23,7 +23,7 @@ class Provider extends Model
 
     public static function getAllProviders()
     {
-        $providers = self::orderBy('priority', 'asc')->orderBy('id', 'asc')->get()->toArray();
+        $providers = self::where('is_enabled', true)->orderBy('priority', 'asc')->orderBy('id', 'asc')->get()->toArray();
 
         if (!empty($providers)) {
             foreach ($providers as $provider) {
