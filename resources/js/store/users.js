@@ -1,6 +1,5 @@
 import Vue from "vue"
 import { getToken } from '../helpers/token'
-import { axios } from '../helpers/axios'
 
 const state = {
   users: [],

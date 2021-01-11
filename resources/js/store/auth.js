@@ -1,14 +1,13 @@
 import { getToken } from '../helpers/token'
 import router from '../router'
 import Cookies from 'js-cookie'
-import { axios } from '../helpers/axios'
 
 const actions = {
   login({}, loginForm) {
     return new Promise((resolve, reject) => {
       axios.post("login", loginForm)
       .then(response => {
-        resolve(response.data.token)
+        resolve(response.data)
       })
       .catch(err => {
         reject(err)

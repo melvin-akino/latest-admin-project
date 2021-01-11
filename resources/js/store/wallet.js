@@ -1,5 +1,4 @@
-import { getWalletToken } from '../helpers/token'
-import { walletAxios } from '../helpers/axios'
+import { getToken, getWalletToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
@@ -17,20 +16,9 @@ const mutations = {
 }
 
 const actions = {
-  login({}, walletCredentials) {
-    return new Promise((resolve, reject) => {
-      walletAxios.post('oauth/token', walletCredentials)
-      .then(response => {
-        resolve(response.data.data.access_token)
-      })
-      .catch(err => {
-        reject(err)
-      });
-    })
-  },
   getClients({commit, dispatch}) {
     commit('SET_IS_LOADING_CLIENTS', true)
-    walletAxios.get('clients', { headers: { 'Authorization': `Bearer ${getWalletToken()}` } })
+    axios.get('wallet/clients', { params: { wallet_token: getWalletToken() }, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_CLIENTS', response.data.data)
       commit('SET_IS_LOADING_CLIENTS', false)

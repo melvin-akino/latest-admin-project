@@ -59,6 +59,6 @@ Route::middleware('auth:api')->group(function () {
 
     //Wallet replated routes
     Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
-    
+    Route::get('/wallet/clients', 'WalletsController@getClients')->name('wallet-clients.api');
 
 });
