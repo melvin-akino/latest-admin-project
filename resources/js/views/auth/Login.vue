@@ -87,6 +87,7 @@ export default {
   },
   methods: {
     ...mapActions('auth', { adminLogin: 'login' }),
+    ...mapActions('wallet', { walletLogin: 'login' }),
     async login() {
       if (!this.$v.loginForm.$invalid) {
         try {
@@ -96,8 +97,10 @@ export default {
             text: "Logging in, please wait."
           });
           let response = await this.adminLogin(this.loginForm)
+          let walletResponse = await this.walletLogin({ client_id: process.env.MIX_WALLET_CLIENT_ID, client_secret: process.env.MIX_WALLET_CLIENT_SECRET, grant_type: 'client_credentials' })
           this.isLoggingIn = false;
           Cookies.set("access_token", response);
+          Cookies.set("wallet_token", walletResponse);
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
             text: "Login successful."

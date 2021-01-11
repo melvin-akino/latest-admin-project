@@ -11,6 +11,7 @@ import resources from './resources'
 import systemConfigurations from './systemConfigurations'
 import generalErrors from './generalErrors'
 import providerErrors from './providerErrors'
+import wallet from './wallet'
 
 export default new Vuex.Store({
   state: {
@@ -29,6 +30,7 @@ export default new Vuex.Store({
     resources,
     systemConfigurations,
     generalErrors,
-    providerErrors
+    providerErrors,
+    wallet
   }
 })

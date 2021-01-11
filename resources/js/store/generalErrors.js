@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { getToken } from '../helpers/token'
 import bus from '../eventBus'
+import { axios } from '../helpers/axios'
 
 const state = {
   generalErrors: [],
