@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\{User, Wallet};
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
-use GuzzleHttp\Client;
 use App\Services\WalletService;
 
 class WalletsController extends Controller
