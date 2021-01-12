@@ -6,6 +6,7 @@ use App\Models\{User, Wallet};
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use App\Services\WalletService;
 
 class WalletsController extends Controller
 {
@@ -16,18 +17,10 @@ class WalletsController extends Controller
         return response()->json($wallet);
     }
 
-    public function getClients(Request $request) 
+    public function getClients(Request $request, WalletService $wallet) 
     {
-        $http = new Client();
-        $walletURL = env('WALLET_URL', 'http://localhost:8000/api/v1');
+        $clients = $wallet->getClients($request->wallet_token);
 
-        $response = $http->request('GET', $walletURL.'/clients', [
-          'headers' => [
-            'Authorization' => 'Bearer '.$request->wallet_token
-          ]
-        ]);
-        $response = json_decode($response->getBody());
-
-        return response()->json($response);
+        return response()->json($clients);
     }
 }
