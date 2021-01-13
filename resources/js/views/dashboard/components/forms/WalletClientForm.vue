@@ -1,4 +1,4 @@
-a<template>
+<template>
   <v-card class="walletClientForm">
     <v-toolbar color="primary" dark height="40px">
       <v-toolbar-title class="text-uppercase subtitle-1"
