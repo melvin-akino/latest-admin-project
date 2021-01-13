@@ -19,7 +19,14 @@ class WalletsController extends Controller
     public function getClients(Request $request, WalletService $wallet) 
     {
         $clients = $wallet->getClients($request->wallet_token);
+        
+        return response()->json($clients, $clients->status_code);
+    }
 
-        return response()->json($clients);
+    public function createClient(Request $request, WalletService $wallet)
+    {
+      $client = $wallet->createClient($request);
+
+      return response()->json($client, $client->status_code);
     }
 }
