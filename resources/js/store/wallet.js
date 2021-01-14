@@ -12,6 +12,9 @@ const mutations = {
   },
   SET_IS_LOADING_CLIENTS: (state, loadingState) => {
     state.isLoadingClients = loadingState
+  },
+  ADD_CLIENT: (state, client) => {
+    state.clients.unshift(client)
   }
 }
 
@@ -28,8 +31,21 @@ const actions = {
       dispatch('auth/logoutOnError', err.response.status, { root: true })
       bus.$emit("SHOW_SNACKBAR", {
         color: "error",
-        text: err.response.data.message
+        text: err.response.data.error
       });
+    })
+  },
+  createClient({commit, dispatch}, data) {
+    return new Promise((resolve, reject) => {
+      axios.post('wallet/create', data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('ADD_CLIENT', response.data.data)
+        resolve(response.data.message)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
     })
   }
 }

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
-
+use GuzzleHttp\Exception\ClientException;
 class WalletService
 {
   public $url;
@@ -34,12 +34,36 @@ class WalletService
 
   public function getClients($token)
   {
-    $response = $this->http->request('GET', $this->url.'/clients', [
-      'headers' => [
-        'Authorization' => 'Bearer '.$token
-      ]
-    ]);
-    $response = json_decode($response->getBody());
+    try {
+      $response = $this->http->request('GET', $this->url.'/clients', [
+        'headers' => [
+          'Authorization' => 'Bearer '.$token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
+
+  public function createClient($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/client/create', [
+        'form_params' => [
+          'name' => $data->name,
+          'client_id' => $data->client_id,
+          'client_secret' => $data->client_secret
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
     return $response;
   }
 

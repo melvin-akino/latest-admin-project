@@ -12,6 +12,9 @@
           class="subtitle-1"
           style="max-width: 200px;"
         ></v-text-field>
+        <button-dialog icon="mdi-plus" label="New Client" width="600" @clearFilters="clearFilters">
+          <wallet-client-form></wallet-client-form>
+        </button-dialog>
       </v-toolbar>
       <v-data-table
         :headers="headers"
@@ -39,6 +42,10 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'WalletClients',
+  components: {
+    ButtonDialog: () => import("../component/ButtonDialog"),
+    WalletClientForm: () => import("../components/forms/WalletClientForm")
+  },
   data: () => ({
     headers: [
       { text: 'CLIENT ID', value: 'client_id' },

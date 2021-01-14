@@ -60,5 +60,6 @@ Route::middleware('auth:api')->group(function () {
     //Wallet replated routes
     Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
     Route::get('/wallet/clients', 'WalletsController@getClients')->name('wallet-clients.api');
+    Route::post('/wallet/create', 'WalletsController@createClient')->name('wallet-create.api');
 
 });
