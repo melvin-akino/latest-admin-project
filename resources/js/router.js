@@ -85,6 +85,11 @@ const router = new Router({
           ]
         },
         {
+          name: 'Wallet Clients',
+          path: 'wallet_clients',
+          component: () => import('./views/dashboard/pages/WalletClients')
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),

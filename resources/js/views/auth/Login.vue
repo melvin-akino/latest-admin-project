@@ -97,7 +97,8 @@ export default {
           });
           let response = await this.adminLogin(this.loginForm)
           this.isLoggingIn = false;
-          Cookies.set("access_token", response);
+          Cookies.set("access_token", response.token);
+          Cookies.set("wallet_token", response.wallet_token);
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
             text: "Login successful."

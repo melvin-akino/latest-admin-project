@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Services\WalletService;
 
 class ApiAuthController extends Controller
 {
-    public function login (Request $request) {
+    public function login (Request $request, WalletService $wallet) {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
@@ -24,7 +25,7 @@ class ApiAuthController extends Controller
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $response = ['token' => $token];
+                $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
                 return response($response, 200);
             } else {
                 $response = ["message" => "Password mismatch"];

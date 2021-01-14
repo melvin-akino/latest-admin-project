@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Services;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+class WalletService
+{
+  public $url;
+  private $clientId;
+  private $clientSecret;
+  private $http;
+
+  public function __construct($url, $clientId, $clientSecret)
+  {
+    $this->url = $url;
+    $this->clientId = $clientId;
+    $this->clientSecret = $clientSecret;
+    $this->http = new Client();
+  }
+
+  public function getAccessToken()
+  {
+    $response = $this->http->request('POST', $this->url.'/oauth/token', [
+      'form_params' => [
+        'client_id' => $this->clientId,
+        'client_secret' => $this->clientSecret,
+        'grant_type' => 'client_credentials'
+      ]
+    ]);
+    $response = json_decode($response->getBody());
+    return $response->data->access_token;
+  }
+
+  public function getClients($token)
+  {
+    try {
+      $response = $this->http->request('GET', $this->url.'/clients', [
+        'headers' => [
+          'Authorization' => 'Bearer '.$token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
+
+  public function createClient($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/client/create', [
+        'form_params' => [
+          'name' => $data->name,
+          'client_id' => $data->client_id,
+          'client_secret' => $data->client_secret
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
+
+}

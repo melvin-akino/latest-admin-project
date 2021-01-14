@@ -59,6 +59,7 @@ export default {
         });
         let response = await this.adminLogout()
         Cookies.remove('access_token')
+        Cookies.remove('wallet_token')
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
           text: response
