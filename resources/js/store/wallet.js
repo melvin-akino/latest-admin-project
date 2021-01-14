@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { getToken, getWalletToken } from '../helpers/token'
 import bus from '../eventBus'
 
@@ -14,7 +15,14 @@ const mutations = {
     state.isLoadingClients = loadingState
   },
   ADD_CLIENT: (state, client) => {
-    state.clients.unshift(client)
+    state.clients.push(client)
+  },
+  UPDATE_CLIENT: (state, client_id) => {
+    state.clients.map(client => {
+      if(client.client_id == client_id) {
+        Vue.set(client, 'revoked', true)
+      }
+    })
   }
 }
 
@@ -41,6 +49,19 @@ const actions = {
       .then(response => {
         commit('ADD_CLIENT', response.data.data)
         resolve(response.data.message)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  revokeClient({commit, dispatch}, data) {
+    return new Promise((resolve, reject) => {
+      axios.post('wallet/revoke', data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('UPDATE_CLIENT', data.client_id)
+        resolve(response.data.data.message)
       })
       .catch(err => {
         reject(err)

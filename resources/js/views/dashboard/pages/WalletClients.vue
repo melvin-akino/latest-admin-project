@@ -31,6 +31,17 @@
             <p class="subtitle-1">Total Clients: {{ clients.length }}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.revoked`]="{ item }">
+          <v-checkbox v-model="item.revoked" :disabled="item.revoked" readonly :class="[ !item.revoked ? `revokeCheckBox-${item.client_id}` : '']"></v-checkbox>
+          <confirm-dialog
+            v-if="!item.revoked"
+            title="Confirm Revoke Client" 
+            message="Are you sure you want to revoke this client? This action cannot be undone." 
+            :activator="`.revokeCheckBox-${item.client_id}`"
+            @confirm="revokeWalletClient(item)"
+            >
+          </confirm-dialog>
+        </template>
       </v-data-table>
     </v-container>
   </div>
@@ -38,12 +49,15 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
-
+import ConfirmDialog from '../component/ConfirmDialog.vue'
+import bus from '../../../eventBus'
+import { getWalletToken } from '../../../helpers/token'
 
 export default {
   name: 'WalletClients',
   components: {
     ButtonDialog: () => import("../component/ButtonDialog"),
+    ConfirmDialog: () => import("../component/ConfirmDialog"),
     WalletClientForm: () => import("../components/forms/WalletClientForm")
   },
   data: () => ({
@@ -65,13 +79,46 @@ export default {
   },
   methods: {
     ...mapMutations('wallet', { setClients: 'SET_CLIENTS' }),
-    ...mapActions('wallet', ['getClients']),
+    ...mapActions('wallet', ['getClients', 'revokeClient']),
     clearFilters() {
       this.search = ''
       this.page = 1
     },
     getPage(pagination) {
       this.page = pagination.page
+    },
+    closeDialog() {
+      bus.$emit("CLOSE_DIALOG");
+    },
+    async revokeWalletClient(wallet) {
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: "Revoking wallet client..."
+        });
+        this.$set(wallet, 'wallet_token', getWalletToken())
+        let response = await this.revokeClient(wallet)
+        this.closeDialog()
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: response
+        });
+      } catch(err) {
+        let error = ''
+        if(err.response.data.hasOwnProperty('errors')) {
+          if(err.response.data.errors.hasOwnProperty('message')) {
+            error = err.response.data.errors.message
+          } else {
+            error = err.response.data.errors[Object.keys(err.response.data.errors)[0]][0]
+          }
+        } else {
+          error = err.response.data.error
+        }
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: error
+        });
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

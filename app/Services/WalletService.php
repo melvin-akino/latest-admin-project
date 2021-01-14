@@ -67,4 +67,23 @@ class WalletService
     return $response;
   }
 
+  public function revokeClient($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/client/revoke', [
+        'form_params' => [
+          'client_id' => $data->client_id,
+          'client_secret' => $data->client_secret
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
+
 }
