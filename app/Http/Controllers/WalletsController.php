@@ -29,4 +29,11 @@ class WalletsController extends Controller
 
       return response()->json($client, $client->status_code);
     }
+
+    public function revokeClient(Request $request, WalletService $wallet)
+    {
+      $client = $wallet->revokeClient($request);
+
+      return response()->json($client, $client->status_code);
+    }
 }
