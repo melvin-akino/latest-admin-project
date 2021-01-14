@@ -98,6 +98,11 @@ export default {
         title: "Wallet Clients",
         to: "/wallet_clients"
       },
+      {
+        icon: "mdi-cash-usd",
+        title: "Currencies",
+        to: "/currencies"
+      }
       // {
       //   title: "icons",
       //   icon: "mdi-chart-bubble",

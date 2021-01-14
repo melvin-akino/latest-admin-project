@@ -52,6 +52,7 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 import ConfirmDialog from '../component/ConfirmDialog.vue'
 import bus from '../../../eventBus'
 import { getWalletToken } from '../../../helpers/token'
+import { handleAPIErrors } from '../../../helpers/errors'
 
 export default {
   name: 'WalletClients',
@@ -103,20 +104,10 @@ export default {
           color: "success",
           text: response
         });
-      } catch(err) {
-        let error = ''
-        if(err.response.data.hasOwnProperty('errors')) {
-          if(err.response.data.errors.hasOwnProperty('message')) {
-            error = err.response.data.errors.message
-          } else {
-            error = err.response.data.errors[Object.keys(err.response.data.errors)[0]][0]
-          }
-        } else {
-          error = err.response.data.error
-        }
+      } catch(err) {        
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: error
+          text: handleAPIErrors(err)
         });
       }
     }

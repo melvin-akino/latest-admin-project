@@ -72,6 +72,7 @@ import bus from '../../../../eventBus'
 import { required, maxLength, alphaNum } from 'vuelidate/lib/validators'
 import { mapActions } from 'vuex'
 import { getWalletToken } from '../../../../helpers/token'
+import { handleAPIErrors } from '../../../../helpers/errors'
 
 export default {
   data: () => ({
@@ -140,7 +141,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.error
+          text: handleAPIErrors(err)
         });
       }
     },

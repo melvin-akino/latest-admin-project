@@ -86,4 +86,19 @@ class WalletService
     return $response;
   }
 
+  public function getCurrencies($token) 
+  {
+    try {
+      $response = $this->http->request('GET', $this->url.'/currency/list', [
+        'headers' => [
+          'Authorization' => 'Bearer '.$token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
+
 }

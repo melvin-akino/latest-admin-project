@@ -36,4 +36,11 @@ class WalletsController extends Controller
 
       return response()->json($client, $client->status_code);
     }
+
+    public function getCurrencies(Request $request, WalletService $wallet)
+    {
+      $currencies = $wallet->getCurrencies($request->wallet_token);
+
+      return response()->json($currencies, $currencies->status_code);
+    }
 }
