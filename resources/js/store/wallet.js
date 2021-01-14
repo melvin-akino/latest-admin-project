@@ -1,10 +1,13 @@
 import Vue from 'vue'
 import { getToken, getWalletToken } from '../helpers/token'
+import { handleAPIErrors } from '../helpers/errors'
 import bus from '../eventBus'
 
 const state = {
   clients: [],
-  isLoadingClients: false
+  isLoadingClients: false,
+  currencies: [],
+  isLoadingCurrencies: false
 }
 
 const mutations = {
@@ -23,6 +26,12 @@ const mutations = {
         Vue.set(client, 'revoked', true)
       }
     })
+  },
+  SET_CURRENCIES: (state, currencies) => {
+    state.currencies = currencies
+  },
+  SET_IS_LOADING_CURRENCIES: (state, loadingState) => {
+    state.isLoadingCurrencies = loadingState
   }
 }
 
@@ -39,7 +48,7 @@ const actions = {
       dispatch('auth/logoutOnError', err.response.status, { root: true })
       bus.$emit("SHOW_SNACKBAR", {
         color: "error",
-        text: err.response.data.error
+        text: handleAPIErrors(err)
       });
     })
   },
@@ -67,6 +76,22 @@ const actions = {
         reject(err)
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
+    })
+  },
+  getCurrencies({commit, dispatch}) {
+    commit('SET_IS_LOADING_CURRENCIES', true)
+    axios.get('wallet/currencies', { params: { wallet_token: getWalletToken() }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_CURRENCIES', response.data.data)
+      commit('SET_IS_LOADING_CURRENCIES', false)
+    })
+    .catch(err => {
+      commit('SET_CURRENCIES', [])
+      dispatch('auth/logoutOnError', err.response.status, { root: true })
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "error",
+        text: handleAPIErrors(err)
+      });
     })
   }
 }

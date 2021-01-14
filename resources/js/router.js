@@ -90,6 +90,11 @@ const router = new Router({
           component: () => import('./views/dashboard/pages/WalletClients')
         },
         {
+          name: 'Currencies',
+          path: 'currencies',
+          component: () => import('./views/dashboard/pages/Currencies')
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),
