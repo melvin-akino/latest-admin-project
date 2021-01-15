@@ -12,6 +12,9 @@
           class="subtitle-1"
           style="max-width: 200px;"
         ></v-text-field>
+        <button-dialog icon="mdi-plus" label="New Currency" width="600" @clearFilters="clearFilters">
+          <currency-form></currency-form>
+        </button-dialog>
       </v-toolbar>
       <v-data-table
         :headers="headers"
@@ -38,6 +41,10 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'Currencies',
+  components: {
+    ButtonDialog: () => import("../component/ButtonDialog"),
+    CurrencyForm: () => import("../components/forms/CurrencyForm")
+  },
   data: () => ({
     headers: [
       { text: 'NAME', value: 'name' },
