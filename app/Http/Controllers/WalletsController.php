@@ -16,6 +16,13 @@ class WalletsController extends Controller
         return response()->json($wallet);
     }
 
+    public function getAccessToken(Request $request, WalletService $wallet) 
+    {
+        $token = $wallet->getAccessToken();
+        
+        return response()->json(['token' => $token ]);
+    }
+
     public function getClients(Request $request, WalletService $wallet) 
     {
         $clients = $wallet->getClients($request->wallet_token);
@@ -47,6 +54,13 @@ class WalletsController extends Controller
     public function createCurrency(Request $request, WalletService $wallet)
     {
       $currency = $wallet->createCurrency($request);
+
+      return response()->json($currency, $currency->status_code);
+    }
+
+    public function updateCurrency(Request $request, WalletService $wallet)
+    {
+      $currency = $wallet->updateCurrency($request);
 
       return response()->json($currency, $currency->status_code);
     }

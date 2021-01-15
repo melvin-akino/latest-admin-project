@@ -59,10 +59,12 @@ Route::middleware('auth:api')->group(function () {
 
     //Wallet replated routes
     Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
+    Route::post('/wallet/token', 'WalletsController@getAccessToken')->name('wallet-token.api');
     Route::get('/wallet/clients', 'WalletsController@getClients')->name('wallet-clients.api');
     Route::post('/wallet/create', 'WalletsController@createClient')->name('wallet-create.api');
     Route::post('/wallet/revoke', 'WalletsController@revokeClient')->name('wallet-revoke.api');
     Route::get('/wallet/currencies', 'WalletsController@getCurrencies')->name('wallet-currencies.api');
     Route::post('/wallet/currencies/create', 'WalletsController@createCurrency')->name('wallet-currencies-create.api');
+    Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
 
 });

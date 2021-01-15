@@ -51,6 +51,13 @@ const mutations = {
       created_at: moment.utc(currency.created_at).format('YYYY-MM-DD HH:mm:ss')
     }
     state.currencies.unshift(newCurrency)
+  },
+  UPDATE_CURRENCY: (state, updatedCurrency) => {
+    state.currencies.map(currency => {
+      if(currency.name == updatedCurrency.name) {
+        Vue.set(currency, 'is_enabled', updatedCurrency.is_enabled)
+      }
+    })
   }
 }
 
@@ -119,6 +126,19 @@ const actions = {
       .then(response => {
         commit('ADD_CURRENCY', response.data.data)
         resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  updateCurrency({commit, dispatch}, data) {
+    return new Promise((resolve, reject) => {
+      axios.post('wallet/currencies/update', data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('UPDATE_CURRENCY', data)
+        resolve(response.data.message)
       })
       .catch(err => {
         reject(err)

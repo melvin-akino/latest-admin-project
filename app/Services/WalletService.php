@@ -119,4 +119,23 @@ class WalletService
     }
     return $response;
   }
+
+  public function updateCurrency($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/currency/update', [
+        'form_params' => [
+          'name' => $data->name,
+          'is_enabled' => $data->is_enabled
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+      $response = json_decode($response->getBody());
+    } catch(ClientException $e) {
+      $response = json_decode($e->getResponse()->getBody()->getContents());
+    }
+    return $response;
+  }
 }
