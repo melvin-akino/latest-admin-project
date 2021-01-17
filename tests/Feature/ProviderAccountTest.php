@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestProviderAccount extends AdminAccountTest
+class ProviderAccountTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.
@@ -89,7 +89,7 @@ class TestProviderAccount extends AdminAccountTest
                     'id' => '',
                     'username'   => $this->faker->text(8),
                     'password' => $this->faker->text(16),
-                    'provider_id' => '2',
+                    'provider_id' => '1',
                     'type' => 'BET_NORMAL',
                     'credits' => 0,
                     'punter_percentage'   => '45',

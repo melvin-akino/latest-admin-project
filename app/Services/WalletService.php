@@ -40,9 +40,8 @@ class WalletService
           'Authorization' => 'Bearer '.$token
         ]
       ]);
-      $response = json_decode($response->getBody());
     } catch(ClientException $e) {
-      $response = json_decode($e->getResponse()->getBody()->getContents());
+      $response = $e->getResponse();
     }
     return $response;
   }
@@ -60,9 +59,8 @@ class WalletService
           'Authorization' => 'Bearer '.$data->wallet_token
         ]
       ]);
-      $response = json_decode($response->getBody());
     } catch(ClientException $e) {
-      $response = json_decode($e->getResponse()->getBody()->getContents());
+      $response = $e->getResponse();
     }
     return $response;
   }
@@ -79,9 +77,8 @@ class WalletService
           'Authorization' => 'Bearer '.$data->wallet_token
         ]
       ]);
-      $response = json_decode($response->getBody());
     } catch(ClientException $e) {
-      $response = json_decode($e->getResponse()->getBody()->getContents());
+      $response = $e->getResponse();
     }
     return $response;
   }

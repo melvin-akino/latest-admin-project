@@ -27,21 +27,21 @@ class WalletsController extends Controller
     {
         $clients = $wallet->getClients($request->wallet_token);
         
-        return response()->json($clients, $clients->status_code);
+        return response()->json(json_decode($clients->getBody()->getContents()), $clients->getStatusCode());
     }
 
     public function createClient(Request $request, WalletService $wallet)
     {
       $client = $wallet->createClient($request);
 
-      return response()->json($client, $client->status_code);
+      return response()->json(json_decode($client->getBody()->getContents()), $client->getStatusCode());
     }
 
     public function revokeClient(Request $request, WalletService $wallet)
     {
       $client = $wallet->revokeClient($request);
 
-      return response()->json($client, $client->status_code);
+      return response()->json(json_decode($client->getBody()->getContents()), $client->getStatusCode());
     }
 
     public function getCurrencies(Request $request, WalletService $wallet)

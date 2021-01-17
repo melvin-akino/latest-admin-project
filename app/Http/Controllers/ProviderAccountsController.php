@@ -61,6 +61,7 @@ class ProviderAccountsController extends Controller
                 }
                 else
                 {    
+                    $data['uuid'] = uniqid();
                     $provider = ProviderAccount::create($data);
                     $provider = ProviderAccount::where('id', $provider->id)->first();
                     $message = 'success';       

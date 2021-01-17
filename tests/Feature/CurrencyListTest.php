@@ -5,27 +5,27 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestProviderList extends AdminAccountTest
+class CurrencyListTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testProviderListWithToken()
+    public function testCurrencyListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/providers', [
+        $response = $this->get('/api/currencies', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
         $response->assertStatus(200);
     }
 
-    public function testProviderListWithoutToken() {
-        $response = $this->get('/api/providers', [
+    public function testCurrencyListWithoutToken() {
+        $response = $this->get('/api/currencies', [
             'X-Requested-With' => 'XMLHttpRequest',
-            'Authorization'    => 'Bearer '
+            'Authorization'    => 'Bearer XXX'
         ]);
 
         $response->assertJson(['message' => 'Unauthenticated.']);
