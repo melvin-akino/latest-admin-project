@@ -13,12 +13,28 @@ class WalletsController extends Controller
     {
         $wallet = Wallet::getUserBalance($request);
 
+        $toLogs = [
+          "class" => "WalletsController",
+          "message" => $wallet,
+          "module" => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($wallet);
     }
 
     public function getAccessToken(Request $request, WalletService $wallet) 
     {
         $token = $wallet->getAccessToken();
+
+        $toLogs = [
+          "class" => "WalletsController",
+          "message" => ['token' => $token ],
+          "module" => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
         
         return response()->json(['token' => $token ]);
     }

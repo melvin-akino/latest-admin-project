@@ -13,6 +13,15 @@ class AdminUsersController extends Controller
     public function index()
     {
         $adminUsers = AdminUser::getAll();
+
+        $toLogs = [
+          "class" => "AdminUsersController",
+          "message" => $adminUsers,
+          "module" => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($adminUsers);
     }
     public function manage (AdminUserRequest $request) 
@@ -39,6 +48,20 @@ class AdminUsersController extends Controller
             if ($adminUser->save())
             {
                 DB::commit();
+
+                $toLogs = [
+                  "class" => "AdminUsersController",
+                  "message" => [
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'success',
+                    'data'        => $adminUser
+                  ],
+                  "module" => "API",
+                  "status_code" => 200
+                ];
+                monitorLog('monitor_api', 'info', $toLogs);
+
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
@@ -50,6 +73,20 @@ class AdminUsersController extends Controller
         catch (Exception $e)
         {
             DB::rollback();
+
+            $toLogs = [
+              "class" => "AdminUsersController",
+              "message" => [
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+              ],
+              "module" => "API_ERROR",
+              "status_code" => 500
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
+        
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,

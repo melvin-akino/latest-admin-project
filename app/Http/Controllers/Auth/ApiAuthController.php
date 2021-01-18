@@ -19,6 +19,14 @@ class ApiAuthController extends Controller
         ]);
         if ($validator->fails())
         {
+            $toLogs = [
+              "class" => "ApiAuthController",
+              "message" => ['errors'=>$validator->errors()->all()],
+              "module" => "API_ERROR",
+              "status_code" => 422
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response(['errors'=>$validator->errors()->all()], 422);
         }
         $user = AdminUser::where('email', $request->email)->first();
@@ -26,13 +34,40 @@ class ApiAuthController extends Controller
             if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('Laravel Password Grant Client')->accessToken;
                 $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
+
+                $toLogs = [
+                  "class" => "ApiAuthController",
+                  "message" => $response,
+                  "module" => "API",
+                  "status_code" => 200
+                ];
+                monitorLog('monitor_api', 'info', $toLogs);
+
                 return response($response, 200);
             } else {
                 $response = ["message" => "Password mismatch"];
+
+                $toLogs = [
+                  "class" => "ApiAuthController",
+                  "message" => $response,
+                  "module" => "API_ERROR",
+                  "status_code" => 401
+                ];
+                monitorLog('monitor_api', 'error', $toLogs);
+
                 return response($response, 401);
             }
         } else {
             $response = ["message" =>'User does not exist'];
+
+            $toLogs = [
+              "class" => "ApiAuthController",
+              "message" => $response,
+              "module" => "API_ERROR",
+              "status_code" => 401
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response($response, 401);
         }
     }
@@ -41,6 +76,15 @@ class ApiAuthController extends Controller
         $token = $request->user()->token();
         $token->revoke();
         $response = ['message' => 'You have been successfully logged out!'];
+
+        $toLogs = [
+          "class" => "ApiAuthController",
+          "message" => $response,
+          "module" => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+        
         return response($response, 200);
     }
 }

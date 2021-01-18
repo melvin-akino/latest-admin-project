@@ -19,6 +19,14 @@ class ProviderAccountsController extends Controller
         }
         $accounts = ProviderAccount::getProviderAccounts($id);
 
+        $toLogs = [
+          "class" => "ProviderAccountsController",
+          "message" => $accounts,
+          "module" => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($accounts);
     }
 
@@ -68,6 +76,20 @@ class ProviderAccountsController extends Controller
                 }
             
                 DB::commit();
+
+                $toLogs = [
+                  "class" => "ProviderAccountsController",
+                  "message" => [
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => $message,
+                    'data'        => $provider
+                  ],
+                  "module" => "API",
+                  "status_code" => 200
+                ];
+                monitorLog('monitor_api', 'info', $toLogs);
+
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
@@ -80,6 +102,19 @@ class ProviderAccountsController extends Controller
         catch (Exception $e) 
         {
             DB::rollBack();
+
+            $toLogs = [
+              "class" => "ProviderAccountsController",
+              "message" => [
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+              ],
+              "module" => "API_ERROR",
+              "status_code" => 500
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,
