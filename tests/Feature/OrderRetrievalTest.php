@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestOrderRetrieval extends AdminAccountTest
+class OrderRetrievalTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.

@@ -5,17 +5,17 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestGeneralErrorMessages extends AdminAccountTest
+class ProviderErrorMessageTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testGeneralErrorListWithToken()
+    public function testProviderErrorListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/general-errors', [
+        $response = $this->get('/api/provider-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -24,8 +24,8 @@ class TestGeneralErrorMessages extends AdminAccountTest
         $response->assertStatus(200);
     }
 
-    public function testGeneralErrorListWithoutToken() {
-        $response = $this->get('/api/general-errors', [
+    public function testProviderErrorListWithoutToken() {
+        $response = $this->get('/api/provider-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -34,15 +34,16 @@ class TestGeneralErrorMessages extends AdminAccountTest
     }
 
      /** @test */
-     public function testGeneralErrorManagewithoutToken() {
+     public function testProviderErrorManagewithoutToken() {
 
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX' 
-        ])->json('POST', '/api/general-errors/manage', 
+        ])->json('POST', '/api/provider-errors/manage', 
                 [
-                    'id' => 1,
-                    'username'   => 'Bet was not placed. Please try again.'
+                    'id'                => 1,
+                    'message'           => 'Abnormal bets',
+                    'error_message_id'  => 6
                 ]
             );
        
@@ -50,16 +51,17 @@ class TestGeneralErrorMessages extends AdminAccountTest
     }
 
     /** @test */
-    public function testGeneralErrorNodataTest() {
+    public function testProviderErrorNodataTest() {
               
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/general-errors/manage', 
+        ])->json('POST', '/api/provider-errors/manage', 
                 [
-                    'id'   => '',
-                    'error' => ''
+                    'id'                => '',
+                    'message'           => '',
+                    'error_message_id'  => ''
                 ]
             );
        
@@ -67,16 +69,17 @@ class TestGeneralErrorMessages extends AdminAccountTest
         
     }
      /** @test */
-    public function testGeneralErrorwithRecordTest() {
+    public function testProviderErrorwithRecordTest() {
          
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/general-errors/manage', 
+        ])->json('POST', '/api/provider-errors/manage', 
                 [
-                    'id' => 1,
-                    'error'   => 'Bet was not placed. Please try again.'
+                    'id'                => 1,
+                    'message'           => 'Abnormal bets',
+                    'error_message_id'  => 6
                 ]
             );
        

@@ -49,7 +49,6 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
-import ConfirmDialog from '../component/ConfirmDialog.vue'
 import bus from '../../../eventBus'
 import { getWalletToken } from '../../../helpers/token'
 import { handleAPIErrors } from '../../../helpers/errors'

@@ -5,17 +5,17 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestProviderErrorMessage extends AdminAccountTest
+class SystemConfigurationTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testProviderErrorListWithToken()
+    public function testSystemConfigurationListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/provider-errors', [
+        $response = $this->get('/api/system-configurations', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -24,8 +24,8 @@ class TestProviderErrorMessage extends AdminAccountTest
         $response->assertStatus(200);
     }
 
-    public function testProviderErrorListWithoutToken() {
-        $response = $this->get('/api/provider-errors', [
+    public function testSystemConfigurationListWithoutToken() {
+        $response = $this->get('/api/system-configurations', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -33,35 +33,27 @@ class TestProviderErrorMessage extends AdminAccountTest
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
-     /** @test */
-     public function testProviderErrorManagewithoutToken() {
-
-        $response = $this->withHeaders([
+    public function testSystemConfigurationManageWithoutToken() {
+        $response = $this->post('/api/system-configurations/manage', [
             'X-Requested-With' => 'XMLHttpRequest',
-            'Authorization'    => 'Bearer XXX' 
-        ])->json('POST', '/api/provider-errors/manage', 
-                [
-                    'id'                => 1,
-                    'message'           => 'Abnormal bets',
-                    'error_message_id'  => 6
-                ]
-            );
-       
-         $response->assertStatus(401);
+            'Authorization'    => 'Bearer XXX'
+        ]);
+
+        $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
     /** @test */
-    public function testProviderErrorNodataTest() {
+    public function ManageSystemConfigurationNodataTest() {
               
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/provider-errors/manage', 
+            ])->json('POST', '/api/system-configurations/manage', 
                 [
-                    'id'                => '',
-                    'message'           => '',
-                    'error_message_id'  => ''
+                    'id'   => null,
+                    'type' => null,
+                    'value' => null
                 ]
             );
        
@@ -69,18 +61,18 @@ class TestProviderErrorMessage extends AdminAccountTest
         
     }
      /** @test */
-    public function testProviderErrorwithRecordTest() {
+    public function ManageSystemConfigurationRecordTest() {
          
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/provider-errors/manage', 
-                [
-                    'id'                => 1,
-                    'message'           => 'Abnormal bets',
-                    'error_message_id'  => 6
-                ]
+        ])->json('POST', '/api/system-configurations/manage', 
+            [
+                'id'   => 1,
+                'type' => 'SCHEDULE_INPLAY_TIMER',
+                'value' => 10
+            ]
             );
        
          $response->assertStatus(200);

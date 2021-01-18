@@ -18,7 +18,8 @@ class ProviderAccount extends Model
         'provider_id',
         'is_enabled',
         'is_idle',
-        'deleted_at'
+        'deleted_at',
+        'uuid'
     ];
 
     protected $hidden = [

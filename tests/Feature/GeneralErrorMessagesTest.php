@@ -5,27 +5,25 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\{WithoutMiddleware,WithFaker};
 use Tests\TestCase;
 
-class TestSystemConfiguration extends AdminAccountTest
+class GeneralErrorMessagesTest extends AdminAccountTestCase
 {
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testSystemConfigurationListWithToken()
+    public function testGeneralErrorListWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/system-configurations', [
+        $response = $this->get('/api/general-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
-
-
         $response->assertStatus(200);
     }
 
-    public function testSystemConfigurationListWithoutToken() {
-        $response = $this->get('/api/system-configurations', [
+    public function testGeneralErrorListWithoutToken() {
+        $response = $this->get('/api/general-errors', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -33,48 +31,51 @@ class TestSystemConfiguration extends AdminAccountTest
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
-    public function testSystemConfigurationManageWithoutToken() {
-        $response = $this->post('/api/system-configurations/manage', [
-            'X-Requested-With' => 'XMLHttpRequest',
-            'Authorization'    => 'Bearer XXX'
-        ]);
+     /** @test */
+     public function testGeneralErrorManagewithoutToken() {
 
-        $response->assertJson(['message' => 'Unauthenticated.']);
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer XXX' 
+        ])->json('POST', '/api/general-errors/manage', 
+                [
+                    'id' => 1,
+                    'username'   => 'Bet was not placed. Please try again.'
+                ]
+            );
+       
+         $response->assertStatus(401);
     }
 
     /** @test */
-    public function ManageSystemConfigurationNodataTest() {
+    public function testGeneralErrorNodataTest() {
               
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-            ])->json('POST', '/api/system-configurations/manage', 
+        ])->json('POST', '/api/general-errors/manage', 
                 [
-                    'id'   => null,
-                    'type' => null,
-                    'value' => null
+                    'id'   => '',
+                    'error' => ''
                 ]
             );
-       
          $response->assertStatus(422);
         
     }
      /** @test */
-    public function ManageSystemConfigurationRecordTest() {
+    public function testGeneralErrorwithRecordTest() {
          
         $this->initialUser();
         $response = $this->withHeaders([
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
-        ])->json('POST', '/api/system-configurations/manage', 
-            [
-                'id'   => 1,
-                'type' => 'SCHEDULE_INPLAY_TIMER',
-                'value' => 10
-            ]
+        ])->json('POST', '/api/general-errors/manage', 
+                [
+                    'id' => 1,
+                    'error'   => 'Bet was not placed. Please try again.'
+                ]
             );
-       
          $response->assertStatus(200);
     }
 }

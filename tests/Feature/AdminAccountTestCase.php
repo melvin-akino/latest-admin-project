@@ -5,14 +5,16 @@ namespace Tests\Feature;
 use App\Models\AdminUser;
 use Tests\TestCase;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\{WithFaker,Data,DatabaseTransactions};
 use Illuminate\Support\Facades\{DB, Auth};
 use Laravel\Passport\ClientRepository;
+use GuzzleHttp\Psr7\Response;
 
-class AdminAccountTest extends TestCase
+abstract class AdminAccountTestCase extends TestCase
 {
-    use WithFaker;
-
+    use DatabaseTransactions;
+    use WithFaker; 
+    
     protected $followRedirects = false;
 
     public $user;
@@ -26,10 +28,10 @@ class AdminAccountTest extends TestCase
 
         DB::table('oauth_personal_access_clients')
             ->insert([
-               'client_id'  => $client->id,
-               'created_at' => Carbon::now(),
-               'updated_at' => Carbon::now(),
-           ]);
+              'client_id'  => $client->id,
+              'created_at' => Carbon::now(),
+              'updated_at' => Carbon::now(),
+          ]);
 
         $data = $this->data();
         $user = new AdminUser([
@@ -56,5 +58,27 @@ class AdminAccountTest extends TestCase
             'password_confirmation'     => 'secret',
             'name'                      => $this->faker->lexify('??????????'),
         ];
+    }
+
+    public function getWalletToken()
+    {
+      $response = $this->withHeaders([
+        'Authorization'    => 'Bearer '. $this->loginJsonResponse->token 
+      ])->json('POST', 'api/wallet/token');
+
+      $this->walletResponse = json_decode($response->getContent(), false);
+    }
+
+    public function mockExternalAPI($service, $method, $statusCode, $headers, $expectedResponse)
+    {
+      $mock = $this->mock($service);
+      $mock->shouldReceive($method)
+        ->andReturn(
+          new Response(
+            $statusCode,
+            $headers,
+            json_encode($expectedResponse)
+          )
+        );
     }
 }
