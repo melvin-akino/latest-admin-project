@@ -48,20 +48,20 @@ class WalletsController extends Controller
     {
       $currencies = $wallet->getCurrencies($request->wallet_token);
 
-      return response()->json($currencies, $currencies->status_code);
+      return response()->json(json_decode($currencies->getBody()->getContents()), $currencies->getStatusCode());
     }
 
     public function createCurrency(Request $request, WalletService $wallet)
     {
       $currency = $wallet->createCurrency($request);
 
-      return response()->json($currency, $currency->status_code);
+      return response()->json(json_decode($currency->getBody()->getContents()), $currency->getStatusCode());
     }
 
     public function updateCurrency(Request $request, WalletService $wallet)
     {
       $currency = $wallet->updateCurrency($request);
 
-      return response()->json($currency, $currency->status_code);
+      return response()->json(json_decode($currency->getBody()->getContents()), $currency->getStatusCode());
     }
 }
