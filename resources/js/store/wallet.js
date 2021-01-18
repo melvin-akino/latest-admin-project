@@ -2,12 +2,23 @@ import Vue from 'vue'
 import { getToken, getWalletToken } from '../helpers/token'
 import { handleAPIErrors } from '../helpers/errors'
 import bus from '../eventBus'
+import moment from 'moment'
 
 const state = {
   clients: [],
   isLoadingClients: false,
   currencies: [],
-  isLoadingCurrencies: false
+  isLoadingCurrencies: false,
+  currencyOptions: [
+    {
+      text: 'Yes',
+      value: true
+    },
+    {
+      text: 'No',
+      value: false
+    }
+  ]
 }
 
 const mutations = {
@@ -32,6 +43,14 @@ const mutations = {
   },
   SET_IS_LOADING_CURRENCIES: (state, loadingState) => {
     state.isLoadingCurrencies = loadingState
+  },
+  ADD_CURRENCY: (state, currency) => {
+    let newCurrency = {
+      name: currency.name,
+      is_enabled: Boolean(Number(currency.is_enabled)),
+      created_at: moment.utc(currency.created_at).format('YYYY-MM-DD HH:mm:ss')
+    }
+    state.currencies.unshift(newCurrency)
   }
 }
 
@@ -92,6 +111,19 @@ const actions = {
         color: "error",
         text: handleAPIErrors(err)
       });
+    })
+  },
+  createCurrency({commit, dispatch}, data) {
+    return new Promise((resolve, reject) => {
+      axios.post('wallet/currencies/create', data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('ADD_CURRENCY', response.data.data)
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
     })
   }
 }
