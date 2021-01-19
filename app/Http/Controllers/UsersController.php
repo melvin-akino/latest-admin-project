@@ -7,6 +7,7 @@ use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Hash};
 use Carbon\Carbon;
+use App\Services\WalletService;
 class UsersController extends Controller
 {
     public function index()
@@ -16,7 +17,7 @@ class UsersController extends Controller
         return response()->json($users);
     }
 
-    public function manage(UserRequest $request)
+    public function manage(UserRequest $request, WalletService $wallet)
     {
         DB::beginTransaction();
         try {
@@ -48,28 +49,14 @@ class UsersController extends Controller
             {
                 if (empty($request->id))
                 {
-                    //Make user wallet and deposit amount in it
-                    $wallet = new Wallet([
-                        'user_id'       => $user->id,
-                        'currency_id'   => $request->currency_id,
-                        'balance'       => $request->balance
-                    ]);
+                  $walletData = [
+                    'uuid'     => $user->uuid,
+                    'currency' => $request->currency,
+                    'amount'   => $request->amount,
+                    'reason'   => 'Initial deposit'
+                  ];
 
-                    $wallet->save();
-                    
-                    $sourceId = Source::getIdByName('REGISTRATION');
-
-                    //Create a wallet ledger here
-                    $walletLedger = new WalletLedger([
-                        'wallet_id'     => $wallet->id,
-                        'balance'       => $request->balance,
-                        'credit'        => $request->balance,
-                        'debit'         => 0,
-                        'source_id'     => $sourceId
-                    ]);
-
-                    $walletLedger->save();
-                    //This will be discussed on tuesday
+                  $wallet->walletCredit((object) $walletData);
                 }
             }
 
@@ -85,8 +72,8 @@ class UsersController extends Controller
                     'email'         => $user->email,
                     'firstname'     => $user->firstname,
                     'lastname'      => $user->lastname,
-                    'currency'      => empty($request->id) ? Currency::getCodeById($wallet->currency_id) : "",
-                    'credits'       => empty($request->id) ? $wallet->balance : "",
+                    'currency'      => empty($request->id) ? $request->currency : "",
+                    'credits'       => empty($request->id) ? $request->amount : "",
                     'status'        => $user->status,
                     'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
                     'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')

@@ -118,7 +118,7 @@ const actions = {
   },
   getUserWallet({dispatch}, user) {
     return new Promise((resolve, reject) => {
-      axios.get('users/wallet', { params: user, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.get('wallet/balance', { params: user, headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         resolve(response.data)
       })

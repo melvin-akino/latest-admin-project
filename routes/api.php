@@ -66,5 +66,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/wallet/currencies', 'WalletsController@getCurrencies')->name('wallet-currencies.api');
     Route::post('/wallet/currencies/create', 'WalletsController@createCurrency')->name('wallet-currencies-create.api');
     Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
-
+    Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-credit.api');
+    Route::get('/wallet/balance', 'WalletsController@walletBalance')->name('wallet-balance.api');
 });

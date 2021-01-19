@@ -132,4 +132,62 @@ class WalletService
     }
     return $response;
   }
+
+  public function walletCredit($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/wallet/credit', [
+        'form_params' => [
+          'uuid' => $data->uuid,
+          'currency' => $data->currency,
+          'amount' => $data->amount,
+          'reason' => $data->reason
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+    } catch(ClientException $e) {
+      $response = $e->getResponse();
+    }
+    return $response;
+  }
+
+  public function walletDebit($data) 
+  {
+    try {
+      $response = $this->http->request('POST', $this->url.'/wallet/debit', [
+        'form_params' => [
+          'uuid' => $data->uuid,
+          'currency' => $data->currency,
+          'amount' => $data->amount,
+          'reason' => $data->reason
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+    } catch(ClientException $e) {
+      $response = $e->getResponse();
+    }
+    return $response;
+  }
+
+  public function walletBalance($data) 
+  {
+    try {
+      $response = $this->http->request('GET', $this->url.'/wallet/balance', [
+        'form_params' => [
+          'uuid' => $data->uuid,
+          'currency' => $data->currency,
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+    } catch(ClientException $e) {
+      $response = $e->getResponse();
+    }
+    return $response;
+  }
 }

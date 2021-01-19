@@ -44,7 +44,8 @@ class User extends Model
             'status',
             'currency_id',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'uuid'
         ])
         ->orderBy('created_at', 'DESC')
         ->get()

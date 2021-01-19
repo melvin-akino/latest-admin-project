@@ -86,9 +86,9 @@
           <table-action-dialog icon="mdi-pencil" width="600">
             <user-form :update="true" :user-to-update="item" :currencies="currencies"></user-form>
           </table-action-dialog>
-          <!-- <table-action-dialog icon="mdi-currency-gbp" width="600">
+          <table-action-dialog icon="mdi-currency-gbp" width="600">
             <wallet-form :user-to-update="item"></wallet-form>
-          </table-action-dialog> -->
+          </table-action-dialog>
           <v-btn icon :to="`users/transactions/${item.id}`" target="_blank">
             <v-icon small>mdi-format-list-bulleted</v-icon>
           </v-btn>
@@ -134,7 +134,7 @@ export default {
   }),
   computed: {
     ...mapState('users', ['userStatus', 'isLoadingUsers']),
-    ...mapState('resources', ['currencies']),
+    ...mapState('wallet', ['currencies']),
     ...mapGetters('users', ['usersTable']),
   },
   mounted() {
@@ -144,7 +144,7 @@ export default {
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
     ...mapActions('users', ['getUsersList', 'manageUser']),
-    ...mapActions('resources', ['getCurrencies']),
+    ...mapActions('wallet', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
