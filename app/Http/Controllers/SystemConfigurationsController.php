@@ -44,8 +44,6 @@ class SystemConfigurationsController extends Controller
                     $toLogs = [
                       "class"       => "SystemConfigurationsController",
                       "message"     => [
-                        'status'      => true,
-                        'status_code' => 200,
                         'data'        => 'success'
                       ],
                       "module"      => "API",

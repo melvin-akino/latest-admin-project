@@ -47,8 +47,6 @@ class GeneralErrorMessagesController extends Controller
                 $toLogs = [
                   "class"        => "GeneralErrorMessagesController",
                   "message"      => [
-                    'status'      => true,
-                    'status_code' => 200,
                     'message'     => $message,
                     'data'        => $data
                   ],

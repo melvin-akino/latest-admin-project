@@ -49,8 +49,6 @@ class ProviderErrorMessagesController extends Controller
                 $toLogs = [
                   "class"       => "ProviderErrorMessagesController",
                   "message"     => [
-                    'status'      => true,
-                    'status_code' => 200,
                     'messsage'    => $message,
                     'data'        => $data
                   ],

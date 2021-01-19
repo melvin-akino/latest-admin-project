@@ -85,8 +85,6 @@ class UsersController extends Controller
             $toLogs = [
               "class" => "UsersController",
               "message" => [
-                'status'      => true,
-                'status_code' => 200,
                 'message'     => 'success',
                 'data'        => [
                     'id'         => $user->id,

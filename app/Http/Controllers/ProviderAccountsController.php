@@ -80,8 +80,6 @@ class ProviderAccountsController extends Controller
                 $toLogs = [
                   "class"       => "ProviderAccountsController",
                   "message"     => [
-                    'status'      => true,
-                    'status_code' => 200,
                     'message'     => $message,
                     'data'        => $provider
                   ],

@@ -52,8 +52,6 @@ class AdminUsersController extends Controller
                 $toLogs = [
                   "class"         => "AdminUsersController",
                   "message"       => [
-                    'status'      => true,
-                    'status_code' => 200,
                     'message'     => 'success',
                     'data'        => $adminUser
                   ],
