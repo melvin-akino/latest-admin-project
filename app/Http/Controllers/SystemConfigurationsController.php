@@ -16,9 +16,9 @@ class SystemConfigurationsController extends Controller
         $data = SystemConfiguration::getAll();
 
         $toLogs = [
-          "class" => "SystemConfigurationsController",
-          "message" => $data,
-          "module" => "API",
+          "class"       => "SystemConfigurationsController",
+          "message"     => $data,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -42,13 +42,13 @@ class SystemConfigurationsController extends Controller
                     DB::commit();
 
                     $toLogs = [
-                      "class" => "SystemConfigurationsController",
-                      "message" => [
+                      "class"       => "SystemConfigurationsController",
+                      "message"     => [
                         'status'      => true,
                         'status_code' => 200,
                         'data'        => 'success'
                       ],
-                      "module" => "API",
+                      "module"      => "API",
                       "status_code" => 200
                     ];
                     monitorLog('monitor_api', 'info', $toLogs);
@@ -65,14 +65,10 @@ class SystemConfigurationsController extends Controller
             DB::rollBack();
 
             $toLogs = [
-              "class" => "SystemConfigurationsController",
-              "message" => [
-                'status'        => false,
-                'status_code'   => 500,
-                'errors'        => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"       => "SystemConfigurationsController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 

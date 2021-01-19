@@ -14,9 +14,9 @@ class UsersController extends Controller
         $users = User::getAll();
 
         $toLogs = [
-          "class" => "UsersController",
-          "message" => $users,
-          "module" => "API",
+          "class"       => "UsersController",
+          "message"     => $users,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -85,24 +85,24 @@ class UsersController extends Controller
             $toLogs = [
               "class" => "UsersController",
               "message" => [
-                'status'                => true,
-                'status_code'           => 200,
-                'message'               => 'success',
-                'data'                  => [
-                    'id'            => $user->id,
-                    'name'          => $user->name,
-                    'email'         => $user->email,
-                    'firstname'     => $user->firstname,
-                    'lastname'      => $user->lastname,
-                    'currency'      => empty($request->id) ? Currency::getCodeById($wallet->currency_id) : "",
-                    'credits'       => empty($request->id) ? $wallet->balance : "",
-                    'status'        => $user->status,
-                    'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
-                    'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
+                'status'      => true,
+                'status_code' => 200,
+                'message'     => 'success',
+                'data'        => [
+                    'id'         => $user->id,
+                    'name'       => $user->name,
+                    'email'      => $user->email,
+                    'firstname'  => $user->firstname,
+                    'lastname'   => $user->lastname,
+                    'currency'   => empty($request->id) ? Currency::getCodeById($wallet->currency_id) : "",
+                    'credits'    => empty($request->id) ? $wallet->balance : "",
+                    'status'     => $user->status,
+                    'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
                 ]
               ],
-              "module" => "API",
-              "status_code" => 200
+              "module"       => "API",
+              "status_code"  => 200
             ];
             monitorLog('monitor_api', 'info', $toLogs);
 
@@ -127,14 +127,10 @@ class UsersController extends Controller
             DB::rollback;
 
             $toLogs = [
-              "class" => "UsersController",
-              "message" => [
-                'status'      => false,
-                'status_code' => 500,
-                'message'     => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"       => "UsersController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 
@@ -151,9 +147,9 @@ class UsersController extends Controller
         $user = User::getUser($userId);
 
         $toLogs = [
-          "class" => "UsersController",
-          "message" => $user,
-          "module" => "API",
+          "class"       => "UsersController",
+          "message"     => $user,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);

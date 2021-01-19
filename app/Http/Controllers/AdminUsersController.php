@@ -15,9 +15,9 @@ class AdminUsersController extends Controller
         $adminUsers = AdminUser::getAll();
 
         $toLogs = [
-          "class" => "AdminUsersController",
-          "message" => $adminUsers,
-          "module" => "API",
+          "class"       => "AdminUsersController",
+          "message"     => $adminUsers,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -50,15 +50,15 @@ class AdminUsersController extends Controller
                 DB::commit();
 
                 $toLogs = [
-                  "class" => "AdminUsersController",
-                  "message" => [
+                  "class"         => "AdminUsersController",
+                  "message"       => [
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => 'success',
                     'data'        => $adminUser
                   ],
-                  "module" => "API",
-                  "status_code" => 200
+                  "module"        => "API",
+                  "status_code"   => 200
                 ];
                 monitorLog('monitor_api', 'info', $toLogs);
 
@@ -75,14 +75,10 @@ class AdminUsersController extends Controller
             DB::rollback();
 
             $toLogs = [
-              "class" => "AdminUsersController",
-              "message" => [
-                'status'      => false,
-                'status_code' => 500,
-                'errors'      => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"         => "AdminUsersController",
+              "message"       => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"        => "API_ERROR",
+              "status_code"   => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 

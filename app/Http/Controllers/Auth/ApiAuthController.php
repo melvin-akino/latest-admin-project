@@ -20,9 +20,9 @@ class ApiAuthController extends Controller
         if ($validator->fails())
         {
             $toLogs = [
-              "class" => "ApiAuthController",
-              "message" => ['errors'=>$validator->errors()->all()],
-              "module" => "API_ERROR",
+              "class"       => "ApiAuthController",
+              "message"     => ['errors'=>$validator->errors()->all()],
+              "module"      => "API_ERROR",
               "status_code" => 422
             ];
             monitorLog('monitor_api', 'error', $toLogs);
@@ -36,9 +36,9 @@ class ApiAuthController extends Controller
                 $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
 
                 $toLogs = [
-                  "class" => "ApiAuthController",
-                  "message" => $response,
-                  "module" => "API",
+                  "class"       => "ApiAuthController",
+                  "message"     => $response,
+                  "module"      => "API",
                   "status_code" => 200
                 ];
                 monitorLog('monitor_api', 'info', $toLogs);
@@ -48,9 +48,9 @@ class ApiAuthController extends Controller
                 $response = ["message" => "Password mismatch"];
 
                 $toLogs = [
-                  "class" => "ApiAuthController",
-                  "message" => $response,
-                  "module" => "API_ERROR",
+                  "class"       => "ApiAuthController",
+                  "message"     => $response,
+                  "module"      => "API_ERROR",
                   "status_code" => 401
                 ];
                 monitorLog('monitor_api', 'error', $toLogs);
@@ -61,9 +61,9 @@ class ApiAuthController extends Controller
             $response = ["message" =>'User does not exist'];
 
             $toLogs = [
-              "class" => "ApiAuthController",
-              "message" => $response,
-              "module" => "API_ERROR",
+              "class"       => "ApiAuthController",
+              "message"     => $response,
+              "module"      => "API_ERROR",
               "status_code" => 401
             ];
             monitorLog('monitor_api', 'error', $toLogs);
@@ -78,9 +78,9 @@ class ApiAuthController extends Controller
         $response = ['message' => 'You have been successfully logged out!'];
 
         $toLogs = [
-          "class" => "ApiAuthController",
-          "message" => $response,
-          "module" => "API",
+          "class"       => "ApiAuthController",
+          "message"     => $response,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);

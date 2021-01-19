@@ -13,9 +13,9 @@ class OrdersController extends Controller
         $orders = Order::getAllOrders($request->id);        
 
         $toLogs = [
-          "class" => "OrdersController",
-          "message" => $orders,
-          "module" => "API",
+          "class"       => "OrdersController",
+          "message"     => $orders,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -28,9 +28,9 @@ class OrdersController extends Controller
         $openOrders = Order::getOpenOrders($request->user_id);
 
         $toLogs = [
-          "class" => "OrdersController",
-          "message" => $openOrders,
-          "module" => "API",
+          "class"       => "OrdersController",
+          "message"     => $openOrders,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -43,9 +43,9 @@ class OrdersController extends Controller
         $orders = Order::getUserTransactions($request);
 
         $toLogs = [
-          "class" => "OrdersController",
-          "message" => $orders,
-          "module" => "API",
+          "class"       => "OrdersController",
+          "message"     => $orders,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);

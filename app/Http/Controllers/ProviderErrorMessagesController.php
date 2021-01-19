@@ -15,9 +15,9 @@ class ProviderErrorMessagesController extends Controller
         $providerErrorMessages = ProviderErrorMessage::getAll();
 
         $toLogs = [
-          "class" => "ProviderErrorMessagesController",
-          "message" => $providerErrorMessages,
-          "module" => "API",
+          "class"       => "ProviderErrorMessagesController",
+          "message"     => $providerErrorMessages,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -47,14 +47,14 @@ class ProviderErrorMessagesController extends Controller
                 DB::commit();
                 
                 $toLogs = [
-                  "class" => "ProviderErrorMessagesController",
-                  "message" => [
+                  "class"       => "ProviderErrorMessagesController",
+                  "message"     => [
                     'status'      => true,
                     'status_code' => 200,
                     'messsage'    => $message,
                     'data'        => $data
                   ],
-                  "module" => "API",
+                  "module"      => "API",
                   "status_code" => 200
                 ];
                 monitorLog('monitor_api', 'info', $toLogs);
@@ -71,14 +71,10 @@ class ProviderErrorMessagesController extends Controller
             DB::rollBack();
 
             $toLogs = [
-              "class" => "ProviderErrorMessagesController",
-              "message" => [
-                'status'      => false,
-                'status_code' => 500,
-                'errors'     => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"       => "ProviderErrorMessagesController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 

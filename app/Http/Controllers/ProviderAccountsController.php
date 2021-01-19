@@ -20,9 +20,9 @@ class ProviderAccountsController extends Controller
         $accounts = ProviderAccount::getProviderAccounts($id);
 
         $toLogs = [
-          "class" => "ProviderAccountsController",
-          "message" => $accounts,
-          "module" => "API",
+          "class"       => "ProviderAccountsController",
+          "message"     => $accounts,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -78,14 +78,14 @@ class ProviderAccountsController extends Controller
                 DB::commit();
 
                 $toLogs = [
-                  "class" => "ProviderAccountsController",
-                  "message" => [
+                  "class"       => "ProviderAccountsController",
+                  "message"     => [
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => $message,
                     'data'        => $provider
                   ],
-                  "module" => "API",
+                  "module"      => "API",
                   "status_code" => 200
                 ];
                 monitorLog('monitor_api', 'info', $toLogs);
@@ -104,14 +104,10 @@ class ProviderAccountsController extends Controller
             DB::rollBack();
 
             $toLogs = [
-              "class" => "ProviderAccountsController",
-              "message" => [
-                'status'      => false,
-                'status_code' => 500,
-                'errors'      => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"       => "ProviderAccountsController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 

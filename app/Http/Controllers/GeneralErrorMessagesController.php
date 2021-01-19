@@ -14,9 +14,9 @@ class GeneralErrorMessagesController extends Controller
         $errorMessages = GeneralErrorMessage::getAll();      
 
         $toLogs = [
-          "class" => "GeneralErrorMessagesController",
-          "message" => $errorMessages,
-          "module" => "API",
+          "class"       => "GeneralErrorMessagesController",
+          "message"     => $errorMessages,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -45,15 +45,15 @@ class GeneralErrorMessagesController extends Controller
                 DB::commit();
                 
                 $toLogs = [
-                  "class" => "GeneralErrorMessagesController",
-                  "message" => [
+                  "class"        => "GeneralErrorMessagesController",
+                  "message"      => [
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => $message,
                     'data'        => $data
                   ],
-                  "module" => "API",
-                  "status_code" => 200
+                  "module"       => "API",
+                  "status_code"  => 200
                 ];
                 monitorLog('monitor_api', 'info', $toLogs);
 
@@ -69,14 +69,10 @@ class GeneralErrorMessagesController extends Controller
             DB::rollBack();
 
             $toLogs = [
-              "class" => "GeneralErrorMessagesController",
-              "message" => [
-                'status'      => false,
-                'status_code' => 500,
-                'errors'     => $e->getMessage()
-              ],
-              "module" => "API_ERROR",
-              "status_code" => 500
+              "class"       => "GeneralErrorMessagesController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
             ];
             monitorLog('monitor_api', 'error', $toLogs);
 

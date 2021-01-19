@@ -14,9 +14,9 @@ class WalletsController extends Controller
         $wallet = Wallet::getUserBalance($request);
 
         $toLogs = [
-          "class" => "WalletsController",
-          "message" => $wallet,
-          "module" => "API",
+          "class"       => "WalletsController",
+          "message"     => $wallet,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
@@ -29,9 +29,9 @@ class WalletsController extends Controller
         $token = $wallet->getAccessToken();
 
         $toLogs = [
-          "class" => "WalletsController",
-          "message" => ['token' => $token ],
-          "module" => "API",
+          "class"       => "WalletsController",
+          "message"     => ['token' => $token ],
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);

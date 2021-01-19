@@ -12,9 +12,9 @@ class CurrenciesController extends Controller
         $currencies = Currency::getAll();
 
         $toLogs = [
-          "class" => "CurrenciesController",
-          "message" => $currencies,
-          "module" => "API",
+          "class"       => "CurrenciesController",
+          "message"     => $currencies,
+          "module"      => "API",
           "status_code" => 200
         ];
         monitorLog('monitor_api', 'info', $toLogs);
