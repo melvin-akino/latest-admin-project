@@ -331,7 +331,7 @@ export default {
         }
       });
       this.user.status = 1
-      this.user.currency = 1
+      this.user.currency_id = 1
     },
     randomizePassword() {
       this.user.password = randomstring.generate(6)
