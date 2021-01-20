@@ -30,7 +30,6 @@ class UsersController extends Controller
                     'firstname'     => $request->firstname,
                     'lastname'      => $request->lastname,
                     'status'        => $request->status,
-                    'currency_id'   => $request->currency_id,
                     'uuid'          => uniqid()
                 ]);
             }
@@ -50,10 +49,11 @@ class UsersController extends Controller
                 if (empty($request->id))
                 {
                   $walletData = [
-                    'uuid'     => $user->uuid,
-                    'currency' => $request->currency,
-                    'amount'   => $request->amount,
-                    'reason'   => 'Initial deposit'
+                    'uuid'          => $user->uuid,
+                    'currency'      => $request->currency,
+                    'amount'        => $request->balance,
+                    'reason'        => 'Initial deposit',
+                    'wallet_token'  => $request->wallet_token
                   ];
 
                   $wallet->walletCredit((object) $walletData);
@@ -73,8 +73,9 @@ class UsersController extends Controller
                     'firstname'     => $user->firstname,
                     'lastname'      => $user->lastname,
                     'currency'      => empty($request->id) ? $request->currency : "",
-                    'credits'       => empty($request->id) ? $request->amount : "",
+                    'credits'       => empty($request->id) ? $request->balance : "",
                     'status'        => $user->status,
+                    'uuid'          => $user->uuid,
                     'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
                     'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
                 ]

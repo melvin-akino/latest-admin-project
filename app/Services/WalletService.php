@@ -177,9 +177,8 @@ class WalletService
   {
     try {
       $response = $this->http->request('GET', $this->url.'/wallet/balance', [
-        'form_params' => [
+        'query' => [
           'uuid' => $data->uuid,
-          'currency' => $data->currency,
         ],
         'headers' => [
           'Authorization' => 'Bearer '.$data->wallet_token
