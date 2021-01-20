@@ -20,7 +20,8 @@ class User extends Model
         'firstname',
         'lastname',
         'currency_id',
-        'status'
+        'status',
+        'uuid'
     ];
 
     /**

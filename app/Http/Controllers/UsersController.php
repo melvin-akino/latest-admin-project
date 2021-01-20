@@ -29,7 +29,8 @@ class UsersController extends Controller
                     'firstname'     => $request->firstname,
                     'lastname'      => $request->lastname,
                     'status'        => $request->status,
-                    'currency_id'   => $request->currency_id
+                    'currency_id'   => $request->currency_id,
+                    'uuid'          => uniqid()
                 ]);
             }
             else {
