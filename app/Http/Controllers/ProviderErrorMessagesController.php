@@ -14,6 +14,14 @@ class ProviderErrorMessagesController extends Controller
     {
         $providerErrorMessages = ProviderErrorMessage::getAll();
 
+        $toLogs = [
+          "class"       => "ProviderErrorMessagesController",
+          "message"     => $providerErrorMessages,
+          "module"      => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($providerErrorMessages);
     }
 
@@ -37,6 +45,17 @@ class ProviderErrorMessagesController extends Controller
                 }
 
                 DB::commit();
+                
+                $toLogs = [
+                  "class"       => "ProviderErrorMessagesController",
+                  "message"     => [
+                    'messsage'    => $message,
+                    'data'        => $data
+                  ],
+                  "module"      => "API",
+                  "status_code" => 200
+                ];
+                monitorLog('monitor_api', 'info', $toLogs);
 
                 return response()->json([
                     'status'      => true,
@@ -48,6 +67,15 @@ class ProviderErrorMessagesController extends Controller
         }  
         catch (Exception $e) {
             DB::rollBack();
+
+            $toLogs = [
+              "class"       => "ProviderErrorMessagesController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,

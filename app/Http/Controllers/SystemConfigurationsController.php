@@ -15,6 +15,14 @@ class SystemConfigurationsController extends Controller
     {
         $data = SystemConfiguration::getAll();
 
+        $toLogs = [
+          "class"       => "SystemConfigurationsController",
+          "message"     => $data,
+          "module"      => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($data);
     }
 
@@ -32,6 +40,17 @@ class SystemConfigurationsController extends Controller
                 if (!empty($config) && $config->update($data)) 
                 {
                     DB::commit();
+
+                    $toLogs = [
+                      "class"       => "SystemConfigurationsController",
+                      "message"     => [
+                        'data'        => 'success'
+                      ],
+                      "module"      => "API",
+                      "status_code" => 200
+                    ];
+                    monitorLog('monitor_api', 'info', $toLogs);
+
                     return response()->json([
                         'status'      => true,
                         'status_code' => 200,
@@ -42,6 +61,15 @@ class SystemConfigurationsController extends Controller
         }
         catch (Exception $e) {
             DB::rollBack();
+
+            $toLogs = [
+              "class"       => "SystemConfigurationsController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response()->json([
                 'status'        => false,
                 'status_code'   => 500,
