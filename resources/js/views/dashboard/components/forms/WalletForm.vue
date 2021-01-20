@@ -47,8 +47,8 @@
                 <v-col cols="12" md="6" class="formColumn">
                   <v-select
                     :items="currencies"
-                    item-text="name"
-                    item-value="name"
+                    item-text="code"
+                    item-value="id"
                     label="Currency"
                     outlined
                     dense
@@ -118,7 +118,7 @@ export default {
     }
   },
   computed: {
-    ...mapState("wallet", ["currencies"]),
+    ...mapState("resources", ["currencies"]),
     transactionTypeErrors() {
       let errors = []
       if (!this.$v.wallet.transactionType.$dirty) return errors

@@ -110,17 +110,17 @@
             </v-col>
             <v-col cols="12" md="6" class="formColumn">
               <v-select
-                :items="currencies.filter(currency => currency.is_enabled)"
-                item-text="name"
-                item-value="name"
+                :items="currencies"
+                item-text="code"
+                item-value="id"
                 label="Currency"
                 outlined
                 dense
                 value="CNY"
-                v-model="$v.user.currency.$model"
+                v-model="$v.user.currency_id.$model"
                 :error-messages="currencyErrors"
-                @input="$v.user.currency.$touch()"
-                @blur="$v.user.currency.$touch()"
+                @input="$v.user.currency_id.$touch()"
+                @blur="$v.user.currency_id.$touch()"
               ></v-select>
             </v-col>
           </v-row>
@@ -169,7 +169,7 @@ export default {
       lastname: "",
       status: 1,
       balance: "",
-      currency: "CNY"
+      currency_id: 1
     }
   }),
   validations: {
@@ -191,7 +191,7 @@ export default {
         creditsValue, 
         decimal 
       },
-      currency: { 
+      currency_id: { 
         required: requiredIf(function() {
           return !this.update
         })
@@ -242,8 +242,8 @@ export default {
     },
     currencyErrors() {
       let errors = []
-      if (!this.$v.user.currency.$dirty) return errors
-      !this.$v.user.currency.required && errors.push('Currency is required.')
+      if (!this.$v.user.currency_id.$dirty) return errors
+      !this.$v.user.currency_id.required && errors.push('Currency is required.')
       return errors
     }
   },
@@ -331,7 +331,7 @@ export default {
         }
       });
       this.user.status = 1
-      this.user.currency = "CNY"
+      this.user.currency = 1
     },
     randomizePassword() {
       this.user.password = randomstring.generate(6)
