@@ -166,7 +166,7 @@ const actions = {
       axios.post('wallet/update', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         commit('UPDATE_USER_WALLET', payload)
-        resolve()
+        resolve(response.data.message)
       })
       .catch(err => {
         reject(err)
