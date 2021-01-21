@@ -1,5 +1,6 @@
 import Vue from "vue"
 import { getToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   adminUsers: [],
