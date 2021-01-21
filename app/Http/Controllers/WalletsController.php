@@ -64,4 +64,22 @@ class WalletsController extends Controller
 
       return response()->json(json_decode($currency->getBody()->getContents()), $currency->getStatusCode());
     }
+
+    public function walletUpdate(Request $request, WalletService $wallet)
+    {
+      if($request->transactionType == 'Deposit') {
+        $update = $wallet->walletCredit($request);
+      } else {
+        $update = $wallet->walletDebit($request);
+      }
+
+      return response()->json(json_decode($update->getBody()->getContents()), $update->getStatusCode());
+    }
+
+    public function walletBalance(Request $request, WalletService $wallet)
+    {
+      $balance = $wallet->walletBalance($request);
+
+      return response()->json(json_decode($balance->getBody()->getContents()), $balance->getStatusCode());
+    }
 }

@@ -86,9 +86,9 @@
           <table-action-dialog icon="mdi-pencil" width="600">
             <user-form :update="true" :user-to-update="item" :currencies="currencies"></user-form>
           </table-action-dialog>
-          <!-- <table-action-dialog icon="mdi-currency-gbp" width="600">
+          <table-action-dialog icon="mdi-currency-gbp" width="600">
             <wallet-form :user-to-update="item"></wallet-form>
-          </table-action-dialog> -->
+          </table-action-dialog>
           <v-btn icon :to="`users/transactions/${item.id}`" target="_blank">
             <v-icon small>mdi-format-list-bulleted</v-icon>
           </v-btn>
