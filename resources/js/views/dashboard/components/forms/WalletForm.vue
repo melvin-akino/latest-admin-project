@@ -52,12 +52,11 @@
                     label="Currency"
                     outlined
                     dense
-                    value="CNY"
                     disabled
-                    v-model="$v.wallet.currency.$model"
+                    v-model="$v.wallet.currency_id.$model"
                     :error-messages="currencyErrors"
-                    @input="$v.wallet.currency.$touch()"
-                    @blur="$v.wallet.currency.$touch()"
+                    @input="$v.wallet.currency_id.$touch()"
+                    @blur="$v.wallet.currency_id.$touch()"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -105,7 +104,7 @@ export default {
     wallet: {
       transactionType: 'Deposit',
       amount: '',
-      currency: 'CNY',
+      currency_id: '',
       reason: ''
     },
   }),
@@ -113,7 +112,7 @@ export default {
     wallet: {
       transactionType: { required },
       amount: { required, decimal, minValue: minValue(1), creditsWithdraw },
-      currency: { required },
+      currency_id: { required },
       reason: { required }
     }
   },
@@ -136,8 +135,8 @@ export default {
     },
     currencyErrors() {
       let errors = []
-      if (!this.$v.wallet.currency.$dirty) return errors
-      !this.$v.wallet.currency.required && errors.push('Currency is required.')
+      if (!this.$v.wallet.currency_id.$dirty) return errors
+      !this.$v.wallet.currency_id.required && errors.push('Currency is required.')
       return errors
     },
     reasonErrors() {
@@ -156,22 +155,23 @@ export default {
       bus.$emit("CLOSE_DIALOG");
     },
     initializeUserCurrency() {
-      this.wallet.currency = this.userToUpdate.currency
+      this.wallet.currency_id = this.userToUpdate.currency_id
     },
     async updateUserCredits() {
       if(!this.$v.wallet.$invalid) {
         try {
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
-            text: "Updating wallet information..."
+            text: this.wallet.transactionType == 'Deposit' ? 'Crediting amount to user...' : 'Debiting amount from user...'
           });
           this.$set(this.wallet, 'wallet_token', getWalletToken())
           this.$set(this.wallet, 'uuid', this.userToUpdate.uuid)
+          this.$set(this.wallet, 'currency', this.userToUpdate.currency)
           let response = await this.updateWallet(this.wallet)
           this.closeDialog()
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
-            text: "Wallet information updated."
+            text: response
           });
         } catch(err) {
           bus.$emit("SHOW_SNACKBAR", {
