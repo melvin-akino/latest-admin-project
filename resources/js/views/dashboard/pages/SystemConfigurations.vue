@@ -53,9 +53,14 @@
             <v-btn v-if="toEditRow == item.id" icon small @click="cancelUpdateSystemConfiguration">
               <v-icon>mdi-undo</v-icon>
             </v-btn>
-            <v-btn v-if="toEditRow != item.id" icon @click="editSystemConfiguration(item.id)">
-              <v-icon small>mdi-pencil</v-icon>
-            </v-btn>
+            <v-tooltip v-if="toEditRow != item.id" bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn icon @click="editSystemConfiguration(item.id)" v-on="on">
+                  <v-icon small>mdi-pencil</v-icon>
+                </v-btn>
+              </template>
+              <span class="caption">Edit</span>
+            </v-tooltip>
           </template>
         </v-data-table>
       </v-form>
