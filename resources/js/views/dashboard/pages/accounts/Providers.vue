@@ -111,7 +111,7 @@
           <span v-else>{{item.last_sync}}</span>    
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>
           </table-action-dialog>
         </template>

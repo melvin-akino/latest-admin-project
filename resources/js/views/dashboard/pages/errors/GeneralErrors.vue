@@ -32,7 +32,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit">
             <general-error-form :update="true" :error-to-update="item"></general-error-form>
           </table-action-dialog>
         </template>
