@@ -24,9 +24,14 @@ class ApiAuthController extends Controller
         $user = AdminUser::where('email', $request->email)->first();
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
-                return response($response, 200);
+              if($user->status == 1) {
+                  $token = $user->createToken('Laravel Password Grant Client')->accessToken;
+                  $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
+                  return response($response, 200);
+              } else {
+                $response = ["message" => 'Your administrator account was suspended.'];
+                return response($response, 401);
+              }
             } else {
                 $response = ["message" => "Password mismatch"];
                 return response($response, 401);

@@ -20,7 +20,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // public routes
     Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
 });
-Route::middleware('auth:api')->group(function () {
+Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // our routes to be protected will go in here
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
     Route::post('/admin-users/manage','AdminUsersController@manage')->name('admin-user-manage.api');
