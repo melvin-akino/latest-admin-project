@@ -87,4 +87,9 @@ class User extends Model
     {
         return self::where('id', $userId)->first();
     }
+
+    public static function getUserByUuid($uuid)
+    {
+        return self::where('uuid', $uuid)->first();
+    }
 }

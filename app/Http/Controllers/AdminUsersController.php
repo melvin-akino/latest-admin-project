@@ -57,4 +57,10 @@ class AdminUsersController extends Controller
             ], 500);
         }        
     }
+
+    public function getAdminActivityLogs(Request $request)
+    {
+        $activityLogs = AdminUser::getActivityLogs($request->id);
+        return response()->json($activityLogs);
+    }
 }

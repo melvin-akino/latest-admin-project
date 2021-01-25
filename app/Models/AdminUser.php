@@ -6,6 +6,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Contracts\Activity;
+use Spatie\Activitylog\Models\Activity as ActivityLog;
+use Carbon\Carbon;
 
 class AdminUser extends Authenticatable
 {
@@ -57,5 +59,27 @@ class AdminUser extends Authenticatable
         ->orderBy('created_at', 'DESC')
         ->get()
         ->toArray();
+    }
+
+    public static function getActivityLogs($id)
+    {   
+        $data = [];
+        $logs = ActivityLog::where('causer_id', $id)
+          ->orderBy('created_at', 'desc')
+          ->get();
+
+        foreach($logs as $log) {
+          $data[] = [
+            'module'      => $log->log_name,
+            'action'      => $log->properties['action'],
+            'description' => $log->description,
+            'old_data'    => isset($log->properties['old']) ? $log->properties['old'] : null,
+            'new_data'    => isset($log->properties['attributes']) ? $log->properties['attributes'] : null,
+            'ip_address'  => $log->properties['ip_address'],
+            'created_at'  => Carbon::parse($log->created_at)->format('Y-m-d H:i:s')
+          ];
+        }
+
+        return $data;
     }
 }
