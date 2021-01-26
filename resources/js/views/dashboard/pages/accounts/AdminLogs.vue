@@ -14,14 +14,26 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="activityLogs"
+        :items="activityLog"
         :search="search"
         :items-per-page="10"
+        :loading="isLoadingActivityLog"
+        loading-text="Loading activity log"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Activity Log for: {{adminEmail}}</p>
+            <p class="subtitle-1">Activity Log for: {{adminUser.email}}</p>
           </v-toolbar>
+        </template>
+        <template v-slot:[`item.description`]="{ item }">
+          <log-details-dialog 
+            v-if="item.old_data || item.new_data"
+            :title="`Log Details ${item.created_at}`"
+            :description="item.description"
+            :log="item"
+          >
+          </log-details-dialog>
+          <span v-else>{{item.description}}</span>
         </template>
       </v-data-table>
     </v-container>
@@ -29,33 +41,61 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { getToken } from '../../../../helpers/token'
+import { mapActions } from 'vuex'
+import bus from '../../../../eventBus'
 
 export default {
   name: 'AdminLogs',
+  components: {
+    LogDetailsDialog: () => import("../../component/LogDetailsDialog")
+  },
   data:() => ({
     headers: [
       { text: 'MODULE', value: 'module' },
       { text: 'ACTION', value: 'action' },
       { text: 'DESCRIPTION', value: 'description' },
       { text: 'IP ADDRESS', value: 'ip_address' },
-      { text: 'CREATED DATE', value: 'created_date' },
+      { text: 'CREATED DATE', value: 'created_at' },
     ],
     search: '',
-    adminEmail: '',
-    activityLogs: []
+    adminUser: '',
+    activityLog: [],
+    isLoadingActivityLog: false
   }),
-  computed: {
-    ...mapState('admin', ['admin'])
-  },
   mounted() {
-    this.getAdminDetails()
+    this.getAdminUser()
+    this.getAdminActivityLog()
   },
   methods: {
-    getAdminDetails() {
-      let admin = this.admin.filter(admin => admin.id == this.$route.params.id)[0]
-      this.adminEmail = admin.email
-      this.activityLogs = admin.activity_logs
+    ...mapActions('auth', ['logoutOnError']),
+    getAdminUser() {
+      axios.get(`admin-user/${this.$route.params.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        this.adminUser = response.data
+      })
+      .catch(err => {
+        this.logoutOnError(err.response.status)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      })
+    },
+    getAdminActivityLog() {
+      this.isLoadingActivityLog = true
+      axios.get('admin-users/logs', { params: { id: this.$route.params.id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        this.activityLog = response.data
+        this.isLoadingActivityLog = false
+      })
+      .catch(err => {
+        this.logoutOnError(err.response.status)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      })
     }
   }
 }

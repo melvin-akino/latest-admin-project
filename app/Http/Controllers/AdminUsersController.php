@@ -63,4 +63,10 @@ class AdminUsersController extends Controller
         $activityLogs = AdminUser::getActivityLogs($request->id);
         return response()->json($activityLogs);
     }
+
+    public function getAdminUser($id)
+    {
+        $adminUser = AdminUser::getAdminUser($id);
+        return response()->json($adminUser);
+    }
 }

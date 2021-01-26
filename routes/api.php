@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/admin-users/manage','AdminUsersController@manage')->name('admin-user-manage.api');
     Route::get('/admin-users','AdminUsersController@index')->name('admin-users.api');
     Route::get('/admin-users/logs','AdminUsersController@getAdminActivityLogs')->name('admin-logs.api');
+    Route::get('/admin-user/{id}','AdminUsersController@getAdminUser')->name('admin-user.api');
 
     //Provider accounts routes
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');

@@ -82,4 +82,9 @@ class AdminUser extends Authenticatable
 
         return $data;
     }
+
+    public static function getAdminUser($id) 
+    {
+        return self::where('id', $id)->first();
+    }
 }
