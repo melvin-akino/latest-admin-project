@@ -54,6 +54,8 @@ const mutations = {
       pl: '-',
       open_orders: '-',
       last_bet: '-',
+      last_scrape: '-',
+      last_sync: '-',
     }
     state.providerAccounts.unshift(newProviderAccount)
   },
