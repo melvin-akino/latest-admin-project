@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\WalletService;
+use Spatie\Activitylog\Contracts\Activity;
 
 class ApiAuthController extends Controller
 {
@@ -27,6 +28,15 @@ class ApiAuthController extends Controller
               if($user->status == 1) {
                   $token = $user->createToken('Laravel Password Grant Client')->accessToken;
                   $response = ['token' => $token, 'wallet_token' => $wallet->getAccessToken()];
+
+                  activity("Admin Users")
+                    ->causedBy($user)
+                    ->tap(function(Activity $activity) use($request) {
+                      $activity->properties = $activity->properties->put('action', 'Authenticated');
+                      $activity->properties = $activity->properties->put('ip_address', $request->ip());
+                    })
+                    ->log("Logged in");
+
                   return response($response, 200);
               } else {
                 $response = ["message" => 'Your administrator account was suspended.'];
@@ -46,6 +56,14 @@ class ApiAuthController extends Controller
         $token = $request->user()->token();
         $token->revoke();
         $response = ['message' => 'You have been successfully logged out!'];
+
+        activity("Admin Users")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Unauthenticated');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Logged out");
+
         return response($response, 200);
     }
 }

@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
     Route::post('/admin-users/manage','AdminUsersController@manage')->name('admin-user-manage.api');
     Route::get('/admin-users','AdminUsersController@index')->name('admin-users.api');
+    Route::get('/admin-users/logs','AdminUsersController@getAdminActivityLogs')->name('admin-logs.api');
 
     //Provider accounts routes
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
@@ -66,6 +67,6 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/wallet/currencies', 'WalletsController@getCurrencies')->name('wallet-currencies.api');
     Route::post('/wallet/currencies/create', 'WalletsController@createCurrency')->name('wallet-currencies-create.api');
     Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
-    Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-credit.api');
+    Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-update.api');
     Route::get('/wallet/balance', 'WalletsController@walletBalance')->name('wallet-balance.api');
 });

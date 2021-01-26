@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\{UserWallet, Currency, OAuthToken};
 use Illuminate\Support\Arr;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Contracts\Activity;
 
 class User extends Model
 {
+    use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *
@@ -33,6 +36,23 @@ class User extends Model
         'password',
         'remember_token',
     ];
+
+    protected static $logAttributes = ['name', 'email', 'firstname', 'lastname', 'currency_id', 'status'];
+
+    protected static $logOnlyDirty = true;
+
+    protected static $logName = 'Accounts';
+
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+      $activity->properties = $activity->properties->put('action', ucfirst($eventName));
+      $activity->properties = $activity->properties->put('ip_address', request()->ip());
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return ucfirst($eventName)." user: ".request()->email;
+    }
 
     public static function getAll()
     {
@@ -66,5 +86,10 @@ class User extends Model
     public static function getUser($userId)
     {
         return self::where('id', $userId)->first();
+    }
+
+    public static function getUserByUuid($uuid)
+    {
+        return self::where('uuid', $uuid)->first();
     }
 }

@@ -6,6 +6,7 @@ use App\Models\{User, Wallet};
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use App\Services\WalletService;
+use Spatie\Activitylog\Contracts\Activity;
 
 class WalletsController extends Controller
 {
@@ -34,12 +35,26 @@ class WalletsController extends Controller
     {
       $client = $wallet->createClient($request);
 
+      activity("Wallet Clients")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Created');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Created client: ".$request->client_id);
+
       return response()->json(json_decode($client->getBody()->getContents()), $client->getStatusCode());
     }
 
     public function revokeClient(Request $request, WalletService $wallet)
     {
       $client = $wallet->revokeClient($request);
+
+      activity("Wallet Clients")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Updated');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Revoked client: ".$request->client_id);
 
       return response()->json(json_decode($client->getBody()->getContents()), $client->getStatusCode());
     }
@@ -55,22 +70,52 @@ class WalletsController extends Controller
     {
       $currency = $wallet->createCurrency($request);
 
+      activity("Currencies")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Created');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Created currency: ".$request->name);
+
       return response()->json(json_decode($currency->getBody()->getContents()), $currency->getStatusCode());
     }
 
     public function updateCurrency(Request $request, WalletService $wallet)
     {
       $currency = $wallet->updateCurrency($request);
+      $action   = $request->is_enabled ? "Enabled" : "Disabled";
+      activity("Currencies")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Updated');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log($action." currency: ".$request->name);
 
       return response()->json(json_decode($currency->getBody()->getContents()), $currency->getStatusCode());
     }
 
     public function walletUpdate(Request $request, WalletService $wallet)
     {
+      $user = User::getUserByUuid($request->uuid);
+
       if($request->transactionType == 'Deposit') {
         $update = $wallet->walletCredit($request);
+
+        activity("Wallet Update")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Credited');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Credited ".$request->amount." to: ".$user->email." (".$request->reason.")");
       } else {
         $update = $wallet->walletDebit($request);
+
+        activity("Wallet Update")
+          ->tap(function(Activity $activity) use($request) {
+            $activity->properties = $activity->properties->put('action', 'Debited');
+            $activity->properties = $activity->properties->put('ip_address', $request->ip());
+          })
+          ->log("Debited ".$request->amount." from: ".$user->email." (".$request->reason.")");
       }
 
       return response()->json(json_decode($update->getBody()->getContents()), $update->getStatusCode());
