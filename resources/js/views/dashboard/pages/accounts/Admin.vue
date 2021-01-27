@@ -38,12 +38,17 @@
           <v-select :items="adminStatus" dense v-model="item.status" @change="updateAdminStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit"  style="z-index:1;">
             <admin-form :update="true" :admin-to-update="item"></admin-form>
           </table-action-dialog>
-          <!-- <v-btn icon :to="`admin/logs/${item.id}`" target="_blank">
-            <v-icon small>mdi-format-list-bulleted</v-icon>
-          </v-btn> -->
+          <v-tooltip bottom style="z-index:2;">
+            <template v-slot:activator="{ on }">
+              <v-btn icon v-on="on" :to="`admin/logs/${item.id}`" target="_blank">
+                <v-icon small>mdi-format-list-bulleted</v-icon>
+              </v-btn>
+            </template>
+            <span class="caption">Activity Log</span>
+          </v-tooltip>
         </template>
       </v-data-table>
     </v-container>
