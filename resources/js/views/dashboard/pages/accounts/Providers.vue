@@ -122,9 +122,17 @@
           <span v-else>{{item.last_sync}}</span>    
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit" style="z-index:1;">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>
           </table-action-dialog>
+          <v-tooltip bottom style="z-index:2;">
+            <template v-slot:activator="{ on }">
+              <v-btn icon :to="`wallet/transactions/provider-account/${item.uuid}`" target="_blank" v-on="on">
+                <v-icon small>mdi-format-list-bulleted</v-icon>
+              </v-btn>
+            </template>
+            <span class="caption">Wallet Transactions</span>
+          </v-tooltip>
         </template>
       </v-data-table>
     </v-container>

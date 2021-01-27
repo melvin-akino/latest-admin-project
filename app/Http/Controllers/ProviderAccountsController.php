@@ -122,4 +122,11 @@ class ProviderAccountsController extends Controller
             ], 500);
         }
     }
+
+    public static function getProviderAccountByUuid($uuid)
+    {
+        $account = ProviderAccount::getProviderAccountByUuid($uuid);
+
+        return response()->json($account);
+    }
 }

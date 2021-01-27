@@ -97,4 +97,13 @@ class ProviderAccount extends Model
         }
       return $data;
     }
+
+    public static function getProviderAccountByUuid($uuid)
+    {
+        return self::where('uuid', $uuid)
+          ->join('providers as p', 'p.id', 'provider_id')
+          ->join('currency as c', 'c.id', 'p.currency_id')
+          ->select(['username', 'c.code as currency', 'uuid'])
+          ->first();
+    }
 }
