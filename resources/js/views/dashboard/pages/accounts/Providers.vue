@@ -52,6 +52,17 @@
             <p class="subtitle-1">Summary</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.credits`]="{ item }">
+          <span v-if="!item.hasOwnProperty('credits')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.credits}}</span>    
+        </template>
         <template v-slot:[`item.pl`]="{ item }">
           <span v-if="!item.hasOwnProperty('pl')">
             <v-progress-circular
