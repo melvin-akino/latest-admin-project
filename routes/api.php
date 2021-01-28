@@ -31,6 +31,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Provider accounts routes
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
     Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
+    Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
@@ -57,7 +58,8 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');
     Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
-    Route::get('/user/{id}', 'UsersController@getUser')->name('get-users.api');
+    Route::get('/user/{id}', 'UsersController@getUser')->name('get-user-by-id.api');
+    Route::get('/user/uuid/{uuid}', 'UsersController@getUserByUuid')->name('get-user-by-uuid.api');
 
     //Wallet replated routes
     Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
@@ -70,4 +72,5 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
     Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-update.api');
     Route::get('/wallet/balance', 'WalletsController@walletBalance')->name('wallet-balance.api');
+    Route::get('/wallet/transaction', 'WalletsController@walletTransaction')->name('wallet-transaction.api');
 });

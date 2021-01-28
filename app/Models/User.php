@@ -56,18 +56,20 @@ class User extends Model
 
     public static function getAll()
     {
-      $users = self::select([
-            'id',
+      $users = self::join('currency as c', 'c.id', 'users.currency_id')
+          ->select([
+            'users.id',
             'email',
             'firstname',
             'lastname',
             'status',
             'currency_id',
-            'created_at',
-            'updated_at',
-            'uuid'
+            'users.created_at',
+            'users.updated_at',
+            'uuid',
+            'c.code as currency_code'
         ])
-        ->orderBy('created_at', 'DESC')
+        ->orderBy('users.created_at', 'DESC')
         ->get()
         ->toArray();
 
@@ -90,6 +92,9 @@ class User extends Model
 
     public static function getUserByUuid($uuid)
     {
-        return self::where('uuid', $uuid)->first();
+        return self::where('uuid', $uuid)
+          ->join('currency as c', 'c.id', 'users.currency_id')
+          ->select(['email', 'firstname', 'lastname', 'c.code as currency', 'uuid'])
+          ->first();
     }
 }

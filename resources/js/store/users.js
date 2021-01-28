@@ -110,18 +110,6 @@ const actions = {
       })
     })
   },
-  getUserWallet({dispatch}, user) {
-    return new Promise((resolve, reject) => {
-      axios.get('wallet/balance', { params: user, headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        resolve(response.data.data[Object.keys(response.data.data)[0]])
-      })
-      .catch(err => {
-        reject(err)
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
-      })
-    })
-  },
   async getUsersList({state, commit, dispatch}) {
     try {
       commit('SET_IS_LOADING_USERS', true)
@@ -130,7 +118,7 @@ const actions = {
       commit('SET_IS_LOADING_USERS', false)
       state.users.map(async user => {
         let openOrders = await dispatch('getUserOpenOrders', user.id)
-        let wallet = await dispatch('getUserWallet', { uuid: user.uuid, wallet_token: getWalletToken() })
+        let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
         Vue.set(user, 'open_bets', openOrders.open_orders)
         Vue.set(user, 'last_bet', openOrders.last_bet)
         Vue.set(user, 'credits', wallet.balance)
