@@ -86,24 +86,24 @@ class ProviderTransactionService
             foreach ($data as $row) {
                 if (!in_array($row->id, $dups)) {
                     $transactions[] = [
-                        'email' => $row->email,
-                        'bet_identifier' => $row->ml_bet_identifier,
-                        'provider_id' => $row->provider_id,
-                        'provider' => $row->provider,
-                        'sport_id' => $row->sport_id,
-                        'sport' => $row->sport,
-                        'bet_id' => $row->bet_id,
-                        'bet_selection' => $row->bet_selection,
-                        'username' => $row->username,
-                        'created_at' => $row->created_at,
-                        'status' => $row->status,
-                        'user_stake' => $row->stake,
-                        'user_pl' => $row->profit_loss,
-                        'actual_stake' => $row->actual_stake,
-                        'actual_to_win' => $row->actual_to_win,
-                        'actual_profit_loss' => $row->actual_profit_loss,
-                        'odds' => $row->odds,
-                        'odds_label' => $row->odd_label
+                        'email'                 => $row->email,
+                        'bet_identifier'        => $row->ml_bet_identifier,
+                        'provider_id'           => $row->provider_id,
+                        'provider'              => $row->provider,
+                        'sport_id'              => $row->sport_id,
+                        'sport'                 => $row->sport,
+                        'bet_id'                => $row->bet_id,
+                        'bet_selection'         => $row->bet_selection,
+                        'username'              => $row->username,
+                        'created_at'            => $row->created_at,
+                        'status'                => $row->status,
+                        'user_stake'            => $row->stake,
+                        'user_pl'               => $row->profit_loss,
+                        'actual_stake'          => $row->actual_stake,
+                        'actual_to_win'         => $row->actual_to_win,
+                        'actual_profit_loss'    => $row->actual_profit_loss,
+                        'odds'                  => $row->odds,
+                        'odds_label'            => $row->odd_label
                     ];
 
                     $dups[] = $row->id;
