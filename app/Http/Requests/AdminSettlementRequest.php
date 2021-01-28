@@ -35,7 +35,6 @@ class AdminSettlementRequest extends FormRequest
             'score'     => "required",
             'stake'     => "required|numeric",
             'pl'        => "required|numeric",
-            'reason'    => "required",
         ];
     }
 
