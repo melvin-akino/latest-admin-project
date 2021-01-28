@@ -52,6 +52,17 @@
             <p class="subtitle-1">Summary</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.credits`]="{ item }">
+          <span v-if="!item.hasOwnProperty('credits')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{item.credits}}</span>    
+        </template>
         <template v-slot:[`item.pl`]="{ item }">
           <span v-if="!item.hasOwnProperty('pl')">
             <v-progress-circular
@@ -111,9 +122,17 @@
           <span v-else>{{item.last_sync}}</span>    
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
-          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit" style="z-index:1;">
             <provider-form :update="true" :provider-account-to-update="item"></provider-form>
           </table-action-dialog>
+          <v-tooltip bottom style="z-index:2;">
+            <template v-slot:activator="{ on }">
+              <v-btn icon :to="`wallet/transactions/provider-account/${item.uuid}`" target="_blank" v-on="on">
+                <v-icon small>mdi-format-list-bulleted</v-icon>
+              </v-btn>
+            </template>
+            <span class="caption">Wallet Transactions</span>
+          </v-tooltip>
         </template>
       </v-data-table>
     </v-container>

@@ -127,4 +127,11 @@ class WalletsController extends Controller
 
       return response()->json(json_decode($balance->getBody()->getContents()), $balance->getStatusCode());
     }
+
+    public function walletTransaction(Request $request, WalletService $wallet)
+    {
+      $transactions = $wallet->walletTransaction($request);
+
+      return response()->json(json_decode($transactions->getBody()->getContents()), $transactions->getStatusCode());
+    }
 }

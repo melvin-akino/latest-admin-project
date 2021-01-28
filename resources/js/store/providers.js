@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { getToken } from '../helpers/token'
+import { getToken, getWalletToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
@@ -46,14 +46,17 @@ const mutations = {
       password: providerAccount.password,
       type: providerAccount.type,
       punter_percentage: providerAccount.punter_percentage,
-      credits: providerAccount.credits,
+      credits: 0,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
       provider_id: providerAccount.provider_id,
       currency_id: providerAccount.currency_id,
+      uuid: providerAccount.uuid,
       pl: '-',
       open_orders: '-',
       last_bet: '-',
+      last_scrape: '-',
+      last_sync: '-'
     }
     state.providerAccounts.unshift(newProviderAccount)
   },
@@ -112,6 +115,7 @@ const actions = {
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
       state.providerAccounts.map(async account => {
         let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+        let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
         if(providerAccountOrder.length != 0) {
           Vue.set(account, 'pl', providerAccountOrder.pl)
           Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
@@ -125,6 +129,7 @@ const actions = {
           Vue.set(account, 'last_scrape', '-')
           Vue.set(account, 'last_sync', '-')
         }
+        Vue.set(account, 'credits', wallet.balance)
       })
     } catch(err) {
       commit('SET_PROVIDER_ACCOUNTS', [])

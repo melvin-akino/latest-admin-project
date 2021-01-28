@@ -179,6 +179,27 @@ class WalletService
       $response = $this->http->request('GET', $this->url.'/wallet/balance', [
         'query' => [
           'uuid' => $data->uuid,
+          'currency' => $data->currency
+        ],
+        'headers' => [
+          'Authorization' => 'Bearer '.$data->wallet_token
+        ]
+      ]);
+    } catch(ClientException $e) {
+      $response = $e->getResponse();
+    }
+    return $response;
+  }
+
+  public function walletTransaction($data) 
+  {
+    try {
+      $response = $this->http->request('GET', $this->url.'/wallet/transaction', [
+        'query' => [
+          'uuid' => $data->uuid,
+          'currency' => $data->currency,
+          'start_date' => $data->start_date,
+          'end_date' => $data->end_date,
         ],
         'headers' => [
           'Authorization' => 'Bearer '.$data->wallet_token

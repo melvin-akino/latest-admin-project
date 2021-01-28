@@ -89,14 +89,26 @@
           <table-action-dialog icon="mdi-currency-gbp" width="600" tooltipText="Wallet Update" style="z-index:2;">
             <wallet-form :user-to-update="item"></wallet-form>
           </table-action-dialog>
-          <v-tooltip bottom style="z-index:3;">
-            <template v-slot:activator="{ on }">
-              <v-btn icon :to="`users/transactions/${item.id}`" target="_blank" v-on="on">
-                <v-icon small>mdi-format-list-bulleted</v-icon>
-              </v-btn>
+          <v-menu style="z-index:3;" offset-y>
+            <template v-slot:activator="{ on: menu, attrs }">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on: tooltip }">
+                  <v-btn icon v-bind="attrs" v-on="{ ...menu, ...tooltip }">
+                    <v-icon small>mdi-format-list-bulleted</v-icon>
+                  </v-btn>
+                </template>
+                <span class="caption">Transactions</span>
+              </v-tooltip>
             </template>
-            <span class="caption">User Transactions</span>
-          </v-tooltip>
+            <v-list>
+              <v-list-item :to="`users/transactions/${item.id}`" target="_blank">
+                <v-list-item-title class="caption">User Transactions</v-list-item-title>
+              </v-list-item>
+              <v-list-item :to="`wallet/transactions/user/${item.uuid}`" target="_blank">
+                <v-list-item-title class="caption">Wallet Transactions</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </template>
       </v-data-table>
     </v-container>

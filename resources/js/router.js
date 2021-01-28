@@ -50,11 +50,16 @@ const router = new Router({
               path: 'admin',
               component: () => import('./views/dashboard/pages/accounts/Admin'),
             },
-            // {
-            //   name: 'Admin Logs',
-            //   path: 'admin/logs/:id',
-            //   component: () => import('./views/dashboard/pages/accounts/AdminLogs')
-            // },
+            {
+              name: 'Admin Logs',
+              path: 'admin/logs/:id',
+              component: () => import('./views/dashboard/pages/accounts/AdminLogs')
+            },
+            {
+              name: 'Wallet Transactions',
+              path: 'wallet/transactions/:module/:uuid',
+              component: () => import('./views/dashboard/pages/accounts/WalletTransactions'),
+            },
             // {
             //   name: 'Admin Roles',
             //   path: 'roles',
