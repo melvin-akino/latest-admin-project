@@ -92,6 +92,9 @@ class User extends Model
 
     public static function getUserByUuid($uuid)
     {
-        return self::where('uuid', $uuid)->first();
+        return self::where('uuid', $uuid)
+          ->join('currency as c', 'c.id', 'users.currency_id')
+          ->select(['email', 'firstname', 'lastname', 'c.code as currency', 'uuid'])
+          ->first();
     }
 }
