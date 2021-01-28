@@ -32,6 +32,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
     Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
     Route::get('/provider-accounts/orders', 'ProviderTransactionsController@transactions')->name('provider-transactions.api');
+    Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
 
 

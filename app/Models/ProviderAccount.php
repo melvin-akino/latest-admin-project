@@ -98,6 +98,12 @@ class ProviderAccount extends Model
       return $data;
     }
 
+    public static function getProviderAccount($id)
+    {
+        return self::where('id', $id)
+          ->first();
+    }
+
     public static function getProviderAccountByUuid($uuid)
     {
         return self::where('uuid', $uuid)

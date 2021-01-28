@@ -60,6 +60,11 @@ const router = new Router({
               path: 'wallet/transactions/:module/:uuid',
               component: () => import('./views/dashboard/pages/accounts/WalletTransactions'),
             },
+            {
+              name: 'Provider Transactions',
+              path: 'providers/transactions/:id',
+              component: () => import('./views/dashboard/pages/accounts/ProviderTransactions'),
+            },
             // {
             //   name: 'Admin Roles',
             //   path: 'roles',
