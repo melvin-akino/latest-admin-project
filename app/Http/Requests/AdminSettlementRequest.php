@@ -27,7 +27,7 @@ class AdminSettlementRequest extends FormRequest
     {
         return [
             'bet_id'    => "required|unique:admin_settlements,bet_id",
-            'provider'  => "required|numeric",
+            'provider'  => "required",
             'sport'     => "required|numeric",
             'username'  => "required",
             'status'    => "required",
