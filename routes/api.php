@@ -70,4 +70,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
     Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-update.api');
     Route::get('/wallet/balance', 'WalletsController@walletBalance')->name('wallet-balance.api');
+
+    //Admin Settlement related routes
+    Route::post('/settlements/create', 'AdminSettlementsController@create')->name('settlement-create.api');
 });

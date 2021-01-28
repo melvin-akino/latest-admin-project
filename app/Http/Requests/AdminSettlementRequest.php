@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
-class ProviderTransactionRequest extends FormRequest
+class AdminSettlementRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,19 +25,18 @@ class ProviderTransactionRequest extends FormRequest
      */
     public function rules()
     {
-        $path = $this->path();        
-
-        if (!empty($this->input('created_from'))) {
-            $rules['created_from'] = 'required|date';
-            $rules['created_to'] = 'required|date|after_or_equal:created_from';
-        }
-
-        if (!empty($this->input('settled_from'))) {
-            $rules['settled_from'] = 'required|date';
-            $rules['settled_to'] = 'required|date|after_or_equal:settled_from';
-        }
-
-        return $rules;
+        return [
+            'bet_id'    => "required|unique:admin_settlements,bet_id",
+            'provider'  => "required|numeric",
+            'sport'     => "required|numeric",
+            'username'  => "required",
+            'status'    => "required",
+            'odds'      => "required|numeric",
+            'score'     => "required",
+            'stake'     => "required|numeric",
+            'pl'        => "required|numeric",
+            'reason'    => "required",
+        ];
     }
 
     protected function failedValidation(Validator $validator)

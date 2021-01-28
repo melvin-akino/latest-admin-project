@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Requests\ProviderTransactionRequest;
+use App\Http\Requests\ProviderTransactionRequest;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 

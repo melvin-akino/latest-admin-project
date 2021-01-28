@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Requests\ProviderTransactionRequest;
+use App\Http\Requests\ProviderTransactionRequest;
 use App\Facades\ProviderTransaction as ProviderTransactionFacade;
 
-class TransactionsController extends Controller
+class ProviderTransactionsController extends Controller
 {
     public function transactions(ProviderTransactionRequest $request)
     {
