@@ -31,7 +31,10 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Provider accounts routes
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
     Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
+    Route::get('/provider-accounts/orders', 'ProviderTransactionsController@transactions')->name('provider-transactions.api');
+    Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
+
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
@@ -72,5 +75,10 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/wallet/currencies/update', 'WalletsController@updateCurrency')->name('wallet-currencies-create.api');
     Route::post('/wallet/update', 'WalletsController@walletUpdate')->name('wallet-update.api');
     Route::get('/wallet/balance', 'WalletsController@walletBalance')->name('wallet-balance.api');
+
+    //Admin Settlement related routes
+    Route::post('/settlements/create', 'AdminSettlementsController@create')->name('settlement-create.api');
+
+    //Wallet related routes
     Route::get('/wallet/transaction', 'WalletsController@walletTransaction')->name('wallet-transaction.api');
 });

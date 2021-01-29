@@ -85,11 +85,6 @@ class User extends Model
         return !empty($users) ? $users : [];
     }
 
-    public static function getUser($userId)
-    {
-        return self::where('id', $userId)->first();
-    }
-
     public static function getUserByUuid($uuid)
     {
         return self::where('uuid', $uuid)

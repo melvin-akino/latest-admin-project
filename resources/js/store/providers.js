@@ -158,6 +158,18 @@ const actions = {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
+  },
+  createSettlement({dispatch}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('settlements/create', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data.message)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
   }
 }
 

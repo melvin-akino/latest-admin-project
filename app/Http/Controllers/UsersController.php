@@ -93,7 +93,7 @@ class UsersController extends Controller
 
     public function getUser($userId)
     {
-        $user = User::getUser($userId);
+        $user = User::find($userId);
 
         return response()->json($user);
     }
