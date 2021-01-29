@@ -18,14 +18,14 @@ class ProviderTransactionService
             $whereDate = [];
             if ($request->created_from)
             {
-                $where[] = ['o.created_at', '>=', $request->created_from . '00:00:00'];
-                $where[] = ['o.created_at', '<=', $request->created_to . '23:59:59'];
+                $where[] = ['o.created_at', '>=', $request->created_from . ' 00:00:00'];
+                $where[] = ['o.created_at', '<=', $request->created_to . ' 23:59:59'];
             }
 
             if ($request->settled_from)
             {
-                $where[] = ['o.settled_at', '>=', $request->settled_from . '00:00:00'];
-                $where[] = ['o.settled_at', '<=', $request->settled_to . '23:59:59'];
+                $where[] = ['o.settled_at', '>=', $request->settled_from . ' 00:00:00'];
+                $where[] = ['o.settled_at', '<=', $request->settled_to . ' 23:59:59'];
             }
 
             if ($request->status)
