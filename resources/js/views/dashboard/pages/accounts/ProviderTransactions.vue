@@ -91,9 +91,9 @@ export default {
         { text: 'POST DATE', value: 'created_at' },
         { text: 'BET SELECTION', value: 'bet_selection', width: "20%" },
         { text: 'PROVIDER', value: 'provider' },
-        { text: 'STAKE', value: 'user_stake' },
+        { text: 'STAKE', value: 'actual_stake' },
         { text: 'PRICE', value: 'odds' },
-        { text: 'TO WIN', value: 'user_towin' },
+        { text: 'TO WIN', value: 'actual_towin' },
         {
           text: "",
           value: "actions",
