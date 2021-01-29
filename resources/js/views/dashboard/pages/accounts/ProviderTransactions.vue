@@ -57,6 +57,11 @@
         <template v-slot:[`item.bet_selection`]="{ item }">
           <span class="betSelection">{{item.bet_selection}}</span>
         </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Generate Settlement">
+            <admin-settlement-form :order="item"></admin-settlement-form>
+          </table-action-dialog>
+        </template>
       </v-data-table>
     </v-container>
   </div>
@@ -75,6 +80,10 @@ function toDateValidation(value) {
 
 export default {
   name: 'ProviderTransactions',
+  components: {
+    TableActionDialog: () => import("../../component/TableActionDialog"),
+    AdminSettlementForm: () => import("../../components/forms/AdminSettlementForm"),
+  },
   data() {
     return {
       headers: [
