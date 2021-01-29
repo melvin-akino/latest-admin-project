@@ -26,7 +26,7 @@
                 outlined
                 dense
                 disabled
-                v-model="settlementForm.actual_stake"
+                v-model="settlementForm.stake"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4" class="formColumn">
@@ -46,7 +46,7 @@
                 outlined
                 dense
                 disabled
-                v-model="settlementForm.actual_to_win"
+                v-model="settlementForm.to_win"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -135,9 +135,9 @@ export default {
         sport: this.order.sport_id,
         username: this.order.username,
         bet_id: this.order.bet_id,
-        stake: this.order.user_stake,
+        stake: this.order.actual_stake,
         odds: this.order.odds,
-        to_win: this.order.user_towin,
+        to_win: this.order.actual_to_win,
         status: '',
         score: '',
         pl: '',
