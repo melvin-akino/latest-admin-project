@@ -87,7 +87,7 @@ export default {
   data() {
     return {
       headers: [
-        { text: 'BET ID', value: 'bet_identifier' },
+        { text: 'BET ID', value: 'bet_id' },
         { text: 'POST DATE', value: 'created_at' },
         { text: 'BET SELECTION', value: 'bet_selection', width: "20%" },
         { text: 'PROVIDER', value: 'provider' },
