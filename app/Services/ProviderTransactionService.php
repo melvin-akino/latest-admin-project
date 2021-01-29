@@ -15,17 +15,17 @@ class ProviderTransactionService
             $dups = [];
             //filter out failed orders by default
             $where[] = ['o.status', '<>', 'FAILED'];
-            $whereDate[] = [];
+            $whereDate = [];
             if ($request->created_from)
             {
-                $whereDate[] = ['o.created_at', '>=', $request->created_from];
-                $whereDate[] = ['o.created_at', '<=', $request->created_to];
+                $where[] = ['o.created_at', '>=', $request->created_from . '00:00:00'];
+                $where[] = ['o.created_at', '<=', $request->created_to . '23:59:59'];
             }
 
             if ($request->settled_from)
             {
-                $whereDate[] = ['o.settled_at', '>=', $request->settled_from];
-                $whereDate[] = ['o.settled_at', '<=', $request->settled_to];
+                $where[] = ['o.settled_at', '>=', $request->settled_from . '00:00:00'];
+                $where[] = ['o.settled_at', '<=', $request->settled_to . '23:59:59'];
             }
 
             if ($request->status)
@@ -57,7 +57,6 @@ class ProviderTransactionService
                 ->join('provider_account_orders AS pao', 'pao.order_log_id', '=', 'ol.id')
                 ->join('odd_types AS ot', 'ot.id', '=', 'o.odd_type_id')
                 ->where($where)
-                ->whereDate($whereDate)
                 ->orderBy('o.id', 'ASC')
                 ->orderBy('pao.order_log_id', 'DESC')
                 ->distinct()
