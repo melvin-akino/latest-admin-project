@@ -12,6 +12,7 @@
     <v-form @submit.prevent="generateSettlement">
       <v-card-text>
         <v-container>
+          <span class="body-1 font-weight-medium">{{order.bet_id}}</span>
           <v-row>
             <v-col cols="12" md="6" class="mb-2">
               <span class="betSelection">{{order.bet_selection}}</span>
