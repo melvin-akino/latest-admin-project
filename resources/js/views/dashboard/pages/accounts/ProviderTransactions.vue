@@ -93,7 +93,7 @@ export default {
         { text: 'PROVIDER', value: 'provider' },
         { text: 'STAKE', value: 'actual_stake' },
         { text: 'PRICE', value: 'odds' },
-        { text: 'TO WIN', value: 'actual_towin' },
+        { text: 'TO WIN', value: 'actual_to_win' },
         {
           text: "",
           value: "actions",
