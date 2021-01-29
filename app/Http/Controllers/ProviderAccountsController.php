@@ -123,6 +123,13 @@ class ProviderAccountsController extends Controller
         }
     }
 
+    public static function getProviderAccount($id)
+    {
+        $account = ProviderAccount::find($id);
+
+        return response()->json($account);
+    }
+
     public static function getProviderAccountByUuid($uuid)
     {
         $account = ProviderAccount::getProviderAccountByUuid($uuid);

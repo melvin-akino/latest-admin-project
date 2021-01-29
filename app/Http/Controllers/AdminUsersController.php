@@ -66,7 +66,8 @@ class AdminUsersController extends Controller
 
     public function getAdminUser($id)
     {
-        $adminUser = AdminUser::getAdminUser($id);
+        $adminUser = AdminUser::find($id);
+        
         return response()->json($adminUser);
     }
 }
