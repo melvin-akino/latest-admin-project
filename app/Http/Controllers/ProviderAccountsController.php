@@ -125,7 +125,7 @@ class ProviderAccountsController extends Controller
 
     public static function getProviderAccount($id)
     {
-        $account = ProviderAccount::getProviderAccount($id);
+        $account = ProviderAccount::find($id);
 
         return response()->json($account);
     }
