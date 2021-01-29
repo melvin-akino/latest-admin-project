@@ -26,7 +26,7 @@
                 outlined
                 dense
                 disabled
-                v-model="settlementForm.stake"
+                v-model="settlementForm.actual_stake"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4" class="formColumn">
@@ -46,7 +46,7 @@
                 outlined
                 dense
                 disabled
-                v-model="settlementForm.to_win"
+                v-model="settlementForm.actual_to_win"
               ></v-text-field>
             </v-col>
           </v-row>
