@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProviderAccountRequest;
-use App\Models\ProviderAccount;
+use App\Models\{ProviderAccount,Currency};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use App\Services\WalletService;
 class ProviderAccountsController extends Controller
 {
     public function index(Request $request)
@@ -30,7 +30,7 @@ class ProviderAccountsController extends Controller
         return response()->json($accounts);
     }
 
-    public function manage(ProviderAccountRequest $request) 
+    public function manage(ProviderAccountRequest $request, WalletService $wallet) 
     {
         DB::beginTransaction();
         try 
@@ -64,14 +64,23 @@ class ProviderAccountsController extends Controller
 
                 if (!empty($providerAccount)) {
                     $providerAccount->update($data);
-                    $provider = ProviderAccount::where('id', $providerAccount->id)->first();
                     $message  = 'success';   
                 }
                 else
                 {    
                     $data['uuid'] = uniqid();
-                    $provider = ProviderAccount::create($data);
-                    $provider = ProviderAccount::where('id', $provider->id)->first();
+                    $providerAccount = ProviderAccount::create($data);
+
+                    $walletData = [
+                      'uuid'          => $providerAccount->uuid,
+                      'currency'      => Currency::getCodeById($providerAccount->provider()->first()->currency_id),
+                      'amount'        => 0,
+                      'reason'        => 'Initial deposit',
+                      'wallet_token'  => $request->wallet_token
+                    ];
+  
+                    $wallet->walletCredit((object) $walletData);
+
                     $message = 'success';       
                 }
             
@@ -92,7 +101,7 @@ class ProviderAccountsController extends Controller
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => $message,
-                    'data'        => $provider
+                    'data'        => $providerAccount
                 ], 200);
             }
             
@@ -141,5 +150,19 @@ class ProviderAccountsController extends Controller
                 'message'     => trans('generic.internal-server-error')
             ], 500);
         }
+    }
+
+    public static function getProviderAccount($id)
+    {
+        $account = ProviderAccount::find($id);
+
+        return response()->json($account);
+    }
+
+    public static function getProviderAccountByUuid($uuid)
+    {
+        $account = ProviderAccount::getProviderAccountByUuid($uuid);
+
+        return response()->json($account);
     }
 }

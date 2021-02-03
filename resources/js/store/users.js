@@ -1,5 +1,6 @@
 import Vue from "vue"
-import { getToken } from '../helpers/token'
+import { getToken, getWalletToken } from '../helpers/token'
+import bus from '../eventBus'
 
 const state = {
   users: [],
@@ -49,6 +50,7 @@ const mutations = {
       credits: user.credits,
       currency: user.currency,
       status: user.status,
+      uuid: user.uuid,
       created_at: user.created_at,
       open_bets: '-',
       last_bet: '-'
@@ -69,26 +71,18 @@ const mutations = {
       }
     });
   },
-  // UPDATE_USER_WALLET: (state, payload) => {
-  //   state.users.map(user => {
-  //     if (user.id == payload.id) {
-  //       if (payload.wallet.transactionType == "Deposit") {
-  //         Vue.set(
-  //           user,
-  //           "credits",
-  //           Number(user.credits) + Number(payload.wallet.credits)
-  //         );
-  //       } else {
-  //         Vue.set(
-  //           user,
-  //           "credits",
-  //           Number(user.credits) - Number(payload.wallet.credits)
-  //         );
-  //       }
-  //       Vue.set(user, "currency", payload.wallet.currency);
-  //     }
-  //   });
-  // }
+  UPDATE_USER_WALLET: (state, payload) => {
+    state.users.map(user => {
+      if (user.uuid == payload.uuid) {
+        if (payload.transactionType == "Deposit") {
+          Vue.set(user, "credits", Number(user.credits) + Number(payload.amount));
+        } else {
+          Vue.set(user, "credits", Number(user.credits) - Number(payload.amount));
+        }
+        Vue.set(user, "currency", payload.currency);
+      }
+    });
+  }
 };
 
 const actions = {
@@ -116,18 +110,6 @@ const actions = {
       })
     })
   },
-  getUserWallet({dispatch}, user) {
-    return new Promise((resolve, reject) => {
-      axios.get('users/wallet', { params: user, headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        resolve(response.data)
-      })
-      .catch(err => {
-        reject(err)
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
-      })
-    })
-  },
   async getUsersList({state, commit, dispatch}) {
     try {
       commit('SET_IS_LOADING_USERS', true)
@@ -136,11 +118,11 @@ const actions = {
       commit('SET_IS_LOADING_USERS', false)
       state.users.map(async user => {
         let openOrders = await dispatch('getUserOpenOrders', user.id)
-        let wallet = await dispatch('getUserWallet', { user_id: user.id, currency_id: user.currency_id })
+        let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
         Vue.set(user, 'open_bets', openOrders.open_orders)
         Vue.set(user, 'last_bet', openOrders.last_bet)
-        Vue.set(user, 'credits', wallet[0].balance)
-        Vue.set(user, 'currency', wallet[0].code)
+        Vue.set(user, 'credits', wallet.balance)
+        Vue.set(user, 'currency', wallet.currency)
       })
     } catch(err) {
       commit('SET_USERS', [])
@@ -160,6 +142,19 @@ const actions = {
           commit('ADD_USER', response.data.data)
         }
         resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  updateWallet({commit, dispatch}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('wallet/update', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('UPDATE_USER_WALLET', payload)
+        resolve(response.data.message)
       })
       .catch(err => {
         reject(err)

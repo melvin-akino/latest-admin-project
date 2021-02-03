@@ -145,7 +145,19 @@ const actions = {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
-  }
+  },
+  getWalletBalance({dispatch}, user) {
+    return new Promise((resolve, reject) => {
+      axios.get('wallet/balance', { params: user, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        resolve(response.data.data)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
 }
 
 export default {
