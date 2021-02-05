@@ -76,16 +76,18 @@ class UsersController extends Controller
               "message" => [
                 'message'     => 'success',
                 'data'        => [
-                    'id'         => $user->id,
-                    'name'       => $user->name,
-                    'email'      => $user->email,
-                    'firstname'  => $user->firstname,
-                    'lastname'   => $user->lastname,
-                    'currency'   => empty($request->id) ? Currency::getCodeById($wallet->currency_id) : "",
-                    'credits'    => empty($request->id) ? $wallet->balance : "",
-                    'status'     => $user->status,
-                    'created_at' => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
-                    'updated_at' => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
+                    'id'          => $user->id,
+                    'name'        => $user->name,
+                    'email'       => $user->email,
+                    'firstname'   => $user->firstname,
+                    'lastname'    => $user->lastname,
+                    'currency_id' => $user->currency_id,
+                    'currency'    => empty($request->id) ? Currency::getCodeById($request->currency_id) : "",
+                    'credits'     => empty($request->id) ? $request->balance : "",
+                    'status'      => $user->status,
+                    'uuid'        => $user->uuid,
+                    'created_at'  => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
+                    'updated_at'  => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
                 ]
               ],
               "module"       => "API",
@@ -103,6 +105,7 @@ class UsersController extends Controller
                     'email'         => $user->email,
                     'firstname'     => $user->firstname,
                     'lastname'      => $user->lastname,
+                    'currency_id'   => $user->currency_id,
                     'currency'      => empty($request->id) ? Currency::getCodeById($request->currency_id) : "",
                     'credits'       => empty($request->id) ? $request->balance : "",
                     'status'        => $user->status,

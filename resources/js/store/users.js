@@ -48,6 +48,7 @@ const mutations = {
       firstname: user.firstname,
       lastname: user.lastname,
       credits: user.credits,
+      currency_id: user.currency_id,
       currency: user.currency,
       status: user.status,
       uuid: user.uuid,

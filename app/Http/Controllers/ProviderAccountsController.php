@@ -90,7 +90,7 @@ class ProviderAccountsController extends Controller
                   "class"       => "ProviderAccountsController",
                   "message"     => [
                     'message'     => $message,
-                    'data'        => $provider
+                    'data'        => $providerAccount
                   ],
                   "module"      => "API",
                   "status_code" => 200
