@@ -57,6 +57,12 @@
         <template v-slot:[`item.bet_selection`]="{ item }">
           <span class="betSelection">{{item.bet_selection}}</span>
         </template>
+        <template v-slot:[`item.actual_stake`]="{ item }">
+          <span>{{ item.actual_stake | moneyFormat }}</span>
+        </template>
+        <template v-slot:[`item.actual_to_win`]="{ item }">
+          <span>{{ item.actual_to_win | moneyFormat }}</span>
+        </template>
         <template v-slot:[`item.actions`]="{ item }">
           <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Generate Settlement">
             <admin-settlement-form :order="item"></admin-settlement-form>
@@ -72,6 +78,7 @@ import { mapActions } from 'vuex'
 import moment from 'moment'
 import { requiredIf } from 'vuelidate/lib/validators'
 import { getToken } from '../../../../helpers/token'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 import bus from '../../../../eventBus'
 
 function toDateValidation(value) {
@@ -176,6 +183,9 @@ export default {
         });
       })
     }
+  },
+  filters: {
+    moneyFormat
   }
 }
 </script>

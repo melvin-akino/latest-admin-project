@@ -54,6 +54,9 @@
             <p class="subtitle-1">Total Wallet Transactions: {{walletTransactions.length}}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.amount`]="{ item }">
+          <span>{{ item.amount | moneyFormat }}</span>
+        </template>
       </v-data-table>
     </v-container>
   </div>
@@ -64,6 +67,7 @@ import { mapActions } from 'vuex'
 import moment from 'moment'
 import { requiredIf } from 'vuelidate/lib/validators'
 import { getToken, getWalletToken } from '../../../../helpers/token'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 import { handleAPIErrors } from '../../../../helpers/errors'
 import bus from '../../../../eventBus'
 
@@ -159,6 +163,9 @@ export default {
       await this.getTransactionUser()
       await this.getWalletTransactions()
     }
+  },
+  filters: {
+    moneyFormat
   }
 }
 </script>
