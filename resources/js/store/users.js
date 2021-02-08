@@ -93,8 +93,10 @@ const actions = {
         resolve(response.data)
       })
       .catch(err => {
-        reject(err)
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        if(!axios.isCancel(err)) {
+          reject(err)
+          dispatch('auth/logoutOnError', err.response.status, { root: true })
+        }
       })
     })
   },
@@ -105,8 +107,10 @@ const actions = {
         resolve(response.data)
       })
       .catch(err => {
-        reject(err)
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        if(!axios.isCancel(err)) {
+          reject(err)
+          dispatch('auth/logoutOnError', err.response.status, { root: true })
+        }
       })
     })
   },

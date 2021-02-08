@@ -126,11 +126,13 @@ const actions = {
     })
     .catch(err => {
       commit('SET_ADMIN_USERS', [])
-      dispatch('auth/logoutOnError', err.response.status, { root: true })
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: err.response.data.message
-      });
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     })
   },
   manageAdminUser({commit, dispatch}, payload) {
