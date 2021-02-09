@@ -79,6 +79,7 @@ class Order extends Model
 
         $openOrders = self::where('user_id', $userId)
             ->whereNotNull('bet_id')
+            ->where('status', ['SUCCESS','PENDING'])
             ->select('stake', 'settled_date', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
@@ -91,10 +92,8 @@ class Order extends Model
                 if ($key == 0) {
                     $lastBetDate = $order['created_at'];
                 }
-                if (empty($order['settled_date']))
-                {
-                    $openOrdersSum += $order['stake'];
-                }
+
+                $openOrdersSum += $order['stake'];
             }
         }
 
