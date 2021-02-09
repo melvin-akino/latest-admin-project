@@ -79,6 +79,7 @@ class Order extends Model
 
         $openOrders = self::where('user_id', $userId)
             ->whereNotNull('bet_id')
+            ->where('status', 'PLACED')
             ->select('stake', 'settled_date', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
