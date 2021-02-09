@@ -25,7 +25,8 @@ class Order extends Model
                 'actual_profit_loss',
                 'orders.created_at',
                 'orders.settled_date',
-                'provider_accounts.updated_at'
+                'provider_accounts.updated_at',
+                'orders.status'
             )
             ->orderBy('created_at', 'desc')
             ->get()
@@ -44,7 +45,7 @@ class Order extends Model
                     $lastAction = 'Check Balance';
                 }
 
-                if ($order['settled_date'] != '') {
+                if (!empty($order['settled_date'])) {
                     $pl += $order['actual_profit_loss'];
 
                     if (Carbon::create($providerAccountLastUpdate)->lte(Carbon::create($order['settled_date']))) {
@@ -52,9 +53,8 @@ class Order extends Model
                         $lastAction = 'Settlement';
                     }
                 }
-                else {
-                    $openOrders += $order['actual_stake'];
-                    
+                if (in_array($order['status'], ['SUCCESS', 'PENDING'])) {
+                    $openOrders += $order['actual_stake'];                    
                 }
                 
             }
@@ -79,6 +79,7 @@ class Order extends Model
 
         $openOrders = self::where('user_id', $userId)
             ->whereNotNull('bet_id')
+            ->where('status', ['SUCCESS','PENDING'])
             ->select('stake', 'settled_date', 'created_at')
             ->orderBy('created_at', 'desc')
             ->get()
@@ -91,10 +92,8 @@ class Order extends Model
                 if ($key == 0) {
                     $lastBetDate = $order['created_at'];
                 }
-                if (empty($order['settled_date']))
-                {
-                    $openOrdersSum += $order['stake'];
-                }
+
+                $openOrdersSum += $order['stake'];
             }
         }
 
