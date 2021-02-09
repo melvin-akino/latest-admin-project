@@ -44,7 +44,7 @@ class Order extends Model
                     $lastAction = 'Check Balance';
                 }
 
-                if ($order['settled_date'] != '') {
+                if (!empty($order['settled_date'])) {
                     $pl += $order['actual_profit_loss'];
 
                     if (Carbon::create($providerAccountLastUpdate)->lte(Carbon::create($order['settled_date']))) {
