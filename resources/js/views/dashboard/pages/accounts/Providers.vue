@@ -61,7 +61,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.credits}}</span>    
+          <span v-else>{{ item.credits | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.pl`]="{ item }">
           <span v-if="!item.hasOwnProperty('pl')">
@@ -72,7 +72,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.pl}}</span>    
+          <span v-else>{{ item.pl | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.open_orders`]="{ item }">
           <span v-if="!item.hasOwnProperty('open_orders')">
@@ -83,7 +83,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.open_orders}}</span>    
+          <span v-else>{{ item.open_orders | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
@@ -154,6 +154,7 @@
 <script>
 import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
 import bus from '../../../../eventBus'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 
 export default {
   name: "Providers",
@@ -261,6 +262,9 @@ export default {
     getPage(pagination) {
       this.page = pagination.page
     },
+  },
+  filters: {
+    moneyFormat
   },
   beforeRouteLeave(to, from, next) {
     this.setProviderAccounts([])

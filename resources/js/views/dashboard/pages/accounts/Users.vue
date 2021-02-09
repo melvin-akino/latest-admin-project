@@ -40,7 +40,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{Number(item.credits).toFixed(2)}}</span>    
+          <span v-else>{{ item.credits | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.currency`]="{ item }">
           <span v-if="!item.hasOwnProperty('currency')">
@@ -62,7 +62,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.open_bets}}</span>    
+          <span v-else>{{item.open_bets | moneyFormat}}</span>    
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
           <span v-if="!item.hasOwnProperty('last_bet')">
@@ -118,6 +118,7 @@
 <script>
 import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
 import bus from '../../../../eventBus'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 
 export default {
   name: "Users",
@@ -187,6 +188,9 @@ export default {
     getPage(pagination) {
       this.page = pagination.page
     }
+  },
+  filters: {
+    moneyFormat
   },
   beforeRouteLeave(to, from, next) {
     this.setUsers([])

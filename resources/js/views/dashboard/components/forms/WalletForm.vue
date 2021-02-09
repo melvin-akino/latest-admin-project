@@ -28,7 +28,7 @@
                 </v-col>
                 <v-col cols="12" md="6" class="formColumn d-flex flex-column align-end text-uppercase">
                   <span class="subtitle-1">Remaining Credits</span>
-                  <p class="headline">{{ userToUpdate.currency }} {{ userToUpdate.credits }}</p>
+                  <p class="headline">{{ userToUpdate.currency }} {{ userToUpdate.credits | moneyFormat }}</p>
                 </v-col>
               </v-row>
               <v-row>
@@ -90,6 +90,7 @@ import bus from "../../../../eventBus";
 import { required, decimal, minValue } from "vuelidate/lib/validators"
 import { getWalletToken } from '../../../../helpers/token'
 import { handleAPIErrors } from '../../../../helpers/errors'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 
 function creditsWithdraw(value) {
   if(this.wallet.transactionType == 'Deposit') return true
@@ -183,6 +184,9 @@ export default {
         this.$v.wallet.$touch()
       }
     }
+  },
+  filters: {
+    moneyFormat
   }
 };
 </script>
