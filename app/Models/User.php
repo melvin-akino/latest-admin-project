@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\{UserWallet, Currency, OAuthToken};
 use Illuminate\Support\Arr;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Contracts\Activity;
 
 class User extends Model
 {
+    use LogsActivity;
     /**
      * The attributes that are mass assignable.
      *
@@ -20,7 +23,8 @@ class User extends Model
         'firstname',
         'lastname',
         'currency_id',
-        'status'
+        'status',
+        'uuid'
     ];
 
     /**
@@ -33,19 +37,39 @@ class User extends Model
         'remember_token',
     ];
 
+    protected static $logAttributes = ['name', 'email', 'firstname', 'lastname', 'currency_id', 'status'];
+
+    protected static $logOnlyDirty = true;
+
+    protected static $logName = 'Accounts';
+
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+      $activity->properties = $activity->properties->put('action', ucfirst($eventName));
+      $activity->properties = $activity->properties->put('ip_address', request()->ip());
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return ucfirst($eventName)." user: ".request()->email;
+    }
+
     public static function getAll()
     {
-      $users = self::select([
-            'id',
+      $users = self::join('currency as c', 'c.id', 'users.currency_id')
+          ->select([
+            'users.id',
             'email',
             'firstname',
             'lastname',
             'status',
             'currency_id',
-            'created_at',
-            'updated_at'
+            'users.created_at',
+            'users.updated_at',
+            'uuid',
+            'c.code as currency_code'
         ])
-        ->orderBy('created_at', 'DESC')
+        ->orderBy('users.created_at', 'DESC')
         ->get()
         ->toArray();
 
@@ -61,8 +85,11 @@ class User extends Model
         return !empty($users) ? $users : [];
     }
 
-    public static function getUser($userId)
+    public static function getUserByUuid($uuid)
     {
-        return self::where('id', $userId)->first();
+        return self::where('uuid', $uuid)
+          ->join('currency as c', 'c.id', 'users.currency_id')
+          ->select(['email', 'firstname', 'lastname', 'c.code as currency', 'uuid'])
+          ->first();
     }
 }

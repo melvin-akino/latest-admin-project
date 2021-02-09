@@ -4,6 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 import { getToken } from './helpers/token'
+import store from './store'
 
 const router = new Router({
   mode: 'hash',
@@ -50,11 +51,21 @@ const router = new Router({
               path: 'admin',
               component: () => import('./views/dashboard/pages/accounts/Admin'),
             },
-            // {
-            //   name: 'Admin Logs',
-            //   path: 'admin/logs/:id',
-            //   component: () => import('./views/dashboard/pages/accounts/AdminLogs')
-            // },
+            {
+              name: 'Admin Logs',
+              path: 'admin/logs/:id',
+              component: () => import('./views/dashboard/pages/accounts/AdminLogs')
+            },
+            {
+              name: 'Wallet Transactions',
+              path: 'wallet/transactions/:module/:uuid',
+              component: () => import('./views/dashboard/pages/accounts/WalletTransactions'),
+            },
+            {
+              name: 'Provider Transactions',
+              path: 'providers/transactions/:id',
+              component: () => import('./views/dashboard/pages/accounts/ProviderTransactions'),
+            },
             // {
             //   name: 'Admin Roles',
             //   path: 'roles',
@@ -83,6 +94,16 @@ const router = new Router({
               component: () => import('./views/dashboard/pages/errors/ProviderErrors')
             }
           ]
+        },
+        {
+          name: 'Wallet Clients',
+          path: 'wallet_clients',
+          component: () => import('./views/dashboard/pages/WalletClients')
+        },
+        {
+          name: 'Currencies',
+          path: 'currencies',
+          component: () => import('./views/dashboard/pages/Currencies')
         },
         {
           name: 'User Profile',
@@ -142,6 +163,8 @@ router.beforeEach((to, from, next) => {
         next('/login')
     }
   }
+  store.dispatch('cancelPendingRequests')
+
 })
 
 export default router

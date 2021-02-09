@@ -7,7 +7,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.post("login", loginForm)
       .then(response => {
-        resolve(response.data.token)
+        resolve(response.data)
       })
       .catch(err => {
         reject(err)

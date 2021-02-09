@@ -103,7 +103,7 @@
                 dense
                 :disabled="update"
                 v-model="$v.user.balance.$model"
-                :error-messages="balanceErrors"
+                :error-messages="creditsErrors"
                 @input="$v.user.balance.$touch()"
                 @blur="$v.user.balance.$touch()"
               ></v-text-field>
@@ -150,6 +150,7 @@ import { mapState, mapActions } from "vuex";
 import bus from "../../../../eventBus";
 import { required, requiredIf, email, minLength, decimal } from 'vuelidate/lib/validators'
 import randomstring from 'randomstring'
+import { getWalletToken } from '../../../../helpers/token'
 
 function creditsValue(value) {
   if(this.update) return true
@@ -231,7 +232,7 @@ export default {
       !this.$v.user.status.required && errors.push('Status is required.')
       return errors
     },
-    balanceErrors() {
+    creditsErrors() {
       let errors = []
       if (!this.$v.user.balance.$dirty) return errors
       !this.$v.user.balance.required && errors.push('Credits is required.')
@@ -269,6 +270,7 @@ export default {
             color: "success",
             text: "Creating a new account..."
           });
+          this.$set(this.user, 'wallet_token', getWalletToken())
           await this.manageUser(this.user)
           this.closeDialog();
           bus.$emit("SHOW_SNACKBAR", {

@@ -130,6 +130,7 @@
 import { mapState, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
 import { required, requiredIf, alphaNum, integer, minLength } from 'vuelidate/lib/validators'
+import { getWalletToken } from '../../../../helpers/token'
 
 export default {
   props: ["update", "providerAccountToUpdate"],
@@ -233,6 +234,7 @@ export default {
             color: "success",
             text: "Adding provider account..."
           });
+          this.$set(this.providerAccount, 'wallet_token', getWalletToken())
           await this.manageProviderAccount(this.providerAccount)
           this.closeDialog()
           bus.$emit("SHOW_SNACKBAR", {

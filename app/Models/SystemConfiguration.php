@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Contracts\Activity;
 
 class SystemConfiguration extends Model
 {
+    use LogsActivity;
+
     protected $table = 'system_configurations';
 
     protected $fillable = [
@@ -18,6 +22,23 @@ class SystemConfiguration extends Model
         'created_at',
         'updated_at',
     ];
+
+    protected static $logAttributes = ['type', 'value', 'module'];
+
+    protected static $logOnlyDirty = true;
+
+    protected static $logName = 'System Configurations';
+
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+      $activity->properties = $activity->properties->put('action', ucfirst($eventName));
+      $activity->properties = $activity->properties->put('ip_address', request()->ip());
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return ucfirst($eventName)." system configuration: ".request()->type;
+    }
 
     public static function getAll() 
     {

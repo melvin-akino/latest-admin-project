@@ -93,6 +93,16 @@ export default {
         title: "Provider Errors",
         to: "/errors/provider"
       },
+      {
+        icon: "mdi-wallet",
+        title: "Wallet Clients",
+        to: "/wallet_clients"
+      },
+      {
+        icon: "mdi-cash-usd",
+        title: "Currencies",
+        to: "/currencies"
+      }
       // {
       //   title: "icons",
       //   icon: "mdi-chart-bubble",

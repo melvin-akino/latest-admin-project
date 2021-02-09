@@ -104,8 +104,17 @@
         <template v-slot:[`item.bet_selection`]="{ item }">
           <span class="betSelection">{{item.bet_selection}}</span>
         </template>
+        <template v-slot:[`item.stake`]="{ item }">
+          <span>{{ item.stake | moneyFormat}}</span>
+        </template>
+        <template v-slot:[`item.to_win`]="{ item }">
+          <span>{{ item.to_win | moneyFormat}}</span>
+        </template>
         <template v-slot:[`item.valid_stake`]="{ item }">
-          <span>{{Math.abs(Number(item.profit_loss))}}</span>
+          <span>{{ Math.abs(item.profit_loss).toFixed(2) | moneyFormat }}</span>
+        </template>
+        <template v-slot:[`item.profit_loss`]="{ item }">
+          <span>{{ item.profit_loss | moneyFormat}}</span>
         </template>
       </v-data-table>
     </v-container>
@@ -115,8 +124,9 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import moment from 'moment'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { requiredIf } from 'vuelidate/lib/validators'
 import { getToken } from '../../../../helpers/token'
+import { moneyFormat } from '../../../../helpers/numberFormat'
 import bus from '../../../../eventBus'
 
 function toDateValidation(value) {
@@ -270,6 +280,9 @@ export default {
     resetPeriod() {
       this.search.period = null
     }
+  },
+  filters: {
+    moneyFormat
   }
 }
 </script>

@@ -42,11 +42,13 @@ const actions = {
     })
     .catch(err => {
       commit('SET_GENERAL_ERRORS', [])
-      dispatch('auth/logoutOnError', err.response.status, { root: true })
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: err.response.data.message
-      });
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     })
   },
   manageGeneralErrors({commit, dispatch}, payload) {
