@@ -4,6 +4,7 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 import { getToken } from './helpers/token'
+import store from './store'
 
 const router = new Router({
   mode: 'hash',
@@ -162,6 +163,8 @@ router.beforeEach((to, from, next) => {
         next('/login')
     }
   }
+  store.dispatch('cancelPendingRequests')
+
 })
 
 export default router

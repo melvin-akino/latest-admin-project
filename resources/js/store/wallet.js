@@ -71,11 +71,13 @@ const actions = {
     })
     .catch(err => {
       commit('SET_CLIENTS', [])
-      dispatch('auth/logoutOnError', err.response.status, { root: true })
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: handleAPIErrors(err)
-      });
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: handleAPIErrors(err)
+        });
+      }
     })
   },
   createClient({commit, dispatch}, data) {
@@ -113,11 +115,13 @@ const actions = {
     })
     .catch(err => {
       commit('SET_CURRENCIES', [])
-      dispatch('auth/logoutOnError', err.response.status, { root: true })
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: handleAPIErrors(err)
-      });
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: handleAPIErrors(err)
+        });
+      }
     })
   },
   createCurrency({commit, dispatch}, data) {
@@ -153,8 +157,10 @@ const actions = {
         resolve(response.data.data)
       })
       .catch(err => {
-        reject(err)
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        if(!axios.isCancel(err)) {
+          reject(err)
+          dispatch('auth/logoutOnError', err.response.status, { root: true })
+        }
       })
     })
   },
