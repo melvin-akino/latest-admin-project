@@ -25,7 +25,8 @@ class Order extends Model
                 'actual_profit_loss',
                 'orders.created_at',
                 'orders.settled_date',
-                'provider_accounts.updated_at'
+                'provider_accounts.updated_at',
+                'orders.status'
             )
             ->orderBy('created_at', 'desc')
             ->get()
@@ -52,9 +53,8 @@ class Order extends Model
                         $lastAction = 'Settlement';
                     }
                 }
-                else {
-                    $openOrders += $order['actual_stake'];
-                    
+                if (in_array($order['status'], ['SUCCESS', 'PENDING'])) {
+                    $openOrders += $order['actual_stake'];                    
                 }
                 
             }
