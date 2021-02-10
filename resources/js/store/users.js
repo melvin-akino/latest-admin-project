@@ -121,12 +121,22 @@ const actions = {
       commit('SET_USERS', users)
       commit('SET_IS_LOADING_USERS', false)
       state.users.map(async user => {
-        let openOrders = await dispatch('getUserOpenOrders', user.id)
-        let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
-        Vue.set(user, 'open_bets', openOrders.open_orders)
-        Vue.set(user, 'last_bet', openOrders.last_bet)
-        Vue.set(user, 'credits', wallet.balance)
-        Vue.set(user, 'currency', wallet.currency)
+        try {
+          let openOrders = await dispatch('getUserOpenOrders', user.id)
+          let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
+          Vue.set(user, 'open_bets', openOrders.open_orders)
+          Vue.set(user, 'last_bet', openOrders.last_bet)
+          Vue.set(user, 'credits', wallet.balance)
+          Vue.set(user, 'currency', wallet.currency)
+        } catch(err) {
+          if(err.response.status == 400) {
+            console.clear()
+            Vue.set(user, 'open_bets', '-')
+            Vue.set(user, 'last_bet', '-')
+            Vue.set(user, 'credits', '-')
+            Vue.set(user, 'currency', '-')
+          }
+        }
       })
     } catch(err) {
       commit('SET_USERS', [])
