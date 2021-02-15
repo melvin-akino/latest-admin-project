@@ -119,27 +119,21 @@ const actions = {
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
       let providerAccountOtherData = ['pl', 'open_orders', 'last_bet', 'last_scrape', 'last_sync']
       state.providerAccounts.map(async account => {
-        try {
-          let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
-          let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
-          if(providerAccountOrder.length != 0) {
-            providerAccountOtherData.map(key => {
-              Vue.set(account, key, providerAccountOrder[key])
-            })
-          } else {
-            providerAccountOtherData.map(key => {
-              Vue.set(account, key, '-')
-            })
-          }
+        let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+        let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
+        if(providerAccountOrder.length != 0) {
+          providerAccountOtherData.map(key => {
+            Vue.set(account, key, providerAccountOrder[key])
+          })
+        } else {
+          providerAccountOtherData.map(key => {
+            Vue.set(account, key, '-')
+          })
+        }
+        if(wallet) {
           Vue.set(account, 'credits', wallet.balance)
-        } catch(err) {
-          if(err.response.status == 400) {
-            console.clear()
-            providerAccountOtherData.map(key => {
-              Vue.set(account, key, '-')
-            })
-            Vue.set(account, 'credits', '-')
-          }
+        } else {
+          Vue.set(account, 'credits', '-')
         }
       })
     } catch(err) {

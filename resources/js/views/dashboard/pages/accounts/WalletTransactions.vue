@@ -158,16 +158,11 @@ export default {
         this.isLoadingWalletTransactions = false
       })
       .catch(err => {
-        if(err.response.status != 400) {
-          this.logoutOnError(err.response.status)
-          bus.$emit("SHOW_SNACKBAR", {
-            color: "error",
-            text: handleAPIErrors(err)
-          });
-        } else {
-          console.clear()
-          this.isLoadingWalletTransactions = false
-        }
+        this.logoutOnError(err.response.status)
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: handleAPIErrors(err)
+        });
       })
     },
     async loadWalletTransactions() {
