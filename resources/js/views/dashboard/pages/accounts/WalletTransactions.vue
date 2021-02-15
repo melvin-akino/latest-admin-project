@@ -57,6 +57,12 @@
         <template v-slot:[`item.amount`]="{ item }">
           <span>{{ item.amount | moneyFormat }}</span>
         </template>
+        <template v-slot:[`item.type`]="{ item }">
+          <span class="text-capitalize">{{ item.type }}</span>
+        </template>
+        <template v-slot:[`item.timestamp`]="{ item }">
+          <span>{{ item.timestamp | dateTimeFormat }}</span>
+        </template>
       </v-data-table>
     </v-container>
   </div>
@@ -152,11 +158,16 @@ export default {
         this.isLoadingWalletTransactions = false
       })
       .catch(err => {
-        this.logoutOnError(err.response.status)
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "error",
-          text: handleAPIErrors(err)
-        });
+        if(err.response.status != 400) {
+          this.logoutOnError(err.response.status)
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: handleAPIErrors(err)
+          });
+        } else {
+          console.clear()
+          this.isLoadingWalletTransactions = false
+        }
       })
     },
     async loadWalletTransactions() {
@@ -165,7 +176,10 @@ export default {
     }
   },
   filters: {
-    moneyFormat
+    moneyFormat,
+    dateTimeFormat(value) {
+      return moment.utc(value).format('YYYY-MM-DD HH:mm:ss')
+    }
   }
 }
 </script>

@@ -117,23 +117,30 @@ const actions = {
       commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
       commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
+      let providerAccountOtherData = ['pl', 'open_orders', 'last_bet', 'last_scrape', 'last_sync']
       state.providerAccounts.map(async account => {
-        let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
-        let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
-        if(providerAccountOrder.length != 0) {
-          Vue.set(account, 'pl', providerAccountOrder.pl)
-          Vue.set(account, 'open_orders', providerAccountOrder.open_orders)
-          Vue.set(account, 'last_bet', providerAccountOrder.last_bet)
-          Vue.set(account, 'last_scrape', providerAccountOrder.last_scrape)
-          Vue.set(account, 'last_sync', providerAccountOrder.last_sync)
-        } else {
-          Vue.set(account, 'pl', '-')
-          Vue.set(account, 'open_orders', '-')
-          Vue.set(account, 'last_bet', '-')
-          Vue.set(account, 'last_scrape', '-')
-          Vue.set(account, 'last_sync', '-')
+        try {
+          let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
+          let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
+          if(providerAccountOrder.length != 0) {
+            providerAccountOtherData.map(key => {
+              Vue.set(account, key, providerAccountOrder[key])
+            })
+          } else {
+            providerAccountOtherData.map(key => {
+              Vue.set(account, key, '-')
+            })
+          }
+          Vue.set(account, 'credits', wallet.balance)
+        } catch(err) {
+          if(err.response.status == 400) {
+            console.clear()
+            providerAccountOtherData.map(key => {
+              Vue.set(account, key, '-')
+            })
+            Vue.set(account, 'credits', '-')
+          }
         }
-        Vue.set(account, 'credits', wallet.balance)
       })
     } catch(err) {
       commit('SET_PROVIDER_ACCOUNTS', [])
