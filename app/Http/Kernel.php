@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\ForceJsonResponse::class,
         \App\Http\Middleware\Cors::class,
+        \Spatie\Csp\AddCspHeaders::class,
     ];
 
     /**
