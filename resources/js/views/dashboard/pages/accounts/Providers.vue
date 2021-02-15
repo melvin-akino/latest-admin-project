@@ -186,7 +186,6 @@ export default {
       provider: 'all',
       currency: 'all'
     },
-    providerAccountsTable: [],
     page: null
   }),
   computed: {
