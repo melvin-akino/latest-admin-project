@@ -125,8 +125,13 @@ const actions = {
         let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
         Vue.set(user, 'open_bets', openOrders.open_orders)
         Vue.set(user, 'last_bet', openOrders.last_bet)
-        Vue.set(user, 'credits', wallet.balance)
-        Vue.set(user, 'currency', wallet.currency)
+        if(wallet) {
+          Vue.set(user, 'credits', wallet.balance)
+          Vue.set(user, 'currency', wallet.currency)
+        } else {
+          Vue.set(user, 'credits', '-')
+          Vue.set(user, 'currency', '-')
+        }
       })
     } catch(err) {
       commit('SET_USERS', [])
