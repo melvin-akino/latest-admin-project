@@ -4,6 +4,7 @@ import bus from '../eventBus'
 
 const state = {
   users: [],
+  totalUsers: 0,
   isLoadingUsers: false,
   userStatus: [
     {
@@ -21,22 +22,12 @@ const state = {
   ]
 };
 
-const getters = {
-  usersTable(state) {
-    let usersTable = []
-    state.users.map(user => {
-      let full_name = `${user.firstname} ${user.lastname}`
-      let userObject = { ...user }
-      Vue.set(userObject, 'full_name', full_name)
-      usersTable.push(userObject)
-    })
-    return usersTable
-  }
-}
-
 const mutations = {
   SET_USERS: (state, users) => {
     state.users = users
+  },
+  SET_TOTAL_USERS: (state, totalUsers) => {
+    state.totalUsers = totalUsers
   },
   SET_IS_LOADING_USERS: (state, loadingState) => {
     state.isLoadingUsers = loadingState
@@ -86,60 +77,24 @@ const mutations = {
 };
 
 const actions = {
-  getUsers({dispatch}) {
-    return new Promise((resolve, reject) => {
-      axios.get('users', { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        resolve(response.data)
-      })
-      .catch(err => {
-        if(!axios.isCancel(err)) {
-          reject(err)
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-        }
-      })
-    })
-  },
-  getUserOpenOrders({dispatch}, user_id) {
-    return new Promise((resolve, reject) => {
-      axios.get('orders/open', { params: { user_id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        resolve(response.data)
-      })
-      .catch(err => {
-        if(!axios.isCancel(err)) {
-          reject(err)
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-        }
-      })
-    })
-  },
-  async getUsersList({state, commit, dispatch}) {
-    try {
-      commit('SET_IS_LOADING_USERS', true)
-      let users = await dispatch('getUsers')
-      commit('SET_USERS', users)
+  getUsers({commit, dispatch}, { options, search }) {
+    commit('SET_IS_LOADING_USERS', true)
+    axios.get('users', { params: { page: options.page, limit: options.itemsPerPage, sortBy: options.sortBy[0], sort: options.sortDesc[0] ? 'DESC' : 'ASC', search: search, wallet_token: getWalletToken() }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
       commit('SET_IS_LOADING_USERS', false)
-      state.users.map(async user => {
-        let openOrders = await dispatch('getUserOpenOrders', user.id)
-        let wallet = await dispatch('wallet/getWalletBalance', { uuid: user.uuid, currency: user.currency_code, wallet_token: getWalletToken() }, { root: true })
-        Vue.set(user, 'open_bets', openOrders.open_orders)
-        Vue.set(user, 'last_bet', openOrders.last_bet)
-        if(wallet) {
-          Vue.set(user, 'credits', wallet.balance)
-          Vue.set(user, 'currency', wallet.currency)
-        } else {
-          Vue.set(user, 'credits', '-')
-          Vue.set(user, 'currency', '-')
-        }
-      })
-    } catch(err) {
+      commit('SET_USERS', response.data.data)
+      commit('SET_TOTAL_USERS', response.data.total)
+    })
+    .catch(err => {
       commit('SET_USERS', [])
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: err.response.data.message
-      });
-    }
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
+    })
   },
   manageUser({commit, dispatch}, payload) {
     return new Promise((resolve, reject) => {
@@ -175,7 +130,6 @@ const actions = {
 
 export default {
   state,
-  getters,
   mutations,
   actions,
   namespaced: true

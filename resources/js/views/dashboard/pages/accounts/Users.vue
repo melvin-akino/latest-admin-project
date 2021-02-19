@@ -18,9 +18,9 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="usersTable"
-        :search="search"
-        :items-per-page="10"
+        :items="users"
+        :options.sync="options"
+        :server-items-length="totalUsers"
         :loading="isLoadingUsers"
         loading-text="Loading Users"
         :page="page"
@@ -28,52 +28,22 @@
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
+            <p class="subtitle-1">Total Accounts: {{ totalUsers }}</p>
           </v-toolbar>
         </template>
+        <template v-slot:[`item.firstname`]="{ item }">
+          <span>{{item.firstname}} {{item.lastname}}</span>   
+        </template>
         <template v-slot:[`item.credits`]="{ item }">
-          <span v-if="!item.hasOwnProperty('credits')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
-          <span v-else>{{ item.credits | moneyFormat }}</span>    
+          <span v-if="!item.credits">-</span>
+          <span v-else>{{item.credits | moneyFormat}}</span>    
         </template>
         <template v-slot:[`item.currency`]="{ item }">
-          <span v-if="!item.hasOwnProperty('currency')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
+          <span v-if="!item.currency">-</span>
           <span v-else>{{item.currency}}</span>    
         </template>
         <template v-slot:[`item.open_bets`]="{ item }">
-          <span v-if="!item.hasOwnProperty('open_bets')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
-          <span v-else>{{item.open_bets | moneyFormat}}</span>    
-        </template>
-        <template v-slot:[`item.last_bet`]="{ item }">
-          <span v-if="!item.hasOwnProperty('last_bet')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
-          <span v-else>{{item.last_bet}}</span>    
+          <span>{{item.open_bets | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.last_login`]="{ item }">
           <span v-if="!item.last_login">-</span>
@@ -116,7 +86,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
 import bus from '../../../../eventBus'
 import { moneyFormat } from '../../../../helpers/numberFormat'
 
@@ -131,12 +101,12 @@ export default {
   data: () => ({
     headers: [
       { text: "USERNAME", value: "email" },
-      { text: "FULL NAME", value: "full_name" },
-      { text: "CREDITS", value: "credits" },
-      { text: "CURRENCY", value: "currency" },
-      { text: "OPEN BETS", value: "open_bets" },
-      { text: "LAST BET", value: "last_bet" },
-      { text: "LAST LOGIN", value: "last_login" },
+      { text: "FULL NAME", value: "firstname" },
+      { text: "CREDITS", value: "credits", sortable: false },
+      { text: "CURRENCY", value: "currency", sortable: false },
+      { text: "OPEN BETS", value: "open_bets", sortable: false },
+      { text: "LAST BET", value: "last_bet", sortable: false },
+      { text: "LAST LOGIN", value: "last_login", sortable: false },
       { text: "STATUS", value: "status" },
       { text: "CREATED DATE", value: "created_at" },
       {
@@ -147,21 +117,28 @@ export default {
         sortable: false
       }
     ],
-    search: '',
-    page: null
+    options: {},
+    search: null,
+    page: 1
   }),
   computed: {
-    ...mapState('users', ['userStatus', 'isLoadingUsers']),
+    ...mapState('users', ['users', 'totalUsers', 'userStatus', 'isLoadingUsers']),
     ...mapState('resources', ['currencies']),
-    ...mapGetters('users', ['usersTable']),
+  },
+  watch: {
+    options: {
+      handler(value) {
+        this.getUsers({ options: value, search: this.search })
+      },
+      deep: true
+    }
   },
   mounted() {
-    this.getUsersList()
     this.getCurrencies()
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsersList', 'manageUser']),
+    ...mapActions('users', ['getUsers', 'manageUser']),
     ...mapActions('resources', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
@@ -181,6 +158,9 @@ export default {
         });
       }
     },
+    // searchUsers() {
+    //   this.getUsers({ options: this.options, search: this.search })
+    // },
     clearFilters() {
       this.search = ''
       this.page = 1
@@ -206,5 +186,9 @@ export default {
 
 .users .v-toolbar__content {
   padding: 16px;
+}
+
+.search {
+  display:flex;
 }
 </style>
