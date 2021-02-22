@@ -21,4 +21,8 @@ class ProvidersController extends Controller
     {
         return ProviderFacade::update($request);
     }
+    public function getIdFromAlias($alias)
+    {
+        return ProviderFacade::getIdFromAlias($alias);
+    }
 }

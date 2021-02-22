@@ -34,9 +34,9 @@ class ProviderService
         }
     }
 
-    public static function getIdFromAlias(ProviderRequest $request)
+    public static function getIdFromAlias($alias)
     {
-        $query = Provider::where('alias', strtoupper($request->alias));
+        $query = Provider::where('alias', strtoupper($alias));
 
         if ($query->exists()) {
             return $query->first()->id;
