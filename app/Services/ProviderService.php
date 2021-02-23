@@ -6,13 +6,13 @@ use App\Http\Requests\ProviderRequest;
 use App\Models\Provider;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
-
+use Carbon\Carbon;
 class ProviderService
 {
     public static function getAllProviders()
     {
         try {
-        $providers = Provider::select(['name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id'])
+        $providers = Provider::select(['id', 'name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id', 'created_at', 'updated_at'])
             ->orderBy('name', 'asc')
             ->get();
 
@@ -70,7 +70,8 @@ class ProviderService
                         'punter_percentage' => $provider->punter_percentage,
                         'is_enabled'        => $provider->is_enabled,
                         'currency_id'       => $provider->currency_id,
-                        'created_at'        => $provider->created_at
+                        'created_at'        => Carbon::parse($provider->created_at)->format('Y-m-d H:i:s'),
+                        'updated_at'        => null
                     ]
                 ], 200);
             }
@@ -110,7 +111,8 @@ class ProviderService
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'message'     => 'Provider successfully updated.'
+                    'message'     => 'Provider successfully updated.',
+                    'data'        => $provider
                 ], 200);
             }
         }

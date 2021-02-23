@@ -19,11 +19,6 @@ class Provider extends Model
         'currency_id'
     ];
 
-    protected $hidden = [
-        'created_at',
-        'updated_at',
-    ];
-
     protected static $logAttributes = ['name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id'];
 
     protected static $logOnlyDirty = true;
