@@ -20,6 +20,7 @@
         :headers="headers"
         :items="users"
         :search="search"
+        :items-per-page="10"
         :loading="isLoadingUsers"
         loading-text="Loading Users"
         :page="page"
@@ -137,7 +138,7 @@ export default {
     page: 1
   }),
   computed: {
-    ...mapState('users', ['users', 'totalUsers', 'userStatus', 'isLoadingUsers']),
+    ...mapState('users', ['users', 'userStatus', 'isLoadingUsers']),
     ...mapState('resources', ['currencies']),
   },
   mounted() {
@@ -205,9 +206,5 @@ export default {
 
 .users .v-toolbar__content {
   padding: 16px;
-}
-
-.search {
-  display:flex;
 }
 </style>
