@@ -4,7 +4,6 @@ import bus from '../eventBus'
 
 const state = {
   users: [],
-  totalUsers: 0,
   isLoadingUsers: false,
   userStatus: [
     {
@@ -26,9 +25,6 @@ const mutations = {
   SET_USERS: (state, users) => {
     state.users = users
   },
-  SET_TOTAL_USERS: (state, totalUsers) => {
-    state.totalUsers = totalUsers
-  },
   SET_IS_LOADING_USERS: (state, loadingState) => {
     state.isLoadingUsers = loadingState
   },
@@ -43,6 +39,7 @@ const mutations = {
       status: user.status,
       uuid: user.uuid,
       created_at: user.created_at,
+      last_login_date: '-',
       open_bets: '-',
       last_bet: '-'
     }
@@ -77,13 +74,12 @@ const mutations = {
 };
 
 const actions = {
-  getUsers({commit, dispatch}, { options, search }) {
+  getUsers({commit, dispatch}) {
     commit('SET_IS_LOADING_USERS', true)
-    axios.get('users', { params: { page: options.page, limit: options.itemsPerPage, sortBy: options.sortBy[0], sort: options.sortDesc[0] ? 'DESC' : 'ASC', search: search, wallet_token: getWalletToken() }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    axios.get('users', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_IS_LOADING_USERS', false)
       commit('SET_USERS', response.data.data)
-      commit('SET_TOTAL_USERS', response.data.total)
     })
     .catch(err => {
       commit('SET_USERS', [])
@@ -124,6 +120,28 @@ const actions = {
         reject(err)
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
+    })
+  },
+  getUserWalletForCurrentItems({state, dispatch}, users) {
+    axios.get('users/wallet', { params: { users: users, wallet_token: getWalletToken() }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      response.data.data.map(data => {
+        state.users.map(user => {
+          if(user.uuid == data.uuid) {
+            Vue.set(user, 'credits', data.credits)
+            Vue.set(user, 'currency', data.currency)
+          }
+        })
+      })
+    })
+    .catch(err => {
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     })
   }
 }

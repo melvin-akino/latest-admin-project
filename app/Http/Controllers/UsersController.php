@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use App\Facades\User;
+
 class UsersController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-      return User::getUsers($request);
+      return User::getUsers();
     }
 
     public function manage(UserRequest $request)
@@ -25,5 +26,10 @@ class UsersController extends Controller
     public function getUserByUuid($uuid)
     {
       return User::getUserByUuid($uuid);
+    }
+
+    public function getUsersWallet(Request $request)
+    {
+      return User::getWalletBalanceForCurrentItems($request);
     }
 }

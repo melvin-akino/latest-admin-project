@@ -48,7 +48,6 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     //Orders related routes
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
-    Route::get('/orders/open', 'OrdersController@getUserOpenOrders')->name('open-orders.api');
     Route::get('/orders/user', 'OrdersController@getUserTransactions')->name('orders-user.api');
 
     //System configurations related routes
@@ -65,12 +64,12 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');
+    Route::get('/users/wallet', 'UsersController@getUsersWallet')->name('get-users-wallet.api');
     Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
     Route::get('/user/{id}', 'UsersController@getUser')->name('get-user-by-id.api');
     Route::get('/user/uuid/{uuid}', 'UsersController@getUserByUuid')->name('get-user-by-uuid.api');
 
     //Wallet replated routes
-    Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
     Route::post('/wallet/token', 'WalletsController@getAccessToken')->name('wallet-token.api');
     Route::get('/wallet/clients', 'WalletsController@getClients')->name('wallet-clients.api');
     Route::post('/wallet/create', 'WalletsController@createClient')->name('wallet-create.api');

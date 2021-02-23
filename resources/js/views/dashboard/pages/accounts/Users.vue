@@ -19,35 +19,51 @@
       <v-data-table
         :headers="headers"
         :items="users"
-        :options.sync="options"
-        :server-items-length="totalUsers"
+        :search="search"
         :loading="isLoadingUsers"
         loading-text="Loading Users"
         :page="page"
         @pagination="getPage"
+        @current-items="getWalletDataForCurrentItems"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ totalUsers }}</p>
+            <p class="subtitle-1">Total Accounts: {{ users.length }}</p>
           </v-toolbar>
         </template>
         <template v-slot:[`item.firstname`]="{ item }">
           <span>{{item.firstname}} {{item.lastname}}</span>   
         </template>
         <template v-slot:[`item.credits`]="{ item }">
-          <span v-if="!item.credits">-</span>
-          <span v-else>{{item.credits | moneyFormat}}</span>    
+          <span v-if="!item.hasOwnProperty('credits')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{ item.credits ? item.credits : 0 | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.currency`]="{ item }">
-          <span v-if="!item.currency">-</span>
-          <span v-else>{{item.currency}}</span>    
+          <span v-if="!item.hasOwnProperty('currency')">
+            <v-progress-circular
+              indeterminate
+              color="#5b5a58"
+              :size="15"
+              :width="1"
+            ></v-progress-circular>
+          </span>    
+          <span v-else>{{ item.currency ? item.currency : '-' }}</span>    
         </template>
         <template v-slot:[`item.open_bets`]="{ item }">
-          <span>{{item.open_bets | moneyFormat }}</span>    
+          <span>{{ item.open_bets ? item.open_bets : 0 | moneyFormat }}</span>    
+        </template>
+        <template v-slot:[`item.last_bet`]="{ item }">
+          <span>{{ item.last_bet ? item.last_bet : '-' }}</span>    
         </template>
         <template v-slot:[`item.last_login`]="{ item }">
-          <span v-if="!item.last_login">-</span>
-          <span v-else>{{item.last_login}}</span>    
+          <span>{{ item.last_login ? item.last_login : '-' }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
@@ -102,11 +118,11 @@ export default {
     headers: [
       { text: "USERNAME", value: "email" },
       { text: "FULL NAME", value: "firstname" },
-      { text: "CREDITS", value: "credits", sortable: false },
-      { text: "CURRENCY", value: "currency", sortable: false },
-      { text: "OPEN BETS", value: "open_bets", sortable: false },
-      { text: "LAST BET", value: "last_bet", sortable: false },
-      { text: "LAST LOGIN", value: "last_login", sortable: false },
+      { text: "CREDITS", value: "credits" },
+      { text: "CURRENCY", value: "currency" },
+      { text: "OPEN BETS", value: "open_bets" },
+      { text: "LAST BET", value: "last_bet" },
+      { text: "LAST LOGIN", value: "last_login" },
       { text: "STATUS", value: "status" },
       { text: "CREATED DATE", value: "created_at" },
       {
@@ -117,7 +133,6 @@ export default {
         sortable: false
       }
     ],
-    options: {},
     search: null,
     page: 1
   }),
@@ -125,20 +140,13 @@ export default {
     ...mapState('users', ['users', 'totalUsers', 'userStatus', 'isLoadingUsers']),
     ...mapState('resources', ['currencies']),
   },
-  watch: {
-    options: {
-      handler(value) {
-        this.getUsers({ options: value, search: this.search })
-      },
-      deep: true
-    }
-  },
   mounted() {
+    this.getUsers()
     this.getCurrencies()
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsers', 'manageUser']),
+    ...mapActions('users', ['getUsers', 'manageUser', 'getUserWalletForCurrentItems']),
     ...mapActions('resources', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
@@ -158,15 +166,26 @@ export default {
         });
       }
     },
-    // searchUsers() {
-    //   this.getUsers({ options: this.options, search: this.search })
-    // },
     clearFilters() {
       this.search = ''
       this.page = 1
     },
     getPage(pagination) {
       this.page = pagination.page
+    },
+    getWalletDataForCurrentItems(users) {
+      if(users.length != 0) {
+        let noWalletData = []
+        users.map(user => {
+          if(!user.hasOwnProperty('credits') && !user.hasOwnProperty('currency')) {
+            noWalletData.push({ uuid: user.uuid, currency: user.currency_code })
+          }
+        })
+
+        if(noWalletData.length != 0) {
+          this.getUserWalletForCurrentItems(noWalletData)
+        }
+      }
     }
   },
   filters: {
