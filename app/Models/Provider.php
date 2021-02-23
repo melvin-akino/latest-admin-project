@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Contracts\Activity;
 
 class Provider extends Model
 {
     protected $table = 'providers';
+    use LogsActivity;
 
     protected $fillable = [
         'name',
         'alias',
         'punter_percentage',
-        'priority',
-        'is_enabled'
+        'is_enabled',
+        'currency_id'
     ];
 
     protected $hidden = [
@@ -21,29 +24,20 @@ class Provider extends Model
         'updated_at',
     ];
 
-    public static function getAllProviders()
+    protected static $logAttributes = ['name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id'];
+
+    protected static $logOnlyDirty = true;
+
+    protected static $logName = 'Providers';
+
+    public function tapActivity(Activity $activity, string $eventName)
     {
-        $providers = self::where('is_enabled', true)->orderBy('priority', 'asc')->orderBy('id', 'asc')->get()->toArray();
-
-        if (!empty($providers)) {
-            foreach ($providers as $provider) {
-                $data['data'][] = [
-                    'id'            => $provider['id'],
-                    'alias'         => $provider['alias'],
-                    'currency_id'   => $provider['currency_id']
-                ];
-            }
-        }
-
-        return !empty($data) ? $data : [];
+      $activity->properties = $activity->properties->put('action', ucfirst($eventName));
+      $activity->properties = $activity->properties->put('ip_address', request()->ip());
     }
 
-    public static function getIdFromAlias($alias)
+    public function getDescriptionForEvent(string $eventName): string
     {
-        $query = self::where('alias', strtoupper($alias));
-
-        if ($query->exists()) {
-            return $query->first()->id;
-        }
+        return ucfirst($eventName)." providers: ".request()->name;
     }
 }
