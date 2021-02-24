@@ -19,6 +19,10 @@ class Provider extends Model
         'currency_id'
     ];
 
+    protected $hidden = [
+      'priority'
+    ];
+
     protected static $logAttributes = ['name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id'];
 
     protected static $logOnlyDirty = true;

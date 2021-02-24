@@ -12,8 +12,7 @@ class ProviderService
     public static function getAllProviders()
     {
         try {
-        $providers = Provider::select(['id', 'name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id', 'created_at', 'updated_at'])
-            ->orderBy('name', 'asc')
+        $providers = Provider::orderBy('name', 'asc')
             ->get();
 
         return response()->json([
