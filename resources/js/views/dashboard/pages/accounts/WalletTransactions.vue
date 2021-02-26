@@ -2,7 +2,7 @@
   <div class="walletTransactions pa-6">
     <v-container>
       <p class="text-h4 text-uppercase" v-if="transactionUser">
-        Wallet Transaction Report for {{transactionUser.email || transactionUser.username}}
+        Wallet Transaction Report for {{ displayName }}
         <span v-if="search.start_date && search.end_date">({{search.start_date}} to {{search.end_date}})</span>
       </p>
       <div class="my-6">
@@ -127,6 +127,14 @@ export default {
       !this.$v.search.end_date.required && errors.push('To date is required.')
       !this.$v.search.end_date.toDateValidation && errors.push('To date value must be a later date.')
       return errors
+    },
+    displayName() {
+      let routePath = this.$route.path.split('/')
+      if(routePath[4] == 'user') {
+        return `${this.transactionUser.firstname} ${this.transactionUser.lastname}`
+      } else {
+        return this.transactionUser.username
+      }
     }
   },
   mounted() {
