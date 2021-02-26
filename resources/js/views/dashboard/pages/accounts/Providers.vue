@@ -35,7 +35,7 @@
       <v-toolbar flat color="transparent">
         <v-spacer></v-spacer>
         <button-dialog icon="mdi-plus" label="New Account" width="600" @clearFilters="clearFilters">
-          <provider-form :update="false"></provider-form>
+          <provider-account-form :update="false"></provider-account-form>
         </button-dialog>
       </v-toolbar>
       <v-data-table
@@ -86,7 +86,7 @@
           <span v-else>{{ item.open_orders | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
+          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
           <span v-if="!item.hasOwnProperty('last_bet')">
@@ -123,7 +123,7 @@
         </template>
         <template v-slot:[`item.actions`]="{ item }" class="actions">
           <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Edit" style="z-index:1;">
-            <provider-form :update="true" :provider-account-to-update="item"></provider-form>
+            <provider-account-form :update="true" :provider-account-to-update="item"></provider-account-form>
           </table-action-dialog>
           <v-menu style="z-index:2;" offset-y>
             <template v-slot:activator="{ on: menu, attrs }">
@@ -157,11 +157,11 @@ import bus from '../../../../eventBus'
 import { moneyFormat } from '../../../../helpers/numberFormat'
 
 export default {
-  name: "Providers",
+  name: "ProviderAccounts",
   components: {
     ButtonDialog: () => import("../../component/ButtonDialog"),
     TableActionDialog: () => import("../../component/TableActionDialog"),
-    ProviderForm: () => import("../../components/forms/ProviderForm")
+    ProviderAccountForm: () => import("../../components/forms/ProviderAccountForm")
   },
   data: () => ({
     headers: [
@@ -189,9 +189,10 @@ export default {
     page: null
   }),
   computed: {
-    ...mapState("providers", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerStatus"]),
-    ...mapState("resources", ["providers"]),
-    ...mapGetters("resources", ["providerFilters", "currencyFilters"])
+    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus"]),
+    ...mapState("providers", ["providers"]),
+    ...mapGetters("providers", ["providerFilters"]),
+    ...mapGetters("currencies", ["currencyFilters"])
   },
   mounted() {
     this.getProviders()
@@ -199,9 +200,10 @@ export default {
     this.getProviderAccountsList()
   },
   methods: {
-    ...mapMutations("providers", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS", setFilteredProviderAccounts: "SET_FILTERED_PROVIDER_ACCOUNTS" }),
-    ...mapActions("providers", ["getProviderAccountsList", "manageProviderAccount"]),
-    ...mapActions("resources", ["getProviders", "getCurrencies"]),
+    ...mapMutations("providerAccounts", { setProviderAccounts: "SET_PROVIDER_ACCOUNTS", setFilteredProviderAccounts: "SET_FILTERED_PROVIDER_ACCOUNTS" }),
+    ...mapActions("providerAccounts", ["getProviderAccountsList", "manageProviderAccount"]),
+    ...mapActions('providers', ['getProviders']),
+    ...mapActions('currencies', ['getCurrencies']),
     async updateProviderAccountStatus(providerAccount) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
