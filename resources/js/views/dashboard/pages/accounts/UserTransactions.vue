@@ -110,6 +110,9 @@
         <template v-slot:[`item.to_win`]="{ item }">
           <span>{{ item.to_win | moneyFormat}}</span>
         </template>
+        <template v-slot:[`item.status`]="{ item }">
+          <span>{{ item.status == 'SUCCESS' ? 'PLACED' : item.status }}</span>
+        </template>
         <template v-slot:[`item.valid_stake`]="{ item }">
           <span>{{ Math.abs(item.profit_loss).toFixed(2) | moneyFormat }}</span>
         </template>
