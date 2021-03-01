@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\WalletService;
+use Illuminate\Support\Str;
+use App\Jobs\KafkaPush;
+use Exception;
+
 class ProviderAccountsController extends Controller
 {
     public function index(Request $request)
@@ -32,6 +36,7 @@ class ProviderAccountsController extends Controller
                 !empty($request->username) ? $data['username'] = $request->username : null;
                 !empty($request->password) ? $data['password'] = $request->password : null;
                 !empty($request->provider_id) ? $data['provider_id'] = $request->provider_id : 0;
+                !empty($request->provider_alias) ? $data['alias'] = $request->provider_alias : null;
                 !empty($request->type) ? $data['type'] = $request->type : null;
                 !empty($request->punter_percentage) ? $data['punter_percentage'] = $request->punter_percentage : 0;
                 !empty($request->credits) ? $data['credits'] = $request->credits : 0;
@@ -77,6 +82,47 @@ class ProviderAccountsController extends Controller
                 }
             
                 DB::commit();
+
+                //Push Kafka Topic here
+                //if (!in_array(env('APP_ENV'), ['testing'])) {                    
+                    $requestId = (string) Str::uuid();
+
+                    $providerTypes = [
+                        'BET_NORMAL'      => 'bet',
+                        'BET_VIP'         => 'bet',
+                        'SCRAPER'         => 'odds',
+                        'SCRAPER_MIN_MAX' => 'minmax', // uncomment if necessary
+                    ];
+
+                    if ($data['is_enabled'] == true) {
+                        $payload = [
+                            'request_id'    => $requestId,
+                            'request_ts'    => getMilliseconds(),
+                            'command'       => 'session',
+                            'sub_command'   => 'add',
+                            'data' => [
+                                'provider'      => $data['alias'],
+                                'username'      => $data['username'],
+                                'password'      => $data['password'],
+                                'category'      => $providerTypes[$data['type']],
+                            ]
+                        ];
+                    }
+                    else {
+                        $payload = [
+                            'request_id'    => $requestId,
+                            'request_ts'    => getMilliseconds(),
+                            'command'       => 'session',
+                            'sub_command'   => 'stop',
+                            'data' => [
+                                'provider'      => $data['alias'],
+                                'username'      => $data['username'],
+                            ]
+                        ];
+                    }
+
+                    KafkaPush::dispatch($data['alias'].'_session_req', $payload, $requestId);
+                //}
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
