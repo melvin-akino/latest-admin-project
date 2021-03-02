@@ -92,33 +92,26 @@ class ProviderAccountsController extends Controller
                         'SCRAPER'         => 'odds',
                         'SCRAPER_MIN_MAX' => 'minmax', // uncomment if necessary
                     ];
-
+                    
+                    $add = [];
                     if ($data['is_enabled'] == true) {
-                        $payload = [
-                            'request_id'    => $requestId,
-                            'request_ts'    => getMilliseconds(),
-                            'command'       => 'session',
-                            'sub_command'   => 'add',
-                            'data' => [
-                                'provider'      => $data['alias'],
-                                'username'      => $data['username'],
+                        $sub_command = 'add';
+                        $add = [
                                 'password'      => $data['password'],
-                                'category'      => $providerTypes[$data['type']],
-                            ]
+                                'category'      => $providerTypes[$data['type']]
                         ];
                     }
                     else {
-                        $payload = [
-                            'request_id'    => $requestId,
-                            'request_ts'    => getMilliseconds(),
-                            'command'       => 'session',
-                            'sub_command'   => 'stop',
-                            'data' => [
-                                'provider'      => $data['alias'],
-                                'username'      => $data['username'],
-                            ]
-                        ];
+                        $sub_command = 'stop';
                     }
+
+                    $payload = [
+                        'request_id'    => $requestId,
+                        'request_ts'    => getMilliseconds(),
+                        'command'       => 'session',
+                        'sub_command'   => $sub_command,
+                        'data'          => array_merge(['provider' => $data['alias'], 'username' => $data['username']], $add)
+                    ];
 
                     kafkaPush($data['alias'].'_session_req', $payload, $requestId);
                 }
