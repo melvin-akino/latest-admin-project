@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\WalletService;
 use Illuminate\Support\Str;
-use App\Jobs\KafkaPush;
 use Exception;
 
 class ProviderAccountsController extends Controller
@@ -84,7 +83,7 @@ class ProviderAccountsController extends Controller
                 DB::commit();
 
                 //Push Kafka Topic here
-                //if (!in_array(env('APP_ENV'), ['testing'])) {                    
+                if (!in_array(env('APP_ENV'), ['testing'])) {                    
                     $requestId = (string) Str::uuid();
 
                     $providerTypes = [
@@ -121,8 +120,8 @@ class ProviderAccountsController extends Controller
                         ];
                     }
 
-                    KafkaPush::dispatch($data['alias'].'_session_req', $payload, $requestId);
-                //}
+                    kafkaPush($data['alias'].'_session_req', $payload, $requestId);
+                }
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
