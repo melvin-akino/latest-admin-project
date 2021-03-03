@@ -102,6 +102,11 @@ export default {
         icon: "mdi-cash-usd",
         title: "Currencies",
         to: "/currencies"
+      },
+      {
+        icon: "mdi-cash-multiple",
+        title: "Providers",
+        to: "/providers"
       }
       // {
       //   title: "icons",

@@ -118,7 +118,7 @@ export default {
     }
   },
   computed: {
-    ...mapState("resources", ["currencies"]),
+    ...mapState("currencies", ["currencies"]),
     transactionTypeErrors() {
       let errors = []
       if (!this.$v.wallet.transactionType.$dirty) return errors

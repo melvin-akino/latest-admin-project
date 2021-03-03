@@ -106,6 +106,11 @@ const router = new Router({
           component: () => import('./views/dashboard/pages/Currencies')
         },
         {
+          name: 'Providers',
+          path: 'providers',
+          component: () => import('./views/dashboard/pages/Providers')
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),

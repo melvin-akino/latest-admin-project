@@ -138,8 +138,9 @@ export default {
     page: 1
   }),
   computed: {
-    ...mapState('users', ['users', 'userStatus', 'isLoadingUsers']),
-    ...mapState('resources', ['currencies']),
+    ...mapState('users', ['userStatus', 'isLoadingUsers']),
+    ...mapState('currencies', ['currencies']),
+    ...mapGetters('users', ['usersTable']),
   },
   mounted() {
     this.getUsers()
@@ -147,8 +148,8 @@ export default {
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsers', 'manageUser', 'getUserWalletForCurrentItems']),
-    ...mapActions('resources', ['getCurrencies']),
+    ...mapActions('users', ['getUsersList', 'manageUser']),
+    ...mapActions('currencies', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
         bus.$emit("SHOW_SNACKBAR", {

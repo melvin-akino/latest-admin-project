@@ -186,7 +186,7 @@ export default {
     this.resetFields()
   },
   methods: {
-    ...mapActions("providers", ["createSettlement"]),
+    ...mapActions("providerAccounts", ["createSettlement"]),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG");
     },

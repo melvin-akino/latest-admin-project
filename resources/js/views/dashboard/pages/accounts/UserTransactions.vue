@@ -188,7 +188,8 @@ export default {
     }
   },
   computed: {
-    ...mapState('resources', ['providers', 'currencies']),
+    ...mapState('providers', ['providers']),
+    ...mapState('currencies', ['currencies']),
     fromDateErrors() {
       let errors = []
       !this.$v.search.date_from.required && errors.push('From date is required.')
@@ -208,7 +209,8 @@ export default {
     this.getUserTransactions()
   },
   methods: {
-    ...mapActions('resources', ['getProviders', 'getCurrencies']),
+    ...mapActions('currencies', ['getCurrencies']),
+    ...mapActions('providers', ['getProviders']),
     ...mapActions('auth', ['logoutOnError']),
     getUser() {
       axios.get(`user/${this.$route.params.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })

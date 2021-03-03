@@ -20,8 +20,7 @@ class Provider extends Model
     ];
 
     protected $hidden = [
-        'created_at',
-        'updated_at',
+      'priority'
     ];
 
     protected static $logAttributes = ['name', 'alias', 'punter_percentage', 'is_enabled', 'currency_id'];
