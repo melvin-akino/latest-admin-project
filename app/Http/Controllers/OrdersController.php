@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Http\Requests\OrderRequest;
+use App\Facades\OrderFacade;
 
 class OrdersController extends Controller
 {
@@ -27,5 +28,10 @@ class OrdersController extends Controller
         $orders = Order::getUserTransactions($request);
 
         return response()->json($orders);
+    }
+
+    public function update(OrderRequest $request) 
+    {
+        return OrderFacade::update($request);
     }
 }
