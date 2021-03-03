@@ -140,7 +140,6 @@ export default {
   computed: {
     ...mapState('users', ['userStatus', 'isLoadingUsers']),
     ...mapState('currencies', ['currencies']),
-    ...mapGetters('users', ['usersTable']),
   },
   mounted() {
     this.getUsers()
