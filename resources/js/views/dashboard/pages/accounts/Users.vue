@@ -138,7 +138,7 @@ export default {
     page: 1
   }),
   computed: {
-    ...mapState('users', ['userStatus', 'isLoadingUsers']),
+    ...mapState('users', ['users', 'userStatus', 'isLoadingUsers']),
     ...mapState('currencies', ['currencies']),
   },
   mounted() {
@@ -147,7 +147,7 @@ export default {
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsersList', 'manageUser']),
+    ...mapActions('users', ['getUsers', 'manageUser', 'getUserWalletForCurrentItems']),
     ...mapActions('currencies', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
