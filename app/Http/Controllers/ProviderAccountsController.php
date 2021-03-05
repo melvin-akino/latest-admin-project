@@ -7,6 +7,7 @@ use App\Http\Requests\ProviderAccountRequest;
 use App\Facades\ProviderAccountFacade;
 use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Exception;
 
 class ProviderAccountsController extends Controller
 {

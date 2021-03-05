@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Facades\OrderFacade;
 use Illuminate\Http\Request;
+use App\Http\Requests\OrderRequest;
 
 class OrdersController extends Controller
 {
@@ -19,5 +20,9 @@ class OrdersController extends Controller
     public function getUserTransactions(Request $request)
     {
         return OrderFacade::getUserTransactions($request);
+    }
+    public function update(OrderRequest $request) 
+    {
+        return OrderFacade::update($request);
     }
 }

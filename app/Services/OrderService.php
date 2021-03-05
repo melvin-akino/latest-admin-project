@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Http\Requests\OrderRequest;
 use Illuminate\Support\Facades\{DB, Log};
 use Carbon\Carbon;
 use Exception;
+
 class OrderService
 {
     public static function getProviderOrders(Request $request) 
@@ -91,104 +93,177 @@ class OrderService
 
     public static function getOpenOrders(Request $request)
     {
-        $lastBetDate = '-';
-        $openOrdersSum = 0;
+        try {    
+            $lastBetDate = '-';
+            $openOrdersSum = 0;
 
-        $openOrders = Order::where('user_id', $request->userId)
-            ->whereNotNull('bet_id')
-            ->where('status', ['SUCCESS','PENDING'])
-            ->select('stake', 'settled_date', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->toArray();
+            $openOrders = Order::where('user_id', $request->userId)
+                ->whereNotNull('bet_id')
+                ->where('status', ['SUCCESS','PENDING'])
+                ->select('stake', 'settled_date', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->toArray();
 
-        if ($openOrders)
-        {
-            foreach($openOrders as $key=>$order) 
+            if ($openOrders)
             {
-                if ($key == 0) {
-                    $lastBetDate = $order['created_at'];
+                foreach($openOrders as $key=>$order) 
+                {
+                    if ($key == 0) {
+                        $lastBetDate = $order['created_at'];
+                    }
+
+                    $openOrdersSum += $order['stake'];
                 }
-
-                $openOrdersSum += $order['stake'];
             }
-        }
 
-        return [
-            'open_orders'   => $openOrdersSum,
-            'last_bet'      => $lastBetDate
-        ];
+            $data = [
+                'open_orders'   => $openOrdersSum,
+                'last_bet'      => $lastBetDate
+            ];
+
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'data'        => $data
+            ], 200);
+        }
+        catch (Exception $e) 
+        {
+            DB::rollBack();
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'     => $e->getMessage()
+            ], 500);
+        }
     }
 
     public static function getUserTransactions(Request $request)
     {
-        $dateFrom = null;
-        $dateTo   = null;
-        $where    = [];
-        if ($request->date_from) 
+        try 
         {
-            $dateFrom = Carbon::createFromFormat("Y-m-d", $request->date_from, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            $dateFrom = null;
+            $dateTo   = null;
+            $where    = [];
+            if ($request->date_from) 
+            {
+                $dateFrom = Carbon::createFromFormat("Y-m-d", $request->date_from, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            }
+            if ($request->date_to) 
+            {
+                $dateTo = Carbon::createFromFormat("Y-m-d", $request->date_to, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            }
+            if ($request->user_id) 
+            {
+                $where[] = ['user_id', $request->user_id];
+            }
+            if ($request->provider_id) 
+            {
+                $where[] = ['orders.provider_id', $request->provider_id];
+            }
+            if ($request->currency_id) 
+            {
+                $where[] = ['providers.currency_id', $request->currency_id];
+            }
+            $orders = Order::leftJoin('providers', 'providers.id', 'orders.provider_id')
+                    ->leftJoin('odd_types AS ot', 'ot.id', 'orders.odd_type_id')
+                    ->leftJoin('event_scores as es', 'es.master_event_unique_id', 'orders.master_event_unique_id')
+                    ->leftJoin('provider_error_messages As pe','pe.id','orders.provider_error_message_id')
+                    ->leftJoin('error_messages as em', 'em.id','pe.error_message_id')
+                    ->leftJoin('users', 'users.id','orders.user_id')
+                    ->select(
+                        [
+                            'orders.id',
+                            'users.name as username',
+                            'orders.bet_id',
+                            'orders.bet_selection',
+                            'orders.odds',
+                            'orders.master_event_market_unique_id',
+                            'orders.stake',
+                            'orders.to_win',
+                            'orders.created_at',
+                            'orders.settled_date',
+                            'orders.profit_loss',
+                            'orders.status',
+                            'orders.odd_label',
+                            'orders.reason',
+                            'orders.master_event_unique_id',
+                            'es.score as current_score',
+                            'ot.id AS odd_type_id',
+                            'providers.alias',
+                            'ml_bet_identifier',
+                            'orders.final_score',
+                            'orders.market_flag',
+                            'orders.master_team_home_name',
+                            'orders.master_team_away_name',
+                            'em.error as multiline_error'
+                        ]
+                    )
+                    ->where($where)
+                    ->where('orders.status', '!=', 'FAILED')
+                    ->when($dateFrom, function($query, $dateFrom) {
+                    return $query->whereDate('orders.created_at', '>=', $dateFrom);
+                    })
+                    ->when($dateTo, function($query, $dateTo) {
+                    return $query->whereDate('orders.created_at', '<=', $dateTo);
+                    })
+                    ->orderBy('orders.created_at', 'desc')
+                    ->get()
+                    ->toArray();
+                    
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'data'        => $orders
+            ], 200);
         }
-        if ($request->date_to) 
+        catch (Exception $e) 
         {
-            $dateTo = Carbon::createFromFormat("Y-m-d", $request->date_to, 'Etc/UTC')->setTimezone('Etc/UTC')->format("Y-m-d H:i:s");
+            DB::rollBack();
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'     => $e->getMessage()
+            ], 500);
         }
-        if ($request->user_id) 
+    }
+
+    public function update(OrderRequest $request)
+    {
+        DB::beginTransaction();
+        try
         {
-            $where[] = ['user_id', $request->user_id];
+            $order = Order::where('id', $request->id)->first();
+            $forUpdate = [
+                'status'        => $request->status,        
+                'profit_loss'   => $request->pl,
+                'reason'        => $request->reason
+            ];
+            if ($order->update($forUpdate))
+            {
+                DB::commit();
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'Order successfully updated.',
+                    'data'        => $order
+                ], 200);
+            }
         }
-        if ($request->provider_id) 
+        catch (Exception $e)
         {
-            $where[] = ['orders.provider_id', $request->provider_id];
+            DB::rollBack();
+
+            Log::info('Updating order ' . $request->id . ' failed.');
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'error'       => trans('responses.internal-error')
+            ], 500);
         }
-        if ($request->currency_id) 
-        {
-            $where[] = ['providers.currency_id', $request->currency_id];
-        }
-        return self::leftJoin('providers', 'providers.id', 'orders.provider_id')
-                 ->leftJoin('odd_types AS ot', 'ot.id', 'orders.odd_type_id')
-                 ->leftJoin('event_scores as es', 'es.master_event_unique_id', 'orders.master_event_unique_id')
-                 ->leftJoin('provider_error_messages As pe','pe.id','orders.provider_error_message_id')
-                 ->leftJoin('error_messages as em', 'em.id','pe.error_message_id')
-                 ->leftJoin('users', 'users.id','orders.user_id')
-                 ->select(
-                     [
-                         'orders.id',
-                         'users.name as username',
-                         'orders.bet_id',
-                         'orders.bet_selection',
-                         'orders.odds',
-                         'orders.master_event_market_unique_id',
-                         'orders.stake',
-                         'orders.to_win',
-                         'orders.created_at',
-                         'orders.settled_date',
-                         'orders.profit_loss',
-                         'orders.status',
-                         'orders.odd_label',
-                         'orders.reason',
-                         'orders.master_event_unique_id',
-                         'es.score as current_score',
-                         'ot.id AS odd_type_id',
-                         'providers.alias',
-                         'ml_bet_identifier',
-                         'orders.final_score',
-                         'orders.market_flag',
-                         'orders.master_team_home_name',
-                         'orders.master_team_away_name',
-                         'em.error as multiline_error'
-                     ]
-                 )
-                 ->where($where)
-                 ->where('orders.status', '!=', 'FAILED')
-                 ->when($dateFrom, function($query, $dateFrom) {
-                   return $query->whereDate('orders.created_at', '>=', $dateFrom);
-                 })
-                 ->when($dateTo, function($query, $dateTo) {
-                  return $query->whereDate('orders.created_at', '<=', $dateTo);
-                 })
-                 ->orderBy('orders.created_at', 'desc')
-                 ->get()
-                 ->toArray();
     }
 }
+
