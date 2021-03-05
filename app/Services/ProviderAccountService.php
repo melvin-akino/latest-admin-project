@@ -11,12 +11,12 @@ use Carbon\Carbon;
 use Exception;
 class ProviderAccountService
 {
-    public static function getProviderAccounts(ProviderAccountRequest $request) 
+    public static function index(Request $request) 
     {
         try {
             $where = null;        
-            if (!empty($request->providerId)) {
-                $where = ['provider_id' => $request->providerId];
+            if (!empty($request->id)) {
+                $where = ['provider_id' => $request->id];
             }
             $accounts = ProviderAccount::where($where)
                 ->join('providers as p', 'p.id', 'provider_id')
@@ -98,30 +98,6 @@ class ProviderAccountService
                 'status'      => false,
                 'status_code' => 500,
                 'error'       => trans('responses.internal-error')
-            ], 500);
-        }
-    }
-
-    public function index(Request $request)
-    {
-        try {
-            $id = null;
-            if (!empty($request->id)) {
-                $id = $request->id;
-            }
-            $accounts = ProviderAccount::getProviderAccounts($id);
-
-            return response()->json([
-                'status'      => true,
-                'status_code' => 200,
-                'data'        => $accounts
-            ], 200);
-        }
-        catch (Exception $e) {
-            return response()->json([
-                'status'      => false,
-                'status_code' => 500,
-                'message'     => trans('generic.internal-server-error')
             ], 500);
         }
     }
