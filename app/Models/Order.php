@@ -13,6 +13,7 @@ class Order extends Model
 
     protected $fillable = [
         'status',
+        'profit_loss',
         'pl',
         'reason',
     ];
@@ -175,7 +176,7 @@ class Order extends Model
                          'orders.master_event_unique_id',
                          'es.score as current_score',
                          'ot.id AS odd_type_id',
-                         'providers.alias',
+                         'providers.alias as provider',
                          'ml_bet_identifier',
                          'orders.final_score',
                          'orders.market_flag',
