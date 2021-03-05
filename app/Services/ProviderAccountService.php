@@ -32,13 +32,7 @@ class ProviderAccountService
                     'provider_id',
                     'p.currency_id',
                     'c.code as currency',
-                    'uuid',
-                    DB::raw("(SELECT created_at FROM oauth_access_tokens WHERE user_id = users.id ORDER BY created_at DESC LIMIT 1)
-                    as last_login_date"),
-                    DB::raw("(SELECT created_at FROM orders WHERE status IN ('SUCCESS', 'PENDING') AND user_id = users.id AND bet_id IS NOT NULL
-                    ORDER BY created_at DESC LIMIT 1) as last_bet"),
-                    DB::raw("(SELECT SUM (stake) FROM orders WHERE status IN ('SUCCESS', 'PENDING') AND user_id = users.id AND bet_id IS NOT NULL)
-                    as open_bets")
+                    'uuid'
                 ])                                    
                 ->orderBy('provider_accounts.created_at', 'DESC')
                 ->skip($request->offset)
