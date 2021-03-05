@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Exception;
 class OrderService
 {
-    public static function getAllOrders(Request $request) 
+    public static function getProviderOrders(Request $request) 
     {
         try 
         {
