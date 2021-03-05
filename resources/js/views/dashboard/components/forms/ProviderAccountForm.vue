@@ -99,7 +99,7 @@
                 item-text="alias"
                 item-value="id"
                 v-model="$v.providerAccount.provider_id.$model"
-                :error-messages="statusErrors"
+                :error-messages="providerErrors"
                 @input="$v.providerAccount.provider_id.$touch()"
                 @blur="$v.providerAccount.provider_id.$touch()"
               ></v-select>
@@ -234,6 +234,8 @@ export default {
             color: "success",
             text: "Adding provider account..."
           });
+          let alias = this.providers.filter(provider => provider.id == this.providerAccount.provider_id)[0].alias
+          this.$set(this.providerAccount, 'provider_alias', alias)
           this.$set(this.providerAccount, 'wallet_token', getWalletToken())
           await this.manageProviderAccount(this.providerAccount)
           this.closeDialog()
@@ -258,6 +260,8 @@ export default {
             color: "success",
             text: "Updating provider account..."
           });
+          let alias = this.providers.filter(provider => provider.id == this.providerAccount.provider_id)[0].alias
+          this.$set(this.providerAccount, 'provider_alias', alias)
           await this.manageProviderAccount(this.providerAccount)
           this.closeDialog()
           bus.$emit("SHOW_SNACKBAR", {
