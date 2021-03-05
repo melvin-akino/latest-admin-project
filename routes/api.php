@@ -40,9 +40,15 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
 
-
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
+    
+    // Leagues routes
+    Route::get('/leagues/{providerId}', 'LeaguesController@getLeaguesByProviderId')->name('leagues.api');
+        
+    // Teams routes
+    Route::get('/teams/{providerId}', 'TeamsController@getTeamsByProviderId')->name('teams.api');
+
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 
