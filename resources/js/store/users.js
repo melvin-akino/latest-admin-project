@@ -18,7 +18,9 @@ const state = {
       text: 'View Only',
       value: 2
     },
-  ]
+  ],
+  userTransactions: [],
+  isLoadingUserTransactions: false
 };
 
 const mutations = {
@@ -70,6 +72,27 @@ const mutations = {
         Vue.set(user, "currency", payload.currency);
       }
     });
+  },
+  SET_USER_TRANSACTIONS: (state, userTransactions) => {
+    state.userTransactions = userTransactions
+  },
+  SET_IS_LOADING_USER_TRANSACTIONS: (state, loadingState) => {
+    state.isLoadingUserTransactions = loadingState
+  },
+  UPDATE_USER_TRANSACTION: (state, payload) => {
+    let updatedTransaction = {
+      status: payload.status,
+      profit_loss: payload.profit_loss,
+      reason: payload.reason,
+    }
+
+    state.userTransactions.map(transaction => {
+      if(payload.id == transaction.id) {
+        Object.keys(updatedTransaction).map(key => {
+          Vue.set(transaction, key, updatedTransaction[key])
+        })
+      }
+    })
   }
 };
 
@@ -142,6 +165,37 @@ const actions = {
           text: err.response.data.message
         });
       }
+    })
+  },
+  getUserTransactions({commit, dispatch}, payload) {
+    commit('SET_USER_TRANSACTIONS', [])
+    commit('SET_IS_LOADING_USER_TRANSACTIONS', true)
+    axios.get('orders/user', { params: payload, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_USER_TRANSACTIONS', response.data)
+      commit('SET_IS_LOADING_USER_TRANSACTIONS', false)
+    })
+    .catch(err => {
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
+    })
+  },
+  adjustUserTransaction({commit, dispatch}, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post('orders/update', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('UPDATE_USER_TRANSACTION', response.data.data)
+        resolve(response.data.message)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
     })
   }
 }

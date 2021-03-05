@@ -74,6 +74,7 @@
                 :error-messages="scoreErrors"
                 @input="$v.settlementForm.score.$touch()"
                 @blur="$v.settlementForm.score.$touch()"
+                :disabled="type == 'user'"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4" class="formColumn">
@@ -118,7 +119,7 @@
 <script>
 import { mapActions } from 'vuex'
 import bus from '../../../../eventBus'
-import { required, decimal } from 'vuelidate/lib/validators'
+import { required, requiredIf, decimal } from 'vuelidate/lib/validators'
 import { handleAPIErrors } from '../../../../helpers/errors'
 
 function scoreValidation(value) {
@@ -127,21 +128,22 @@ function scoreValidation(value) {
 }
 
 export default {
-  props: ["order"],
+  props: ["order", "type"],
   data() {
     return {
       settlementForm: {
         provider: this.order.provider,
-        sport: this.order.sport_id,
+        sport: this.order.sport_id || null,
         username: this.order.username,
         bet_id: this.order.bet_id,
-        stake: this.order.actual_stake,
+        stake: this.type == 'user' ? this.order.stake : this.order.actual_stake,
         odds: this.order.odds,
-        to_win: this.order.actual_to_win,
+        to_win: this.type == 'user' ? this.order.to_win : this.order.actual_to_win,
         status: '',
-        score: '',
+        score: this.type == 'user' ? this.order.current_score : '',
         pl: '',
-        reason: ''
+        reason: '',
+        id: this.type == 'user'? this.order.id : null
       },
       orderStatus: ['WIN', 'LOSE', 'HALF WIN', 'HALF LOSE', 'PUSH', 'VOID', 'DRAW', 'CANCELLED', 'REJECTED', 'ABNORMAL BET', 'REFUNDED']
     }
@@ -149,7 +151,12 @@ export default {
   validations: {
     settlementForm: {
       status: { required },
-      score: { required, scoreValidation },
+      score: { 
+        required: requiredIf(function() {
+          return this.type == 'providerAccount'
+        }), 
+        scoreValidation 
+      },
       pl: { required, decimal },
       reason: { required }
     }
@@ -187,6 +194,7 @@ export default {
   },
   methods: {
     ...mapActions("providerAccounts", ["createSettlement"]),
+    ...mapActions("users", ["adjustUserTransaction"]),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG");
     },
@@ -197,7 +205,14 @@ export default {
             color: "success",
             text: "Generating settlement..."
           });
-          let response = await this.createSettlement(this.settlementForm)
+
+          let response = ''
+          if(this.type == 'user') {
+            response = await this.adjustUserTransaction(this.settlementForm)
+          } else {
+            response = await this.createSettlement(this.settlementForm)
+          }
+
           this.closeDialog()
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
@@ -215,7 +230,6 @@ export default {
     },
     resetFields() {
       let fieldsToEmpty = [
-        "score",
         "pl",
       ];
       Object.keys(this.settlementForm).map(key => {

@@ -42,7 +42,7 @@ const router = new Router({
               component: () => import('./views/dashboard/pages/accounts/UserTransactions'),
             },
             {
-              name: 'Providers',
+              name: 'Provider Accounts',
               path: 'providers',
               component: () => import('./views/dashboard/pages/accounts/Providers'),
             },
