@@ -20,6 +20,12 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // public routes
     Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
 });
+    
+// Leagues routes
+Route::group(['prefix' => 'leagues'], function() {
+    Route::get('/{providerId}', 'LeaguesController@getLeaguesByProviderId')->name('leagues.api');
+    Route::post('/match', 'LeaguesController@matchLeagues')->name('leagues-match.api');
+});
 Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // our routes to be protected will go in here
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
@@ -42,9 +48,6 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
-    
-    // Leagues routes
-    Route::get('/leagues/{providerId}', 'LeaguesController@getLeaguesByProviderId')->name('leagues.api');
         
     // Teams routes
     Route::get('/teams/{providerId}', 'TeamsController@getTeamsByProviderId')->name('teams.api');
