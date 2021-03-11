@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, MasterEvent, MasterEventMarket};
+use App\Models\{MasterLeague, MasterTeam};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
