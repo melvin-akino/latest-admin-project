@@ -44,10 +44,14 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
     
     // Leagues routes
-    Route::get('/matched-leagues', 'LeaguesController@getLeagues')->name('leagues.api');
+    Route::get('/raw-leagues/{providerId}', 'LeaguesController@getRawLeagues')->name('leagues.api');
+    Route::get('/matched-leagues', 'LeaguesController@getLeagues')->name('matched-leagues.api');
+    Route::post('/leagues/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
         
     // Teams routes
-    Route::get('/matched-teams', 'TeamsController@getTeams')->name('teams.api');
+    Route::get('/raw-teams/{providerId}', 'TeamsController@getRawTeams')->name('teams.api');
+    Route::get('/matched-teams', 'TeamsController@getTeams')->name('matched-teams.api');
+    Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
 
     // Events Group routes
     Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');

@@ -7,6 +7,33 @@ use Tests\TestCase;
 
 class TeamTest extends AdminAccountTestCase
 {
+    public function testRawTeamsByProviderIdWithToken()
+    {
+        $this->initialUser();
+        $response = $this->get('/api/raw-teams/1', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            '*' => [
+                'name',
+                'sport_id',
+                'provider_id'
+            ]
+        ]);
+    }
+
+    public function testRaweamsByProviderIdWithoutToken() {
+        $response = $this->get('/api/raw-teams/1', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer XXX'
+        ]);
+
+        $response->assertJson(['message' => 'Unauthenticated.']);
+    }
+
     public function testTeamsByProviderIdWithToken()
     {
         $this->initialUser();
@@ -23,7 +50,6 @@ class TeamTest extends AdminAccountTestCase
                 'provider_id'
             ]
         ]);
-
     }
 
     public function testTeamsByProviderIdWithoutToken() {
@@ -35,4 +61,37 @@ class TeamTest extends AdminAccountTestCase
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
+    public function testMatchTeamsWithToken()
+    {
+        $this->initialUser();
+
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ])->json('POST', '/api/teams/match', [
+            "primary_provider_team_id" => 1,
+            "match_team_id"            => 7,
+            "master_team_alias"        => "",
+            "add_master_team"          => false
+        ]);
+
+        $response->assertStatus(200);
+    }
+
+    public function testMatchTeamsNoWithToken()
+    {
+        $this->initialUser();
+
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer XXX'
+        ])->json('POST', '/api/teams/match', [
+            "primary_provider_team_id" => 1,
+            "match_team_id"            => 7,
+            "master_team_alias"        => "",
+            "add_master_team"          => false
+        ]);
+
+        $response->assertJson(['message' => 'Unauthenticated.']);
+    }
 }
