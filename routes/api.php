@@ -49,6 +49,9 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // Teams routes
     Route::get('/matched-teams', 'TeamsController@getTeams')->name('teams.api');
 
+    // Events Group routes
+    Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
+
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 
