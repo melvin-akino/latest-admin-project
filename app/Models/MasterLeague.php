@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class MasterTeam extends Model
+class MasterLeague extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'master_teams';
+    protected $table = 'master_leagues';
 
     protected $fillable = [
         'sport_id',

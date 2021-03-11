@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\{League, Provider, SystemConfiguration AS SC};
+use App\Facades\MatchingFacade;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class LeaguesController extends Controller
 {
@@ -17,22 +17,34 @@ class LeaguesController extends Controller
      */
     public function getRawLeagues($providerId)
     {
-        $leagueGroups = DB::table('league_groups')->pluck('league_id');
-        $data         = League::whereNotIn('id', $leagueGroups)
-            ->where('provider_id', $providerId)
-            ->get();
+        $data = League::getLeaguesByProvider($providerId, false);
 
         return response()->json($data);
     }
 
     public function getLeagues()
     {
-        $providerId   = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagueGroups = DB::table('league_groups')->pluck('league_id');
-        $leagues      = League::whereIn('id', $leagueGroups)
-            ->where('provider_id', $providerId)
-            ->get();
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $leagues    = League::getLeaguesByProvider($providerId);
 
         return response()->json($leagues);
+    }
+
+    /**
+     * Save Grouped Leagues to Database to server as available entries for Leagues Master List
+     * 
+     * @param  object   Illuminate\Http\Request $request
+     *     $request->primary_provider_league_id   int         Dropdown selected value
+     *     $request->match_league_id              int         Raw Name ID
+     *     $request->master_league_alias          string      Alias Text input
+     *     $request->add_master_league            boolean     Checkbox value
+     * 
+     * @param  string   MatchingFacade $matching   ['leauge', 'team', 'event', 'event_market]
+     * 
+     * @return json
+     */
+    public function postMatchLeagues(Request $request)
+    {
+        MatchingFacade::postMatch($request, 'league');
     }
 }

@@ -21,4 +21,24 @@ class Team extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Get `teams` data by Provider, also allowing to choose from `raw` or `existing match`
+     * 
+     * @param  int          $providerId
+     * @param  bool|boolean $grouped
+     * 
+     * @return object
+     */
+    public static function getTeamsByProvider(int $providerId, bool $grouped = true)
+    {
+        $where = $grouped ? "whereIn" : "whereNotIn";
+
+        return self::{$where}('id', function ($query) {
+                $query->select('team_id')
+                    ->from('team_groups');
+            })
+            ->where('provider_id', $providerId)
+            ->get();
+    }
 }

@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
-class MasterTeam extends Model
+class MasterEvent extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'master_teams';
+    protected $table = 'master_events';
 
     protected $fillable = [
         'sport_id',
-        'name',
+        'master_league_id',
+        'master_team_home_id',
+        'master_team_away_id',
+        'master_event_unique_id',
     ];
 
     protected $hidden = [

@@ -21,4 +21,24 @@ class League extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Get `leagues` data by Provider, also allowing to choose from `raw` or `existing match`
+     * 
+     * @param  int          $providerId
+     * @param  bool|boolean $grouped
+     * 
+     * @return object
+     */
+    public static function getLeaguesByProvider(int $providerId, bool $grouped = true)
+    {
+        $where = $grouped ? "whereIn" : "whereNotIn";
+
+        return self::{$where}('id', function ($query) {
+                $query->select('league_id')
+                    ->from('league_groups');
+            })
+            ->where('provider_id', $providerId)
+            ->get();
+    }
 }

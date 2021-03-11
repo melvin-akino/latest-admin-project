@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\WalletServiceProvider::class,
         App\Providers\KafkaServiceProvider::class,
+        App\Providers\MatchingServiceProvider::class,
 
     ],
 

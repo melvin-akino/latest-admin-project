@@ -69,10 +69,10 @@ class TeamTest extends AdminAccountTestCase
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ])->json('POST', '/api/teams/match', [
-                "primary_provider_team_id" => 1,
-                "match_team_id"            => 7,
-                "master_team_alias"        => "",
-                "add_master_team"          => false
+            "primary_provider_team_id" => 1,
+            "match_team_id"            => 7,
+            "master_team_alias"        => "",
+            "add_master_team"          => false
         ]);
 
         $response->assertStatus(200);
@@ -86,10 +86,10 @@ class TeamTest extends AdminAccountTestCase
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ])->json('POST', '/api/teams/match', [
-                "primary_provider_team_id" => 1,
-                "match_team_id"            => 7,
-                "master_team_alias"        => "",
-                "add_master_team"          => false
+            "primary_provider_team_id" => 1,
+            "match_team_id"            => 7,
+            "master_team_alias"        => "",
+            "add_master_team"          => false
         ]);
 
         $response->assertJson(['message' => 'Unauthenticated.']);
