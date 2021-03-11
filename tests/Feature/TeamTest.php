@@ -60,4 +60,38 @@ class TeamTest extends AdminAccountTestCase
 
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
+
+    public function testMatchTeamsWithToken()
+    {
+        $this->initialUser();
+
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ])->json('POST', '/api/teams/match', [
+                "primary_provider_team_id" => 1,
+                "match_team_id"            => 7,
+                "master_team_alias"        => "",
+                "add_master_team"          => false
+        ]);
+
+        $response->assertStatus(200);
+    }
+
+    public function testMatchTeamsNoWithToken()
+    {
+        $this->initialUser();
+
+        $response = $this->withHeaders([
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer XXX'
+        ])->json('POST', '/api/teams/match', [
+                "primary_provider_team_id" => 1,
+                "match_team_id"            => 7,
+                "master_team_alias"        => "",
+                "add_master_team"          => false
+        ]);
+
+        $response->assertJson(['message' => 'Unauthenticated.']);
+    }
 }
