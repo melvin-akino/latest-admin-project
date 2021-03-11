@@ -39,7 +39,7 @@ class TeamsController extends Controller
      *     $request->master_team_alias          string      Alias Text input
      *     $request->add_master_team            boolean     Checkbox value
      * 
-     * @param  string   MatchingFacade $matching   ['leauge', 'team', 'event', 'event_market]
+     * @param  string   MatchingFacade $matching   ['leauge', 'team']
      * 
      * @return json
      */

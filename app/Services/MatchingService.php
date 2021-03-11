@@ -16,10 +16,8 @@ class MatchingService
 
         try {
             $types = [
-                'league'       => MasterLeague::class,
-                'team'         => MasterTeam::class,
-                'event'        => MasterEvent::class,
-                'event_market' => MasterEventMarket::class,
+                'league' => MasterLeague::class,
+                'team'   => MasterTeam::class,
             ];
 
             $master = !$request->{ 'add_master_' . $type } ? 'required|numeric|exists:master_' . $type . 's,id' : '';
