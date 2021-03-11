@@ -10,7 +10,7 @@ class LeagueTest extends AdminAccountTestCase
     public function testLeaguesByProviderIdWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/leagues/1', [
+        $response = $this->get('/api/matched-leagues', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -27,7 +27,7 @@ class LeagueTest extends AdminAccountTestCase
     }
 
     public function testLeaguesByProviderIdWithoutToken() {
-        $response = $this->get('/api/leagues/1', [
+        $response = $this->get('/api/matched-leagues', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);

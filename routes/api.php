@@ -44,10 +44,10 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
     
     // Leagues routes
-    Route::get('/leagues/{providerId}', 'LeaguesController@getLeaguesByProviderId')->name('leagues.api');
+    Route::get('/matched-leagues', 'LeaguesController@getLeagues')->name('leagues.api');
         
     // Teams routes
-    Route::get('/teams/{providerId}', 'TeamsController@getTeamsByProviderId')->name('teams.api');
+    Route::get('/matched-teams', 'TeamsController@getTeams')->name('teams.api');
 
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
