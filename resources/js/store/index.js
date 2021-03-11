@@ -13,6 +13,7 @@ import systemConfigurations from './systemConfigurations'
 import generalErrors from './generalErrors'
 import providerErrors from './providerErrors'
 import wallet from './wallet'
+import masterlistMatching from './masterlistMatching'
 
 export default new Vuex.Store({
   state: {
@@ -50,6 +51,7 @@ export default new Vuex.Store({
     systemConfigurations,
     generalErrors,
     providerErrors,
-    wallet
+    wallet,
+    masterlistMatching
   }
 })

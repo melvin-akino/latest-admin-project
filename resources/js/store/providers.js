@@ -62,9 +62,10 @@ const mutations = {
 }
 
 const actions = {
-  getProviders({commit, dispatch}) {
+  getProviders({commit, dispatch}, non_primary = false) {
     commit('SET_IS_LOADING_PROVIDERS', true)
-    axios.get('providers', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    let params = non_primary ? { non_primary } : null
+    axios.get('providers', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_PROVIDERS', response.data.data)
       commit('SET_IS_LOADING_PROVIDERS', false)

@@ -3,23 +3,30 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderRequest;
-use App\Models\Provider;
+use App\Models\{Provider,SystemConfiguration};
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Carbon\Carbon;
 class ProviderService
 {
-    public static function getAllProviders()
+    public static function getAllProviders($nonPrimary = false)
     {
         try {
-        $providers = Provider::orderBy('name', 'asc')
-            ->get();
+          if($nonPrimary) {
+            $primaryProvider = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $providers = Provider::where('id', '!=', $primaryProvider)
+                        ->where('is_enabled', true)
+                        ->get();
+          } else {
+            $providers = Provider::orderBy('name', 'asc')
+                ->get();
+          }
 
-        return response()->json([
-            'status'      => true,
-            'status_code' => 200,
-            'data'        => !empty($providers) ? $providers : null
-        ], 200);
+          return response()->json([
+              'status'      => true,
+              'status_code' => 200,
+              'data'        => !empty($providers) ? $providers : null
+          ], 200);
         }
         catch (Exception $e)
         {

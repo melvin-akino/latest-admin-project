@@ -107,6 +107,11 @@ export default {
         icon: "mdi-cash-multiple",
         title: "Providers",
         to: "/providers"
+      },
+      {
+        icon: "mdi-arrow-decision",
+        title: "Masterlist Matching",
+        to: "/matching"
       }
       // {
       //   title: "icons",
