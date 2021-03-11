@@ -10,7 +10,7 @@ class TeamTest extends AdminAccountTestCase
     public function testTeamsByProviderIdWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/teams', [
+        $response = $this->get('/api/matched-teams', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -27,7 +27,7 @@ class TeamTest extends AdminAccountTestCase
     }
 
     public function testTeamsByProviderIdWithoutToken() {
-        $response = $this->get('/api/teams', [
+        $response = $this->get('/api/matched-teams', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
