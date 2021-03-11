@@ -44,6 +44,6 @@ class EventGroupService
     }
 
     private static function getMasterEventId($primaryProviderEventId) {
-        return EventGroup::where('event_id', $primaryProviderEventId)->first()->event_id;
+        return EventGroup::where('event_id', $primaryProviderEventId)->first()->master_event_id;
     }
 }
