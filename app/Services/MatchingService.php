@@ -22,7 +22,7 @@ class MatchingService
                 'event_market' => MasterEventMarket::class,
             ];
 
-            $master = $request->{ 'add_master_' . $type } ? 'numeric|exists:master_' . $type . 's,id' : '';
+            $master = !$request->{ 'add_master_' . $type } ? 'numeric|exists:master_' . $type . 's,id' : '';
             $raw    = 'numeric|exists:' . $type . 's,id';
             $alias  = $request->{ 'add_master_' . $type } ? 'required|min:1|max:100' : 'max:100';
 
