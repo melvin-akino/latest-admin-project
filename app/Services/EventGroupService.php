@@ -14,8 +14,8 @@ class EventGroupService
         DB::beginTransaction();
         try {
                 $eventGroup = new EventGroup([
-                    'primary_provider_event_id' => $request->primary_provider_event_id,
-                    'match_event_id'            => $request->match_event_id
+                    'master_event_id' => self::getMasterEventId($request->primary_provider_event_id),
+                    'event_id'        => $request->match_event_id
                 ]);
 
             if ($eventGroup->save())
@@ -32,7 +32,7 @@ class EventGroupService
         {
             DB::rollBack();
 
-            Log::info('Creating event group for primary provider event id: ' . $request->primary_provider_event_id . ' has failed.');
+            Log::info('Creating event group for event id: ' . $request->match_event_id . ' has failed.');
             Log::error($e->getMessage());
 
             return response()->json([
@@ -41,5 +41,9 @@ class EventGroupService
                 'error'       => trans('responses.internal-error')
             ], 500);
         }
+    }
+
+    private static function getMasterEventId($primaryProviderEventId) {
+        return EventGroup::where('event_id', $primaryProviderEventId)->first()->event_id;
     }
 }

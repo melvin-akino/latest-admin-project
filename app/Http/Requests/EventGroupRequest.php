@@ -26,8 +26,8 @@ class EventGroupRequest extends FormRequest
     public function rules()
     {
         return [
-            'primary_provider_event_id' => 'required|numeric',
-            'match_event_id'            => 'required|numeric'
+            'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
+            'match_event_id'            => 'required|int|exists:events,id'
         ];
     }
 
