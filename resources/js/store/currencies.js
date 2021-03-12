@@ -2,20 +2,10 @@ import { getToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
-  providers: [],
   currencies: []
 } 
 
 const getters = {
-  providerFilters(state) {
-    let allOption = { text: 'All', value: 'all' }
-    let filters = [allOption]
-    state.providers.map(provider => {
-      let option = { text: provider.alias, value: provider.id }
-      filters.push(option)
-    })
-    return filters
-  },
   currencyFilters(state) {
     let allOption = { text: 'All', value: 'all' }
     let filters = [allOption]
@@ -28,31 +18,12 @@ const getters = {
 }
 
 const mutations = {
-  SET_PROVIDERS: (state, providers) => {
-    state.providers = providers
-  },
   SET_CURRENCIES: (state, currencies) => {
     state.currencies = currencies
   }  
 } 
 
 const actions = {
-  getProviders({commit, dispatch}) {
-    axios.get('providers', { headers: { 'Authorization': `Bearer ${getToken()}` } })
-    .then(response => {
-      commit('SET_PROVIDERS', response.data.data)
-    })
-    .catch(err => {
-      commit('SET_PROVIDERS', [])
-      if(!axios.isCancel(err)) {
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "error",
-          text: err.response.data.message
-        });
-      }
-    })
-  },
   getCurrencies({commit, dispatch}) {
     axios.get('currencies', { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {

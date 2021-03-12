@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Provider;
-use Illuminate\Http\Request;
+use App\Http\Requests\ProviderRequest;
+use App\Facades\ProviderFacade;
 
 class ProvidersController extends Controller
 {
     public function index()
     {
-        $providers = Provider::getAllProviders();              
+        return ProviderFacade::getAllProviders();
+    }
 
-        $toLogs = [
-          "class"       => "ProvidersController",
-          "message"     => $providers,
-          "module"      => "API",
-          "status_code" => 200
-        ];
-        monitorLog('monitor_api', 'info', $toLogs);
+    public function create(ProviderRequest $request)
+    {
+        return ProviderFacade::create($request);
+    }
 
-        return response()->json($providers);
+    public function update(ProviderRequest $request)
+    {
+        return ProviderFacade::update($request);
+    }
+    public function getIdFromAlias($alias)
+    {
+        return ProviderFacade::getIdFromAlias($alias);
     }
 }

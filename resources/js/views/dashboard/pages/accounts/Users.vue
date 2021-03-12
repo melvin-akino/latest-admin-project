@@ -18,18 +18,22 @@
       </v-toolbar>
       <v-data-table
         :headers="headers"
-        :items="usersTable"
+        :items="users"
         :search="search"
         :items-per-page="10"
         :loading="isLoadingUsers"
         loading-text="Loading Users"
         :page="page"
         @pagination="getPage"
+        @current-items="getWalletDataForCurrentItems"
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ usersTable.length }}</p>
+            <p class="subtitle-1">Total Accounts: {{ users.length }}</p>
           </v-toolbar>
+        </template>
+        <template v-slot:[`item.firstname`]="{ item }">
+          <span>{{item.firstname}} {{item.lastname}}</span>   
         </template>
         <template v-slot:[`item.credits`]="{ item }">
           <span v-if="!item.hasOwnProperty('credits')">
@@ -40,7 +44,7 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{ item.credits | moneyFormat }}</span>    
+          <span v-else>{{ item.credits ? item.credits : 0 | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.currency`]="{ item }">
           <span v-if="!item.hasOwnProperty('currency')">
@@ -51,33 +55,16 @@
               :width="1"
             ></v-progress-circular>
           </span>    
-          <span v-else>{{item.currency}}</span>    
+          <span v-else>{{ item.currency ? item.currency : '-' }}</span>    
         </template>
         <template v-slot:[`item.open_bets`]="{ item }">
-          <span v-if="!item.hasOwnProperty('open_bets')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
-          <span v-else>{{item.open_bets | moneyFormat}}</span>    
+          <span>{{ item.open_bets ? item.open_bets : 0 | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
-          <span v-if="!item.hasOwnProperty('last_bet')">
-            <v-progress-circular
-              indeterminate
-              color="#5b5a58"
-              :size="15"
-              :width="1"
-            ></v-progress-circular>
-          </span>    
-          <span v-else>{{item.last_bet}}</span>    
+          <span>{{ item.last_bet ? item.last_bet : '-' }}</span>    
         </template>
         <template v-slot:[`item.last_login`]="{ item }">
-          <span v-if="!item.last_login">-</span>
-          <span v-else>{{item.last_login}}</span>    
+          <span>{{ item.last_login ? item.last_login : '-' }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-select :items="userStatus" dense v-model="item.status" @change="updateUserStatus(item)"></v-select>
@@ -116,7 +103,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
 import bus from '../../../../eventBus'
 import { moneyFormat } from '../../../../helpers/numberFormat'
 
@@ -131,7 +118,7 @@ export default {
   data: () => ({
     headers: [
       { text: "USERNAME", value: "email" },
-      { text: "FULL NAME", value: "full_name" },
+      { text: "FULL NAME", value: "firstname" },
       { text: "CREDITS", value: "credits" },
       { text: "CURRENCY", value: "currency" },
       { text: "OPEN BETS", value: "open_bets" },
@@ -147,22 +134,21 @@ export default {
         sortable: false
       }
     ],
-    search: '',
-    page: null
+    search: null,
+    page: 1
   }),
   computed: {
-    ...mapState('users', ['userStatus', 'isLoadingUsers']),
-    ...mapState('resources', ['currencies']),
-    ...mapGetters('users', ['usersTable']),
+    ...mapState('users', ['users', 'userStatus', 'isLoadingUsers']),
+    ...mapState('currencies', ['currencies']),
   },
   mounted() {
-    this.getUsersList()
+    this.getUsers()
     this.getCurrencies()
   },
   methods: {
     ...mapMutations('users', { setUsers: 'SET_USERS' }),
-    ...mapActions('users', ['getUsersList', 'manageUser']),
-    ...mapActions('resources', ['getCurrencies']),
+    ...mapActions('users', ['getUsers', 'manageUser', 'getUserWalletForCurrentItems']),
+    ...mapActions('currencies', ['getCurrencies']),
     async updateUserStatus(user) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
@@ -187,6 +173,20 @@ export default {
     },
     getPage(pagination) {
       this.page = pagination.page
+    },
+    getWalletDataForCurrentItems(users) {
+      if(users.length != 0) {
+        let noWalletData = []
+        users.map(user => {
+          if(!user.hasOwnProperty('credits') && !user.hasOwnProperty('currency')) {
+            noWalletData.push({ uuid: user.uuid, currency: user.currency_code })
+          }
+        })
+
+        if(noWalletData.length != 0) {
+          this.getUserWalletForCurrentItems(noWalletData)
+        }
+      }
     }
   },
   filters: {

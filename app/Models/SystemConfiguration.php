@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Contracts\Activity;
+use Exception;
 
 class SystemConfiguration extends Model
 {
@@ -53,5 +54,23 @@ class SystemConfiguration extends Model
         }
 
         return !empty($data) ? $data : [];
+    }
+
+    /**
+     * Get column `value` from parameter `type`
+     * 
+     * @param  string $type
+     * 
+     * @return string|int|float
+     */
+    public static function getValueByType(string $type)
+    {
+        $query = self::where('type', $type);
+
+        if ($query->count()) {
+            return $query->first()->value;
+        } else {
+            throw new Exception('Type does not exist.');
+        }
     }
 }

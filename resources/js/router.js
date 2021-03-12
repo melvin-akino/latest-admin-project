@@ -42,7 +42,7 @@ const router = new Router({
               component: () => import('./views/dashboard/pages/accounts/UserTransactions'),
             },
             {
-              name: 'Providers',
+              name: 'Provider Accounts',
               path: 'providers',
               component: () => import('./views/dashboard/pages/accounts/Providers'),
             },
@@ -104,6 +104,11 @@ const router = new Router({
           name: 'Currencies',
           path: 'currencies',
           component: () => import('./views/dashboard/pages/Currencies')
+        },
+        {
+          name: 'Providers',
+          path: 'providers',
+          component: () => import('./views/dashboard/pages/Providers')
         },
         {
           name: 'User Profile',

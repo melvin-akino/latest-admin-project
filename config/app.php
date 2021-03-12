@@ -174,7 +174,9 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\WalletServiceProvider::class
+        App\Providers\WalletServiceProvider::class,
+        App\Providers\KafkaServiceProvider::class,
+        App\Providers\MatchingServiceProvider::class,
 
     ],
 

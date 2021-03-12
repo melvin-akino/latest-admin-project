@@ -6,6 +6,7 @@ use App\Models\GeneralErrorMessage;
 use App\Http\Requests\GeneralErrorMessageRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Exception;
 
 class GeneralErrorMessagesController extends Controller
 {

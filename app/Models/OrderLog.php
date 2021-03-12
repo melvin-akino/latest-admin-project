@@ -9,7 +9,7 @@ class OrderLog extends Model
     protected $table = "order_logs";
 
     public function ProviderAccountOrder() {
-        return $this->hasOne(App/Models/ProviderAccountOrder::class, 'order_log_id', 'id');
+        return $this->hasOne(App\Models\ProviderAccountOrder::class, 'order_log_id', 'id');
     }
 
 }
