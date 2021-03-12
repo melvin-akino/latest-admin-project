@@ -55,6 +55,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     // Events routes
     Route::get('/raw-events/{providerId}', 'EventsController@getRawEvents')->name('events.api');
+    Route::get('/matched-events', 'EventsController@getEvents')->name('matched-events.api');
     Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
 
     //Routes to get all currencies

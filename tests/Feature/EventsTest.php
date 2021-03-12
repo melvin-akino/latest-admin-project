@@ -40,4 +40,38 @@ class EventsTest extends AdminAccountTestCase
 
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
+
+    public function testEventsByProviderIdWithToken()
+    {
+        $this->initialUser();
+        $response = $this->get('/api/matched-events', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            '*' => [
+                'ref_schedule',
+                'missing_count',
+                'game_schedule',
+                'score',
+                'running_time',
+                'home_penalty',
+                'away_penalty',
+                'league',
+                'teamHome',
+                'teamAway'
+            ]
+        ]);
+    }
+
+    public function testEventsByProviderIdWithoutToken() {
+        $response = $this->get('/api/matched-events', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer XXX'
+        ]);
+
+        $response->assertJson(['message' => 'Unauthenticated.']);
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Events;
+use App\Models\{Events, Provider, SystemConfiguration AS SC};
 use Illuminate\Http\Request;
 
 class EventsController extends Controller
@@ -19,5 +19,13 @@ class EventsController extends Controller
         $data = Events::getEventsByProvider($providerId, false);
 
         return response()->json($data);
+    }
+
+    public function getEvents()
+    {
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $events    = Events::getEventsByProvider($providerId);
+
+        return response()->json($events);
     }
 }
