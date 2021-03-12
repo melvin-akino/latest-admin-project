@@ -3,24 +3,17 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderRequest;
-use App\Models\{Provider,SystemConfiguration};
+use App\Models\{Provider,SystemConfiguration,League,Team};
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Carbon\Carbon;
 class ProviderService
 {
-    public static function getAllProviders($nonPrimary = false)
+    public static function getAllProviders()
     {
         try {
-          if($nonPrimary) {
-            $primaryProvider = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
-            $providers = Provider::where('id', '!=', $primaryProvider)
-                        ->where('is_enabled', true)
-                        ->get();
-          } else {
             $providers = Provider::orderBy('name', 'asc')
                 ->get();
-          }
 
           return response()->json([
               'status'      => true,
@@ -31,6 +24,41 @@ class ProviderService
         catch (Exception $e)
         {
             Log::info('Viewing providers failed.');
+            Log::error($e->getMessage());
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'error'       => trans('responses.internal-error')
+            ], 500);
+        }
+    }
+
+    public function getNonPrimaryProviders()
+    {
+        try {
+          $primaryProvider = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+          $providers = Provider::where('id', '!=', $primaryProvider)
+                            ->where('is_enabled', true)
+                            ->get();
+          $data = [];
+
+          foreach($providers as $provider) {
+            $data[] = [
+              'id' => $provider->id,
+              'name' => $provider->name,
+              'alias' => $provider->alias,
+              'raw_leagues' => League::getLeaguesByProvider($provider->id, false)->count(),
+              'raw_teams' =>  Team::getTeamsByProvider($provider->id, false)->count()
+            ];
+          }
+
+          return response()->json([
+              'status'      => true,
+              'status_code' => 200,
+              'data'        => !empty($data) ? $data : null
+          ], 200);
+        } catch (Exception $e) {
+            Log::info('Viewing non primary providers failed.');
             Log::error($e->getMessage());
             return response()->json([
                 'status'      => false,

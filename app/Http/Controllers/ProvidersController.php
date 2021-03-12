@@ -7,9 +7,14 @@ use App\Facades\ProviderFacade;
 use Illuminate\Http\Request;
 class ProvidersController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        return ProviderFacade::getAllProviders($request->non_primary);
+        return ProviderFacade::getAllProviders();
+    }
+
+    public function getNonPrimaryProviders()
+    {
+        return ProviderFacade::getNonPrimaryProviders();
     }
 
     public function create(ProviderRequest $request)

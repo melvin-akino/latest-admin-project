@@ -8,7 +8,7 @@
     class="mt-4 matchingTable"
   > 
     <template v-slot:item="{ item, index }">
-      <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :matchedData="matchedData" :item="item" :key="index" ></matching-table-row>
+      <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :item="item" :itemNumber="index" :key="item.id" ></matching-table-row>
     </template>
   </v-data-table>
 </template>
@@ -34,7 +34,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData', 'matchedData']),
+    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData']),
     dataType() {
       let path = this.$route.path.split('/')
       return path[2].charAt(0) + path[2].slice(1)
@@ -53,6 +53,5 @@ export default {
   
   .matchingTable .v-label {
     font-size: 13px;
-    color: rgba(0, 0, 0, 0.87);
   }
 </style>

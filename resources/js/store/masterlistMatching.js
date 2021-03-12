@@ -17,8 +17,8 @@ const mutations = {
   SET_MATCHED_DATA: (state, data) => {
     state.matchedData = data
   },
-  REMOVE_MATCHED_DATA: (state, index) => {
-    state.rawData.splice(index, 1)
+  REMOVE_MATCHED_DATA: (state, id) => {
+    state.rawData = state.rawData.filter(data => data.id != id)
   }
 }
 
@@ -63,7 +63,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.post(`${payload.type}/match`, payload.data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        commit('REMOVE_MATCHED_DATA', payload.index)
+        commit('REMOVE_MATCHED_DATA', payload.id)
         resolve()
       })
       .catch(err => {
