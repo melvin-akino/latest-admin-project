@@ -14,6 +14,14 @@ class GeneralErrorMessagesController extends Controller
     {
         $errorMessages = GeneralErrorMessage::getAll();      
 
+        $toLogs = [
+          "class"       => "GeneralErrorMessagesController",
+          "message"     => $errorMessages,
+          "module"      => "API",
+          "status_code" => 200
+        ];
+        monitorLog('monitor_api', 'info', $toLogs);
+
         return response()->json($errorMessages);
     }
 
@@ -36,6 +44,17 @@ class GeneralErrorMessagesController extends Controller
                 }
 
                 DB::commit();
+                
+                $toLogs = [
+                  "class"        => "GeneralErrorMessagesController",
+                  "message"      => [
+                    'message'     => $message,
+                    'data'        => $data
+                  ],
+                  "module"       => "API",
+                  "status_code"  => 200
+                ];
+                monitorLog('monitor_api', 'info', $toLogs);
 
                 return response()->json([
                     'status'      => true,
@@ -47,6 +66,15 @@ class GeneralErrorMessagesController extends Controller
         }  
         catch (Exception $e) {
             DB::rollBack();
+
+            $toLogs = [
+              "class"       => "GeneralErrorMessagesController",
+              "message"     => "Line " . $e->getLine() . " | " . $e->getMessage(),
+              "module"      => "API_ERROR",
+              "status_code" => $e->getCode()
+            ];
+            monitorLog('monitor_api', 'error', $toLogs);
+
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,
