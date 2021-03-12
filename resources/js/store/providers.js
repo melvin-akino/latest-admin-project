@@ -58,6 +58,13 @@ const mutations = {
         }) 
       }
     })
+  },
+   UPDATE_PROVIDER_COUNT: (state, data) => {
+    state.providers.map(provider => {
+      if(provider.hasOwnProperty('raw_leagues') && provider.hasOwnProperty('raw_teams') && provider[`raw_${data.type}`]) {
+        Vue.set(provider, `raw_${data.type}`, provider[`raw_${data.type}`] - 1)
+      }
+    })
   }
 }
 

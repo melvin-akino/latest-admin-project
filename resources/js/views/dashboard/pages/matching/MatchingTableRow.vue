@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 
@@ -101,6 +101,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations('providers', { updateProviderCount: 'UPDATE_PROVIDER_COUNT' }),
     ...mapActions('masterlistMatching', ['matchData']),
     initializeParams() {
       let params = {}
@@ -129,6 +130,7 @@ export default {
             id: this.item.id
           }
           await this.matchData(payload)
+          this.updateProviderCount({ type: this.dataType, provider_id: this.item.provider_id })
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
             text: `Matched ${this.dataTypeSingular} successfully.`
