@@ -18,16 +18,12 @@ class EventsTest extends AdminAccountTestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             '*' => [
+                'sport_id',
+                'provider_id',
                 'ref_schedule',
-                'missing_count',
-                'game_schedule',
-                'score',
-                'running_time',
-                'home_penalty',
-                'away_penalty',
-                'league',
-                'teamHome',
-                'teamAway'
+                'league_name',
+                'team_home_name',
+                'team_away_name'
             ]
         ]);
     }
@@ -52,16 +48,12 @@ class EventsTest extends AdminAccountTestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             '*' => [
+                'sport_id',
+                'provider_id',
                 'ref_schedule',
-                'missing_count',
-                'game_schedule',
-                'score',
-                'running_time',
-                'home_penalty',
-                'away_penalty',
-                'league',
-                'teamHome',
-                'teamAway'
+                'league_name',
+                'team_home_name',
+                'team_away_name'
             ]
         ]);
     }

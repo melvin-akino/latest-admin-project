@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use App\Models\{League, Team};
+use Illuminate\Support\Facades\DB;
 
 class Events extends Model
 {
@@ -42,11 +43,15 @@ class Events extends Model
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        return self::with('league', 'teamHome', 'teamAway')->{$where}('id', function ($query) {
+        return DB::table('events as e')
+            ->join('leagues as l', 'l.id', 'e.league_id')
+            ->join('teams as th', 'th.id', 'e.team_home_id')
+            ->join('teams as ta', 'ta.id', 'e.team_away_id')
+            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name'])
+            ->{$where}('e.id', function ($query) {
                 $query->select('event_id')
                     ->from('event_groups');
             })
-            ->where('provider_id', $providerId)
             ->get();
     }
 
