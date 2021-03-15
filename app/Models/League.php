@@ -38,6 +38,14 @@ class League extends Model
                 $query->select('league_id')
                     ->from('league_groups');
             })
+            ->when(!$grouped, function ($query) use ($providerId) {
+                $query->whereIn('id', function ($where) use ($providerId) {
+                    $where->select('data_id')
+                        ->from('unmatched_data')
+                        ->where('data_type', 'league')
+                        ->where('provider_id', $providerId);
+                });
+            })
             ->where('provider_id', $providerId)
             ->get();
     }
