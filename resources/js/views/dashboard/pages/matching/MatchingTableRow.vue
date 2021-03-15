@@ -112,7 +112,7 @@ export default {
     primaryProviderErrors() {
       let errors = []
       if (!this.$v.matchingForm.primary_provider_id.$dirty) return errors
-      !this.$v.matchingForm.primary_provider_id.required && errors.push('Matched league is required.')
+      !this.$v.matchingForm.primary_provider_id.required && errors.push(`Matched ${this.dataTypeSingular} is required.`)
       return errors
     },
     aliasErrors() {

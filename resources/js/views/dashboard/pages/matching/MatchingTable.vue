@@ -7,7 +7,7 @@
     :loading-text="`Loading ${dataType}`"
     class="mt-4 matchingTable"
   > 
-    <template v-slot:item="{ item, index }">
+    <template v-slot:item="{ item }">
       <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :item="item" :key="item.id" ></matching-table-row>
     </template>
   </v-data-table>

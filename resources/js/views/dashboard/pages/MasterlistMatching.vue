@@ -62,7 +62,7 @@ export default {
       return this.checkIfHasRawData('leagues')
     },
     hasRawTeams() {
-      return this.checkIfHasRawData('leagues')
+      return this.checkIfHasRawData('teams')
     },
     hasRawEvents() {
       return this.checkIfHasRawData('events')
