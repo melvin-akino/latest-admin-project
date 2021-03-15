@@ -8,3 +8,4 @@ class OrderFacade extends Facade
 {
     protected static function getFacadeAccessor() { return 'App\Services\OrderService'; }
 }
+

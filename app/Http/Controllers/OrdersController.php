@@ -2,34 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Http\Controllers\Controller;
+use App\Facades\OrderFacade;
 use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
-use App\Facades\OrderFacade;
 
 class OrdersController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Order::getAllOrders($request->id);        
-
-        return response()->json($orders);
+        return OrderFacade::getProviderOrders($request);
     }
-
     public function getUserOpenOrders(Request $request)
     {
-        $openOrders = Order::getOpenOrders($request->user_id);
-
-        return response()->json($openOrders);
+        return OrderFacade::getOpenOrders($request);
     }
-
     public function getUserTransactions(Request $request)
     {
-        $orders = Order::getUserTransactions($request);
-
-        return response()->json($orders);
+        return OrderFacade::getUserTransactions($request);
     }
-
     public function update(OrderRequest $request) 
     {
         return OrderFacade::update($request);
