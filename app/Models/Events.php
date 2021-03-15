@@ -52,6 +52,7 @@ class Events extends Model
                 $query->select('event_id')
                     ->from('event_groups');
             })
+            ->where('e.provider_id', $providerId)
             ->get();
     }
 
