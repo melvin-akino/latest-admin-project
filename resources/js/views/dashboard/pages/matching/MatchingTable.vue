@@ -8,7 +8,7 @@
     class="mt-4 matchingTable"
   > 
     <template v-slot:item="{ item, index }">
-      <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :item="item" :itemNumber="index" :key="item.id" ></matching-table-row>
+      <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :item="item" :key="item.id" ></matching-table-row>
     </template>
   </v-data-table>
 </template>
@@ -18,13 +18,12 @@ import { mapState } from 'vuex'
 
 export default {
   name: 'MatchingTable',
-   components: {
+  components: {
     MatchingTableRow: () => import("./MatchingTableRow"),
   },
   data() {
     return {
       headers: [
-        { text: '#', value: 'number', sortable: false },
         { text: 'NAME', value: 'name' },
         { text: 'MATCHES', value: 'matches', sortable: false },
         { text: '', value: 'alias', sortable: false },

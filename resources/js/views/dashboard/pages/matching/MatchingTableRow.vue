@@ -1,12 +1,20 @@
 <template>
   <tr>
-    <td class="text-start">#{{itemNumber + 1}}</td>
-    <td class="text-start">{{item.name}}</td>
+    <td class="text-start">
+      <div v-if="dataType != 'events'">
+        <span>{{item.name}}</span>
+      </div>
+      <div v-else class="py-2">
+        <p class="rawEvent">{{item.league_name}}</p>
+        <p class="rawEvent">{{item.team_home_name}}</p>
+        <p class="rawEvent">{{item.team_away_name}}</p>
+        <p class="rawEvent">{{item.ref_schedule}}</p>
+      </div>
+    </td>
     <td class="text-start">
       <v-select
         :items="matchedData"
         item-value="id"
-        item-text="name"
         :label="`Select matched ${dataType}`"
         dense
         clearable
@@ -17,7 +25,25 @@
         :error-messages="primaryProviderErrors"
         @input="$v.matchingForm.primary_provider_id.$touch()"
         @blur="$v.matchingForm.primary_provider_id.$touch()"
-      ></v-select>
+      >
+        <template v-slot:selection="{ item }" v-if="dataType != 'events'">
+          <span>{{item.name}}</span>
+        </template>
+        <template v-slot:selection="{ item }" v-else>
+          <span>{{item.league_name}} - {{item.team_home_name}} vs {{item.team_away_name}} - {{item.ref_schedule}}</span>
+        </template>
+        <template v-slot:item="{ item }" v-if="dataType != 'events'">
+          <span class="matchOption">{{item.name}}</span>
+        </template>
+        <template v-slot:item="{ item }" v-else>
+          <div class="eventSelection py-2">
+            <p class="matchedEvent matchOption">{{item.league_name}}</p>
+            <p class="matchedEvent matchOption">{{item.team_home_name}}</p>
+            <p class="matchedEvent matchOption">{{item.team_away_name}}</p>
+            <p class="matchedEvent matchOption">{{item.ref_schedule}}</p>
+          </div>
+        </template>
+      </v-select>
     </td>
     <td class="text-start">
         <v-text-field
@@ -53,10 +79,10 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
-import { required, requiredIf } from 'vuelidate/lib/validators'
+import { requiredIf } from 'vuelidate/lib/validators'
 
 export default {
-  props: ['dataType', 'dataTypeSingular', 'item', 'itemNumber'],
+  props: ['dataType', 'dataTypeSingular', 'item'],
   name: 'MatchingTableRow',
   data() {
     return {
@@ -74,7 +100,11 @@ export default {
           return !this.matchingForm.add_master
         })
       },
-      master_alias: { required }
+      master_alias: { 
+        required: requiredIf(function() {
+          return this.dataType != 'events'
+        }) 
+      }
     }
   },
   computed: {
@@ -149,3 +179,19 @@ export default {
   }
 }
 </script>
+
+<style>
+  .matchingTable .rawEvent, .eventSelection .matchedEvent {
+    margin: 0;
+    padding: 0;
+  }
+
+  .matchOption {
+    font-size: 13px !important;
+  }
+
+  .eventSelection {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+</style>

@@ -18,7 +18,11 @@
             Teams
           </v-badge>
         </v-tab>
-        <!-- <v-tab to="events" @change="changeType('events')">Events</v-tab> -->
+        <v-tab to="events" @change="changeType('events')">
+          <v-badge color="error" content="!" :value="hasRawEvents">
+            Events
+          </v-badge>
+        </v-tab>
       </v-tabs>
       <v-tabs
         hide-slider
@@ -59,6 +63,9 @@ export default {
     },
     hasRawTeams() {
       return this.checkIfHasRawData('leagues')
+    },
+    hasRawEvents() {
+      return this.checkIfHasRawData('events')
     }
   },
   watch: {
@@ -83,7 +90,7 @@ export default {
     this.getProviders(true)
   },
   methods: {
-     ...mapMutations('masterlistMatching', { setRawData: 'SET_RAW_DATA', setMatchedData: 'SET_MATCHED_DATA' }),
+    ...mapMutations('masterlistMatching', { setRawData: 'SET_RAW_DATA', setMatchedData: 'SET_MATCHED_DATA' }),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('masterlistMatching', ['getRawData', 'getMatchedData']),
     changeType(type) {
@@ -100,7 +107,7 @@ export default {
       }
     }
   },
-   beforeRouteLeave(to, from, next) {
+  beforeRouteLeave(to, from, next) {
     this.setRawData([])
     this.setMatchedData([])
     next()
