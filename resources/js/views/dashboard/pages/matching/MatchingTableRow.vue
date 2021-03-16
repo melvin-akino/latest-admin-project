@@ -1,20 +1,13 @@
 <template>
   <tr>
     <td class="text-start">
-      <div v-if="dataType != 'events'">
-        <span>{{item.name}}</span>
-      </div>
-      <div v-else class="py-2">
-        <p class="rawEvent">{{item.league_name}}</p>
-        <p class="rawEvent">{{item.team_home_name}}</p>
-        <p class="rawEvent">{{item.team_away_name}}</p>
-        <p class="rawEvent">{{item.ref_schedule}}</p>
-      </div>
+      <div class="data py-2">{{item.data}}</div>
     </td>
     <td class="text-start">
-      <v-select
-        :items="matchedData"
+      <v-autocomplete
+        :items="matchedDataSelection"
         item-value="id"
+        item-text="data"
         :label="`Select matched ${dataType}`"
         dense
         clearable
@@ -26,24 +19,7 @@
         @input="$v.matchingForm.primary_provider_id.$touch()"
         @blur="$v.matchingForm.primary_provider_id.$touch()"
       >
-        <template v-slot:selection="{ item }" v-if="dataType != 'events'">
-          <span>{{item.name}}</span>
-        </template>
-        <template v-slot:selection="{ item }" v-else>
-          <span>{{item.league_name}} - {{item.team_home_name}} vs {{item.team_away_name}} - {{item.ref_schedule}}</span>
-        </template>
-        <template v-slot:item="{ item }" v-if="dataType != 'events'">
-          <span class="matchOption">{{item.name}}</span>
-        </template>
-        <template v-slot:item="{ item }" v-else>
-          <div class="eventSelection py-2">
-            <p class="matchedEvent matchOption">{{item.league_name}}</p>
-            <p class="matchedEvent matchOption">{{item.team_home_name}}</p>
-            <p class="matchedEvent matchOption">{{item.team_away_name}}</p>
-            <p class="matchedEvent matchOption">{{item.ref_schedule}}</p>
-          </div>
-        </template>
-      </v-select>
+      </v-autocomplete>
     </td>
     <td class="text-start">
         <v-text-field
@@ -120,6 +96,27 @@ export default {
       if (!this.$v.matchingForm.master_alias.$dirty) return errors
       !this.$v.matchingForm.master_alias.required && errors.push('Alias is required.')
       return errors
+    },
+    matchedDataSelection() {
+      if(this.matchedData.length != 0) {
+        let selection = []
+        this.matchedData.map(matched => {
+          let item = { ...matched }
+          if(this.dataType != 'events') {
+            this.$set(item, 'data', matched.name)
+          } else {
+            let event = ''
+            if(this.matchingForm.primary_provider_id == matched.id) {
+              event = `${matched.league_name} - ${matched.team_home_name} vs ${matched.team_away_name} (${matched.ref_schedule})`
+            } else {
+              event = `${matched.league_name} \n ${matched.team_home_name} \n ${matched.team_away_name} \n ${matched.ref_schedule}`
+            }
+            this.$set(item, 'data', event)
+          }
+          selection.push(item)
+        })
+        return selection
+      }
     }
   },
   watch: {
@@ -181,17 +178,12 @@ export default {
 </script>
 
 <style>
-  .matchingTable .rawEvent, .eventSelection .matchedEvent {
+  .matchingTable .rawEvent {
     margin: 0;
     padding: 0;
   }
 
-  .matchOption {
-    font-size: 13px !important;
-  }
-
-  .eventSelection {
-    flex-direction: column !important;
-    align-items: flex-start !important;
+  .v-list-item__title, .data {
+    white-space: pre-line;
   }
 </style>
