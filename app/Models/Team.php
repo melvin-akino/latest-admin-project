@@ -38,6 +38,14 @@ class Team extends Model
                 $query->select('team_id')
                     ->from('team_groups');
             })
+            ->when(!$grouped, function ($query) use ($providerId) {
+                $query->whereIn('id', function ($where) use ($providerId) {
+                    $where->select('data_id')
+                        ->from('unmatched_data')
+                        ->where('data_type', 'team')
+                        ->where('provider_id', $providerId);
+                });
+            })
             ->where('provider_id', $providerId)
             ->get();
     }

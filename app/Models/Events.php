@@ -52,6 +52,15 @@ class Events extends Model
                 $query->select('event_id')
                     ->from('event_groups');
             })
+            ->when(!$grouped, function ($query) use ($providerId) {
+                $query->whereIn('e.id', function ($where) use ($providerId) {
+                    $where->select('ud.data_id')
+                        ->from('unmatched_data AS ud')
+                        ->where('ud.data_type', 'event')
+                        ->where('ud.provider_id', $providerId);
+                });
+            })
+            ->where('e.provider_id', $providerId)
             ->get();
     }
 

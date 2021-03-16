@@ -45,6 +45,6 @@ class TeamsController extends Controller
      */
     public function postMatchTeams(Request $request)
     {
-        MatchingFacade::postMatch($request, 'team');
+        return MatchingFacade::postMatch($request, 'team');
     }
 }

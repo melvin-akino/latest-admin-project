@@ -58,13 +58,21 @@ const mutations = {
         }) 
       }
     })
+  },
+   UPDATE_PROVIDER_COUNT: (state, data) => {
+    state.providers.map(provider => {
+      if(provider.hasOwnProperty('raw_leagues') && provider.hasOwnProperty('raw_teams') && provider[`raw_${data.type}`]) {
+        Vue.set(provider, `raw_${data.type}`, provider[`raw_${data.type}`] - 1)
+      }
+    })
   }
 }
 
 const actions = {
-  getProviders({commit, dispatch}) {
+  getProviders({commit, dispatch}, non_primary = false) {
     commit('SET_IS_LOADING_PROVIDERS', true)
-    axios.get('providers', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    let path = non_primary ? 'providers/non-primary' : 'providers'
+    axios.get(path, { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_PROVIDERS', response.data.data)
       commit('SET_IS_LOADING_PROVIDERS', false)

@@ -45,6 +45,6 @@ class LeaguesController extends Controller
      */
     public function postMatchLeagues(Request $request)
     {
-        MatchingFacade::postMatch($request, 'league');
+        return MatchingFacade::postMatch($request, 'league');
     }
 }
