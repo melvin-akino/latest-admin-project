@@ -61,6 +61,7 @@ class Events extends Model
                 });
             })
             ->where('e.provider_id', $providerId)
+            ->orderBy('e.ref_schedule', 'desc')
             ->get();
     }
 

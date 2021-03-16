@@ -47,6 +47,7 @@ class League extends Model
                 });
             })
             ->where('provider_id', $providerId)
+            ->orderBy('name')
             ->get();
     }
 }
