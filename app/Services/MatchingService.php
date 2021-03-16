@@ -42,7 +42,7 @@ class MatchingService
                     ->where($type . '_id', $request->{ 'primary_provider_' . $type . '_id' })
                     ->first()
                     ->{ 'master_' . $type . '_id' };
-            } else { 
+            } else {
                 $sportId = DB::table($type . 's')
                     ->where('id', $request->{ 'match_' . $type . '_id' })
                     ->first()
@@ -60,6 +60,13 @@ class MatchingService
                     $type . '_id'             => $request->{ 'match_' . $type . '_id' }
                 ]);
 
+            $providerId = DB::table($type . 's')
+                ->where('id', $request->{ 'match_' . $type . '_id' })
+                ->first()
+                ->provider_id;
+
+            self::removeFromUnmatchedData(strtolower($type), $providerId, $request->{ 'match_' . $type . '_id' });
+
             DB::commit();
 
             return response()->json([
@@ -75,6 +82,25 @@ class MatchingService
                 'status_code' => 500,
                 'errors'      => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Remove Processed data to `unmatched_data` Database Table.
+     * 
+     * @param  string $type
+     * @param  int    $providerId
+     * @param  int    $id
+     */
+    public static function removeFromUnmatchedData(string $type, int $providerId, int $id)
+    {
+        $unmatched = DB::table('unmatched_data')
+            ->where('data_type', strtolower($type))
+            ->where('provider_id', $providerId)
+            ->where('data_id', $id);
+
+        if ($unmatched->count()) {
+            $unmatched->delete();
         }
     }
 }
