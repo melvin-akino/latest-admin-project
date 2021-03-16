@@ -1,6 +1,6 @@
 <template>
   <v-snackbar v-model="snackbar.show" right dark :color="snackbar.color">
-    <span class="subtitle-1">{{ snackbar.text }}</span>
+    <span class="subtitle-1 snackbar-text">{{ snackbar.text }}</span>
     <template v-slot:action="{ attrs }">
       <v-btn @click="snackbar.show = false" dark icon :bind="attrs">
         <v-icon>mdi-close</v-icon>
@@ -31,6 +31,10 @@ export default {
 </script>
 
 <style>
+  .snackbar-text {
+    text-transform: capitalize;
+  }
+
   .v-snack__content {
     padding: 0px 16px;
   }

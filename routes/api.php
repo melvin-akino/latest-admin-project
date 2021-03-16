@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
+    Route::get('/providers/non-primary', 'ProvidersController@getNonPrimaryProviders')->name('non-primary-providers.api');
     
     // Leagues routes
     Route::get('/raw-leagues/{providerId}', 'LeaguesController@getRawLeagues')->name('leagues.api');

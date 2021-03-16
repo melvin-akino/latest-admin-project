@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProviderRequest;
 use App\Facades\ProviderFacade;
-
 class ProvidersController extends Controller
 {
     public function index()
     {
         return ProviderFacade::getAllProviders();
+    }
+
+    public function getNonPrimaryProviders()
+    {
+        return ProviderFacade::getNonPrimaryProviders();
     }
 
     public function create(ProviderRequest $request)
