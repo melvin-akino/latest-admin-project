@@ -1,9 +1,7 @@
 <template>
   <tr>
     <td class="text-start">
-     <div class="data py-2">
-        <span>{{item.data}}</span>
-      </div>
+      <div class="data py-2">{{item.data}}</div>
     </td>
     <td class="text-start">
       <v-autocomplete
