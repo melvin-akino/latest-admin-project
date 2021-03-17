@@ -26,15 +26,18 @@ class League extends Model
      * Get `leagues` data by Provider, also allowing to choose from `raw` or `existing match`
      * 
      * @param  int          $providerId
+     * @param  string       $searchKey
+     * @param  int          $page
+     * @param  int          $limit
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getLeaguesByProvider(int $providerId, bool $grouped = true)
+    public static function getLeaguesByProvider(int $providerId, string $searchKey = '', int $page = 0, int $limit = 0, bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        return self::{$where}('id', function ($query) {
+        $query = self::{$where}('id', function ($query) {
                 $query->select('league_id')
                     ->from('league_groups');
             })
@@ -47,7 +50,15 @@ class League extends Model
                 });
             })
             ->where('provider_id', $providerId)
-            ->orderBy('name')
-            ->get();
+            ->where('name', 'LIKE', '%'.$searchKey.'%')
+            ->orderBy('name');
+        
+        if ($page == 0 || $limit == 0) {
+            return $query->get();
+        } else {
+            return $query->offset(($page - 1) * $limit)
+                ->limit($limit)
+                ->get();
+        }
     }
 }

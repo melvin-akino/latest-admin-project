@@ -5,19 +5,38 @@ namespace App\Http\Controllers;
 use App\Models\{League, Provider, SystemConfiguration AS SC};
 use App\Facades\MatchingFacade;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LeaguesController extends Controller
 {
     /**
      * Get raw `league_names` from paramgeter Provider
      * 
-     * @param  int $providerId
+     * @param  Request $request
      * 
      * @return json
      */
-    public function getRawLeagues($providerId)
+    public function getRawLeagues(Request $request)
     {
-        $data = League::getLeaguesByProvider($providerId, false);
+        $validator = Validator::make($request->all(), [
+            'providerId' => 'required',
+        ]);
+        if ($validator->fails())
+        {
+            return response(['errors'=>$validator->errors()->all()], 422);
+        }
+
+        $searchKey = '';
+        $page = 1;
+        $limit = 10;
+
+        if ($request->has('searchKey')) $searchKey = $request->searchKey;
+
+        if ($request->has('page')) $page = $request->page;
+
+        if ($request->has('limit')) $limit = $request->limit;
+
+        $data = League::getLeaguesByProvider($request->providerId, $searchKey, $page, $limit, false);
 
         return response()->json($data);
     }
