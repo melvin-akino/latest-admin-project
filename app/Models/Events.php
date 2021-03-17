@@ -61,6 +61,7 @@ class Events extends Model
                 });
             })
             ->where('e.provider_id', $providerId)
+            ->whereNull('e.deleted_at')
             ->orderBy('e.ref_schedule', 'desc')
             ->get();
     }
