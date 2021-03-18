@@ -10,7 +10,7 @@ class TeamTest extends AdminAccountTestCase
     public function testRawTeamsByProviderIdWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/raw-teams/1', [
+        $response = $this->get('/api/raw-teams?providerId=1&page=1&limit=10&searchKey=Tea', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -26,7 +26,7 @@ class TeamTest extends AdminAccountTestCase
     }
 
     public function testRaweamsByProviderIdWithoutToken() {
-        $response = $this->get('/api/raw-teams/1', [
+        $response = $this->get('/api/raw-teams?providerId=1&page=1&limit=10', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
@@ -50,6 +50,17 @@ class TeamTest extends AdminAccountTestCase
                 'provider_id'
             ]
         ]);
+    }
+
+    public function testRawTeamsByProviderIdWithoutProviderId()
+    {
+        $this->initialUser();
+        $response = $this->get('/api/raw-teams', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ]);
+
+        $response->assertStatus(422);
     }
 
     public function testTeamsByProviderIdWithoutToken() {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
+use Illuminate\Support\Facades\DB;
 
 class Team extends Model
 {
@@ -26,28 +27,51 @@ class Team extends Model
      * Get `teams` data by Provider, also allowing to choose from `raw` or `existing match`
      * 
      * @param  int          $providerId
+     * @param  string       $searchKey
+     * @param  int          $page
+     * @param  int          $limit
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getTeamsByProvider(int $providerId, bool $grouped = true)
+    public static function getTeamsByProvider(int $providerId, string $searchKey = '', int $page = 0, int $limit = 0, bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        return self::{$where}('id', function ($query) {
+        $query = DB::table('teams as t');
+
+        if (!$grouped) {
+            $query = $query->join('events as e', function($join) {
+                    $join->on('e.team_home_id', '=', 't.id')
+                        ->orOn('e.team_away_id', '=', 't.id');
+                })
+                ->join('league_groups as lg', 'lg.league_id', 'e.league_id');
+        }
+        
+        $query = $query->{$where}('t.id', function ($query) {
                 $query->select('team_id')
                     ->from('team_groups');
             })
             ->when(!$grouped, function ($query) use ($providerId) {
-                $query->whereIn('id', function ($where) use ($providerId) {
+                $query->whereIn('t.id', function ($where) use ($providerId) {
                     $where->select('data_id')
                         ->from('unmatched_data')
                         ->where('data_type', 'team')
                         ->where('provider_id', $providerId);
                 });
             })
-            ->where('provider_id', $providerId)
-            ->orderBy('name')
-            ->get();
+            ->where('t.provider_id', $providerId)
+            ->where('t.name', 'LIKE', '%'.$searchKey.'%')
+            ->whereNull('t.deleted_at')
+            ->select('t.id', 't.sport_id', 't.provider_id', 't.name')
+            ->orderBy('name');
+        
+        if ($page == 0 || $limit == 0) {
+            return $query->get();
+        } else {
+            return $query->offset(($page - 1) * $limit)
+                ->limit($limit)
+                ->get();
+        }
     }
 }
