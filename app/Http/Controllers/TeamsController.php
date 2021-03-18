@@ -36,9 +36,15 @@ class TeamsController extends Controller
 
         if ($request->has('limit')) $limit = $request->limit;
 
-        $data = Team::getTeamsByProvider($request->providerId, $searchKey, $page, $limit, false);
+        $data = Team::getTeamsByProvider($request->providerId, $searchKey, false);
 
-        return response()->json($data);
+        $result = [
+            'total' => $data->count(),
+            'pageNum' => $page,
+            'pageData' => $data->skip(($page - 1) * $limit)->take($limit)
+        ];
+
+        return response()->json($result);
     }
 
     public function getTeams()

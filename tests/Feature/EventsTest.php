@@ -17,13 +17,17 @@ class EventsTest extends AdminAccountTestCase
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => [
-                'sport_id',
-                'provider_id',
-                'ref_schedule',
-                'league_name',
-                'team_home_name',
-                'team_away_name'
+            'total',
+            'pageNum',
+            'pageData' => [
+                '*' => [
+                    'sport_id',
+                    'provider_id',
+                    'ref_schedule',
+                    'league_name',
+                    'team_home_name',
+                    'team_away_name'
+                ]
             ]
         ]);
     }

@@ -28,17 +28,15 @@ class Team extends Model
      * 
      * @param  int          $providerId
      * @param  string       $searchKey
-     * @param  int          $page
-     * @param  int          $limit
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getTeamsByProvider(int $providerId, string $searchKey = '', int $page = 0, int $limit = 0, bool $grouped = true)
+    public static function getTeamsByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        $query = DB::table('teams as t')
+        return DB::table('teams as t')
             ->when(!$grouped, function ($q) {
                 $q->join('events as e', function($join) {
                     $join->on('e.team_home_id', '=', 't.id')
@@ -62,14 +60,7 @@ class Team extends Model
             ->where('t.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('t.deleted_at')
             ->select('t.id', 't.sport_id', 't.provider_id', 't.name')
-            ->orderBy('name');
-        
-        if ($page == 0 || $limit == 0) {
-            return $query->get();
-        } else {
-            return $query->offset(($page - 1) * $limit)
-                ->limit($limit)
-                ->get();
-        }
+            ->orderBy('name')
+            ->get();
     }
 }

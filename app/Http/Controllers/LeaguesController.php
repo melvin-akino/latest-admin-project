@@ -36,9 +36,15 @@ class LeaguesController extends Controller
 
         if ($request->has('limit')) $limit = $request->limit;
 
-        $data = League::getLeaguesByProvider($request->providerId, $searchKey, $page, $limit, false);
+        $data = League::getLeaguesByProvider($request->providerId, $searchKey, false);
 
-        return response()->json($data);
+        $result = [
+            'total' => $data->count(),
+            'pageNum' => $page,
+            'pageData' => $data->skip(($page - 1) * $limit)->take($limit)
+        ];
+
+        return response()->json($result);
     }
 
     public function getLeagues()

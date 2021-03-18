@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
+use Illuminate\Support\Facades\DB;
 
 class League extends Model
 {
@@ -27,17 +28,15 @@ class League extends Model
      * 
      * @param  int          $providerId
      * @param  string       $searchKey
-     * @param  int          $page
-     * @param  int          $limit
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getLeaguesByProvider(int $providerId, string $searchKey = '', int $page = 0, int $limit = 0, bool $grouped = true)
+    public static function getLeaguesByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        $query = self::{$where}('id', function ($query) {
+        return self::{$where}('id', function ($query) {
                 $query->select('league_id')
                     ->from('league_groups');
             })
@@ -51,14 +50,8 @@ class League extends Model
             })
             ->where('provider_id', $providerId)
             ->where('name', 'ILIKE', '%'.$searchKey.'%')
-            ->orderBy('name');
-        
-        if ($page == 0 || $limit == 0) {
-            return $query->get();
-        } else {
-            return $query->offset(($page - 1) * $limit)
-                ->limit($limit)
-                ->get();
-        }
+            ->select('id', 'sport_id', 'provider_id', 'name')
+            ->orderBy('name')
+            ->get();
     }
 }

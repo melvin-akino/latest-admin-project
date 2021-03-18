@@ -36,17 +36,15 @@ class Events extends Model
      * 
      * @param  int          $providerId
      * @param  string       $searchKey
-     * @param  int          $page
-     * @param  int          $limit
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getEventsByProvider(int $providerId, string $searchKey = '', int $page = 0, int $limit = 0, bool $grouped = true)
+    public static function getEventsByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        $query = DB::table('events as e')
+        return DB::table('events as e')
             ->join('leagues as l', 'l.id', 'e.league_id')
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
@@ -75,15 +73,8 @@ class Events extends Model
             ->where('e.provider_id', $providerId)
             ->where(DB::raw('CONCAT(l.name, \' \', th.name, \' \', ta.name, \' \', e.ref_schedule)'), 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')
-            ->orderBy('e.ref_schedule', 'desc');
-        
-        if ($page == 0 || $limit == 0) {
-            return $query->get();
-        } else {
-            return $query->offset(($page - 1) * $limit)
-                ->limit($limit)
-                ->get();
-        }
+            ->orderBy('e.ref_schedule', 'desc')
+            ->get();
     }
 
     public function league() {

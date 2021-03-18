@@ -17,10 +17,14 @@ class LeagueTest extends AdminAccountTestCase
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => [
-                'name',
-                'sport_id',
-                'provider_id'
+            'total',
+            'pageNum',
+            'pageData' => [
+                '*' => [
+                    'name',
+                    'sport_id',
+                    'provider_id'
+                ]
             ]
         ]);
     }
