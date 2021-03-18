@@ -50,7 +50,7 @@ class League extends Model
                 });
             })
             ->where('provider_id', $providerId)
-            ->where('name', 'LIKE', '%'.$searchKey.'%')
+            ->where('name', 'ILIKE', '%'.$searchKey.'%')
             ->orderBy('name');
         
         if ($page == 0 || $limit == 0) {

@@ -59,7 +59,7 @@ class Team extends Model
                 });
             })
             ->where('t.provider_id', $providerId)
-            ->where('t.name', 'LIKE', '%'.$searchKey.'%')
+            ->where('t.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('t.deleted_at')
             ->select('t.id', 't.sport_id', 't.provider_id', 't.name')
             ->orderBy('name');
