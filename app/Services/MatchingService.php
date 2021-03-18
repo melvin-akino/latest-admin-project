@@ -20,7 +20,7 @@ class MatchingService
                 'team'   => MasterTeam::class,
             ];
 
-            $master = !$request->{ 'add_master_' . $type } ? 'required|numeric|exists:master_' . $type . 's,id' : '';
+            $master = !$request->{ 'add_master_' . $type } ? 'required|numeric|exists:' . $type . '_groups,' . $type . '_id' : '';
             $raw    = 'numeric|exists:' . $type . 's,id';
             $alias  = $request->{ 'add_master_' . $type } ? 'required|min:1|max:100' : 'max:100';
 
