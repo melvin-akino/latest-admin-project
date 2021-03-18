@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\{League, Provider, SystemConfiguration AS SC};
-use App\Facades\MatchingFacade;
+use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,31 +18,13 @@ class LeaguesController extends Controller
      */
     public function getRawLeagues(RawListRequest $request)
     {
-        $searchKey = '';
-        $page = 1;
-        $limit = 10;
-
-        if ($request->has('searchKey')) $searchKey = $request->searchKey;
-
-        if ($request->has('page')) $page = $request->page;
-
-        if ($request->has('limit')) $limit = $request->limit;
-
-        $data = League::getLeaguesByProvider($request->providerId, $searchKey, false);
-
-        $result = [
-            'total' => $data->count(),
-            'pageNum' => $page,
-            'pageData' => $data->skip(($page - 1) * $limit)->take($limit)->values()
-        ];
-
-        return response()->json($result);
+        return RawListingFacade::getByProvider($request, 'league');
     }
 
     public function getLeagues()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagues    = League::getLeaguesByProvider($providerId);
+        $leagues    = League::getByProvider($providerId);
 
         return response()->json($leagues);
     }

@@ -40,7 +40,7 @@ class Events extends Model
      * 
      * @return object
      */
-    public static function getEventsByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
+    public static function getByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
