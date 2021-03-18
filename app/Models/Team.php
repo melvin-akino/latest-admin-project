@@ -38,22 +38,20 @@ class Team extends Model
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        $query = DB::table('teams as t');
-
-        if (!$grouped) {
-            $query = $query->join('events as e', function($join) {
+        $query = DB::table('teams as t')
+            ->when(!$grouped, function ($q) {
+                $q->join('events as e', function($join) {
                     $join->on('e.team_home_id', '=', 't.id')
                         ->orOn('e.team_away_id', '=', 't.id');
                 })
                 ->join('league_groups as lg', 'lg.league_id', 'e.league_id');
-        }
-        
-        $query = $query->{$where}('t.id', function ($query) {
-                $query->select('team_id')
+            })
+            ->{$where}('t.id', function ($q) {
+                $q->select('team_id')
                     ->from('team_groups');
             })
-            ->when(!$grouped, function ($query) use ($providerId) {
-                $query->whereIn('t.id', function ($where) use ($providerId) {
+            ->when(!$grouped, function ($q) use ($providerId) {
+                $q->whereIn('t.id', function ($where) use ($providerId) {
                     $where->select('data_id')
                         ->from('unmatched_data')
                         ->where('data_type', 'team')
