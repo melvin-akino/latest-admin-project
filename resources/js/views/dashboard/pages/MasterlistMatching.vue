@@ -29,7 +29,7 @@
         class="mt-4"
       >
         <v-tab v-for="provider in providers" :key="provider.id" @change="changeProvider(provider.id, provider.alias)">
-          <v-badge color="error" :content="provider[`raw_${matching.type}`]" :value="provider[`raw_${matching.type}`]">
+          <v-badge color="error" :content="provider[`raw_${matchingParams.type}`]" :value="provider[`raw_${matchingParams.type}`]">
             {{provider.alias}}
           </v-badge>
         </v-tab>
@@ -44,19 +44,11 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'MasterlistMatching',
-  data() {
-    return {
-      matching: {
-        type: '',
-        provider_id: null,
-        provider_alias: ''
-      }
-    }
-  },
   computed: {
     ...mapState('providers', ['providers']),
+    ...mapState('masterlistMatching', ['options']),
     matchingParams() {
-      return { ...this.matching }
+      return { ...this.options }
     },
     hasRawLeagues() {
       return this.checkIfHasRawData('leagues')
@@ -70,35 +62,34 @@ export default {
   },
   watch: {
     providers(value) {
-      if(value.length != 0 && !this.matching.provider_id) {
+      if(value.length != 0 && !this.matchingParams.providerId) {
         this.changeProvider(value[0].id, value[0].alias)
       }
     },
     matchingParams: {
       deep: true,
       handler(value, oldValue) {
-        if(value.type && value.provider_id) {
-          this.getRawData(value)
+        if(value.type && value.providerId) {
+          this.getRawData()
+          this.getProviders(true)
         }
       }
     },
-    'matchingParams.type'(value) {
-      this.getMatchedData(value)
+    'matchingParams.type'() {
+      this.getMatchedData()
+      this.getProviders(true)
     }
   },
-  mounted() {
-    this.getProviders(true)
-  },
   methods: {
-    ...mapMutations('masterlistMatching', { setRawData: 'SET_RAW_DATA', setMatchedData: 'SET_MATCHED_DATA' }),
+    ...mapMutations('masterlistMatching', { setRawData: 'SET_RAW_DATA', setIsLoadingRawData: 'SET_IS_LOADING_RAW_DATA', setMatchedData: 'SET_MATCHED_DATA', setOptions: 'SET_OPTIONS' }),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('masterlistMatching', ['getRawData', 'getMatchedData']),
     changeType(type) {
-      this.matching.type = type
+      this.setOptions({ option: 'type', data: type})
     },
     changeProvider(id, alias) {
-      this.matching.provider_id = id
-      this.matching.provider_alias = alias
+      this.setOptions({ option: 'providerId', data: id})
+      this.setOptions({ option: 'provider_alias', data: alias})
     },
     checkIfHasRawData(type) {
       if(this.providers.length != 0) {

@@ -6,7 +6,7 @@ use App\Models\{Team, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Http\Request;
 class TeamsController extends Controller
 {
     /**

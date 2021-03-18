@@ -1,10 +1,19 @@
+import Vue from 'vue'
 import { getToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
   rawData: [],
   isLoadingRawData: false,
-  matchedData: []
+  totalRawData: 0,
+  matchedData: [],
+  options: {
+    type: '',
+    providerId: null,
+    provider_alias: '',
+    page: null, 
+    limit: null
+  }
 } 
 
 const mutations = {
@@ -13,6 +22,15 @@ const mutations = {
   },
   SET_IS_LOADING_RAW_DATA: (state, loadingState) => {
     state.isLoadingRawData = loadingState
+  },
+  SET_TOTAL_RAW_DATA: (state, total) => {
+    state.totalRawData = total
+  },
+  SET_OPTIONS: (state, data) => {
+    Vue.set(state.options, data.option, data.data)
+  },
+  REMOVE_OPTIONS: (state, key) => {
+    Vue.delete(state.options, key)
   },
   SET_MATCHED_DATA: (state, data) => {
     state.matchedData = data
@@ -23,12 +41,11 @@ const mutations = {
 }
 
 const actions = {
-  getRawData({commit, dispatch}, payload) {
-    commit('SET_IS_LOADING_RAW_DATA', true)
-    commit('SET_RAW_DATA', [])
-    axios.get(`raw-${payload.type}/${payload.provider_id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+  getRawData({commit, dispatch, state}) {
+    axios.get(`raw-${state.options.type}`, { params: state.options, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
-      commit('SET_RAW_DATA', response.data)
+      commit('SET_RAW_DATA', response.data.pageData)
+      commit('SET_TOTAL_RAW_DATA', response.data.total)
       commit('SET_IS_LOADING_RAW_DATA', false)
     })
     .catch(err => {
@@ -42,9 +59,9 @@ const actions = {
       }
     })
   },
-  getMatchedData({commit, dispatch}, type) {
+  getMatchedData({commit, dispatch, state}) {
     commit('SET_MATCHED_DATA', [])
-    axios.get(`matched-${type}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    axios.get(`matched-${state.options.type}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_MATCHED_DATA', response.data)
     })
@@ -63,7 +80,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.post(`${payload.type}/match`, payload.data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        commit('REMOVE_MATCHED_DATA', payload.id)
+        dispatch('getRawData')
         resolve()
       })
       .catch(err => {
