@@ -73,6 +73,7 @@ class Events extends Model
                 });
             })
             ->where('e.provider_id', $providerId)
+            ->where(DB::raw('CONCAT(l.name, \' \', th.name, \' \', ta.name, \' \', e.ref_schedule)'), 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')
             ->orderBy('e.ref_schedule', 'desc');
         
