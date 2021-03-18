@@ -32,7 +32,7 @@ class EventsController extends Controller
         $result = [
             'total' => $data->count(),
             'pageNum' => $page,
-            'pageData' => $data->skip(($page - 1) * $limit)->take($limit)
+            'pageData' => $data->skip(($page - 1) * $limit)->take($limit)->values()
         ];
 
         return response()->json($result);
