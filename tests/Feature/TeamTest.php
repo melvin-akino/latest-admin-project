@@ -46,7 +46,7 @@ class TeamTest extends AdminAccountTestCase
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
 
-        $response->assertStatus(422);
+        $response->assertStatus(400);
     }
 
     public function testTeamsByProviderIdWithToken()

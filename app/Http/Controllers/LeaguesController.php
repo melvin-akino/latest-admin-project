@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{League, Provider, SystemConfiguration AS SC};
 use App\Facades\MatchingFacade;
-use Illuminate\Http\Request;
+use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
 
 class LeaguesController extends Controller
@@ -12,20 +12,12 @@ class LeaguesController extends Controller
     /**
      * Get raw `league_names` from paramgeter Provider
      * 
-     * @param  Request $request
+     * @param  RawListRequest $request
      * 
      * @return json
      */
-    public function getRawLeagues(Request $request)
+    public function getRawLeagues(RawListRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'providerId' => 'required',
-        ]);
-        if ($validator->fails())
-        {
-            return response(['errors'=>$validator->errors()->all()], 422);
-        }
-
         $searchKey = '';
         $page = 1;
         $limit = 10;

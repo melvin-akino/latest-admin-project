@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Events, Provider, SystemConfiguration AS SC};
-use Illuminate\Http\Request;
+use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
 
 class EventsController extends Controller
@@ -11,20 +11,12 @@ class EventsController extends Controller
     /**
      * Get raw `events` from parameter Provider
      * 
-     * @param  Request $request
+     * @param  RawListRequest $request
      * 
      * @return json
      */
-    public function getRawEvents(Request $request)
+    public function getRawEvents(RawListRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'providerId' => 'required',
-        ]);
-        if ($validator->fails())
-        {
-            return response(['errors'=>$validator->errors()->all()], 422);
-        }
-
         $searchKey = '';
         $page = 1;
         $limit = 10;
