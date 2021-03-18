@@ -55,7 +55,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
 
     // Events routes
-    Route::get('/raw-events/{providerId}', 'EventsController@getRawEvents')->name('events.api');
+    Route::get('/raw-events', 'EventsController@getRawEvents')->name('events.api');
     Route::get('/matched-events', 'EventsController@getEvents')->name('matched-events.api');
     Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
 

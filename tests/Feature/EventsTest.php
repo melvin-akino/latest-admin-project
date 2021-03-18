@@ -10,7 +10,7 @@ class EventsTest extends AdminAccountTestCase
     public function testRawEventsByProviderIdWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/raw-events/1', [
+        $response = $this->get('/api/raw-events?providerId=1&page=1&limit=10', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
@@ -29,12 +29,23 @@ class EventsTest extends AdminAccountTestCase
     }
 
     public function testRawEventsByProviderIdWithoutToken() {
-        $response = $this->get('/api/raw-events/1', [
+        $response = $this->get('/api/raw-events?providerId=1&page=1&limit=10', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
 
         $response->assertJson(['message' => 'Unauthenticated.']);
+    }
+
+    public function testRawEventsByProviderIdWithoutProviderId()
+    {
+        $this->initialUser();
+        $response = $this->get('/api/raw-events', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ]);
+
+        $response->assertStatus(422);
     }
 
     public function testEventsByProviderIdWithToken()
