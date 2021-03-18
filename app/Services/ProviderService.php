@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderRequest;
-use App\Models\{Provider,SystemConfiguration};
+use App\Models\{Provider,SystemConfiguration,League,Team,Events};
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Carbon\Carbon;
@@ -48,9 +48,9 @@ class ProviderService
               'id' => $provider->id,
               'name' => $provider->name,
               'alias' => $provider->alias,
-              'raw_leagues' => 0,//RawListingFacade::getByProvider($provider->id, 'league')->count(),
-              'raw_teams'   => 0,//RawListingFacade::getByProvider($provider->id, 'team')->count(),
-              'raw_events'  => 0//RawListingFacade::getByProvider($provider->id, 'event')->count()
+              'raw_leagues' => League::getByProvider($provider->id, '', false)->count(),
+              'raw_teams'   => Team::getByProvider($provider->id, '', false)->count(),
+              'raw_events'  => Events::getByProvider($provider->id, 'event', false)->count()
             ];
           }
 

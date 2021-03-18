@@ -83,11 +83,15 @@ export default {
         this.setOptions({ option: 'limit', data: value.itemsPerPage != -1 ? value.itemsPerPage : null })  
       },
       deep: true
+    },
+    rawDataTable(value) {
+      if(!value && this.options.page > 1) {
+        this.options.page = this.options.page - 1
+      }
     }
   },
   methods: {
     ...mapMutations('masterlistMatching', { setOptions: 'SET_OPTIONS', removeOptions: 'REMOVE_OPTIONS' }),
-    ...mapActions('masterlistMatching', ['getRawData']),
     search() {
       if(this.searchKey) {
         this.setOptions({ option: 'searchKey', data: this.searchKey })  

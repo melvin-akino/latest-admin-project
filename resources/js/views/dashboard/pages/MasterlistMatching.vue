@@ -68,20 +68,27 @@ export default {
     },
     matchingParams: {
       deep: true,
-      handler(value, oldValue) {
+      handler(value) {
         if(value.type && value.providerId) {
           this.getRawData()
-          this.getProviders(true)
         }
       }
     },
-    'matchingParams.type'() {
-      this.getMatchedData()
-      this.getProviders(true)
+    'matchingParams.type'(value, oldValue) {
+      if(value) {
+        this.getMatchedData()
+        this.resetTable(value, oldValue)
+      }
+    },
+    'matchingParams.providerId'(value, oldValue) {
+      if(value) {
+        this.resetTable(value, oldValue)
+      }
     }
   },
   methods: {
     ...mapMutations('masterlistMatching', { setRawData: 'SET_RAW_DATA', setIsLoadingRawData: 'SET_IS_LOADING_RAW_DATA', setMatchedData: 'SET_MATCHED_DATA', setOptions: 'SET_OPTIONS' }),
+    ...mapMutations('providers', { setProviders: 'SET_PROVIDERS' }),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('masterlistMatching', ['getRawData', 'getMatchedData']),
     changeType(type) {
@@ -96,11 +103,24 @@ export default {
         let raw = this.providers.map(provider => provider[`raw_${type}`])
         return raw.some(count => count != 0)
       }
+    },
+    resetTable(value, oldValue) {
+      this.getProviders(true)
+      if(value != oldValue) {
+        this.setIsLoadingRawData(true)
+        this.setRawData([])
+      }
     }
   },
   beforeRouteLeave(to, from, next) {
     this.setRawData([])
     this.setMatchedData([])
+    this.setProviders([])
+    this.setOptions({ option: 'type', data: ''})
+    this.setOptions({ option: 'providerId', data: null})
+    this.setOptions({ option: 'provider_alias', data: ''})
+    this.setOptions({ option: 'page', data: null})
+    this.setOptions({ option: 'alias', data: null})
     next()
   }
 }
