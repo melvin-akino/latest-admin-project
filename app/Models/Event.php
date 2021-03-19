@@ -35,11 +35,12 @@ class Event extends Model
      * Get `events` data by Provider, also allowing to choose from `raw` or `existing match`
      * 
      * @param  int          $providerId
+     * @param  string       $searchKey
      * @param  bool|boolean $grouped
      * 
      * @return object
      */
-    public static function getEventsByProvider(int $providerId, bool $grouped = true)
+    public static function getByProvider(int $providerId, string $searchKey = '', string $sortOrder = 'asc', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -47,21 +48,33 @@ class Event extends Model
             ->join('leagues as l', 'l.id', 'e.league_id')
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
-            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name'])
-            ->{$where}('e.id', function ($query) {
-                $query->select('event_id')
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
+            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'lg.master_league_id as master_league_id'])
+            ->{$where}('e.id', function ($q) {
+                $q->select('event_id')
                     ->from('event_groups');
             })
-            ->when(!$grouped, function ($query) use ($providerId) {
-                $query->whereIn('e.id', function ($where) use ($providerId) {
+            ->when(!$grouped, function ($q) use ($providerId) {
+                $q->whereIn('e.id', function ($where) use ($providerId) {
                     $where->select('ud.data_id')
                         ->from('unmatched_data AS ud')
                         ->where('ud.data_type', 'event')
                         ->where('ud.provider_id', $providerId);
+                })
+                ->whereIn('e.team_home_id', function($q) {
+                    $q->select('team_id')->from('team_groups');
+                })
+                ->whereIn('e.team_away_id', function($q) {
+                    $q->select('team_id')->from('team_groups');
+                })
+                ->whereIn('e.league_id', function($q) {
+                    $q->select('league_id')->from('league_groups');
                 });
             })
             ->where('e.provider_id', $providerId)
-            ->orderBy('e.ref_schedule', 'desc')
+            ->where(DB::raw('CONCAT(l.name, \' \', th.name, \' \', ta.name, \' \', e.ref_schedule)'), 'ILIKE', '%'.$searchKey.'%')
+            ->whereNull('e.deleted_at')
+            ->orderBy('e.ref_schedule', $sortOrder)
             ->get();
     }
 

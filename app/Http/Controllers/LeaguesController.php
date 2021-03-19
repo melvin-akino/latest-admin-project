@@ -3,29 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\{League, Provider, SystemConfiguration AS SC};
-use App\Facades\MatchingFacade;
-use Illuminate\Http\Request;
+use App\Facades\{RawListingFacade, MatchingFacade};
+use App\Http\Requests\RawListRequest;
+use Illuminate\Support\Facades\Validator;
 
 class LeaguesController extends Controller
 {
     /**
      * Get raw `league_names` from paramgeter Provider
      * 
-     * @param  int $providerId
+     * @param  RawListRequest $request
      * 
      * @return json
      */
-    public function getRawLeagues($providerId)
+    public function getRawLeagues(RawListRequest $request)
     {
-        $data = League::getLeaguesByProvider($providerId, false);
-
-        return response()->json($data);
+        return RawListingFacade::getByProvider($request, 'league');
     }
 
     public function getLeagues()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagues    = League::getLeaguesByProvider($providerId);
+        $leagues    = League::getByProvider($providerId);
 
         return response()->json($leagues);
     }

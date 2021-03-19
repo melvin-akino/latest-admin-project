@@ -10,28 +10,44 @@ class TeamTest extends AdminAccountTestCase
     public function testRawTeamsByProviderIdWithToken()
     {
         $this->initialUser();
-        $response = $this->get('/api/raw-teams/1', [
+        $response = $this->get('/api/raw-teams?providerId=1&page=1&limit=10&searchKey=Tea', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
         ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => [
-                'name',
-                'sport_id',
-                'provider_id'
+            'total',
+            'pageNum',
+            'pageData' => [
+                '*' => [
+                    'name',
+                    'sport_id',
+                    'provider_id',
+                    'master_league_ids'
+                ]
             ]
         ]);
     }
 
-    public function testRaweamsByProviderIdWithoutToken() {
-        $response = $this->get('/api/raw-teams/1', [
+    public function testRawTeamsByProviderIdWithoutToken() {
+        $response = $this->get('/api/raw-teams?providerId=1&page=1&limit=10', [
             'X-Requested-With' => 'XMLHttpRequest',
             'Authorization'    => 'Bearer XXX'
         ]);
 
         $response->assertJson(['message' => 'Unauthenticated.']);
+    }
+
+    public function testRawTeamsByProviderIdWithoutProviderId()
+    {
+        $this->initialUser();
+        $response = $this->get('/api/raw-teams', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Authorization'    => 'Bearer ' . $this->loginJsonResponse->token
+        ]);
+
+        $response->assertStatus(400);
     }
 
     public function testTeamsByProviderIdWithToken()

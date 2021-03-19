@@ -3,29 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Team, Provider, SystemConfiguration AS SC};
-use App\Facades\MatchingFacade;
-use Illuminate\Http\Request;
+use App\Facades\{RawListingFacade, MatchingFacade};
+use App\Http\Requests\RawListRequest;
+use Illuminate\Support\Facades\Validator;
 
 class TeamsController extends Controller
 {
     /**
      * Get raw `team_names` from paramgeter Provider
      * 
-     * @param  int $providerId
+     * @param  RawListRequest $request
      * 
      * @return json
      */
-    public function getRawTeams($providerId)
+    public function getRawTeams(RawListRequest $request)
     {
-        $data = Team::getTeamsByProvider($providerId, false);
-
-        return response()->json($data);
+        return RawListingFacade::getByProvider($request, 'team');
     }
 
     public function getTeams()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $teams      = Team::getTeamsByProvider($providerId);
+        $teams      = Team::getByProvider($providerId);
 
         return response()->json($teams);
     }

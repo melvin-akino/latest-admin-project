@@ -3,28 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Event, Provider, SystemConfiguration AS SC};
-use Illuminate\Http\Request;
+use App\Facades\{RawListingFacade, MatchingFacade};
+use App\Http\Requests\RawListRequest;
+use Illuminate\Support\Facades\Validator;
 
 class EventsController extends Controller
 {
     /**
      * Get raw `events` from parameter Provider
      * 
-     * @param  int $providerId
+     * @param  RawListRequest $request
      * 
      * @return json
      */
-    public function getRawEvents($providerId)
+    public function getRawEvents(RawListRequest $request)
     {
-        $data = Event::getEventsByProvider($providerId, false);
-
-        return response()->json($data);
+        return RawListingFacade::getByProvider($request, 'event');
     }
 
     public function getEvents()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $events    = Event::getEventsByProvider($providerId);
+        $events     = Event::getByProvider($providerId);
 
         return response()->json($events);
     }
