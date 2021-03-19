@@ -48,7 +48,8 @@ class Event extends Model
             ->join('leagues as l', 'l.id', 'e.league_id')
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
-            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name'])
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
+            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'lg.master_league_id as master_league_id'])
             ->{$where}('e.id', function ($q) {
                 $q->select('event_id')
                     ->from('event_groups');

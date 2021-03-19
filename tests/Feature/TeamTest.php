@@ -23,7 +23,8 @@ class TeamTest extends AdminAccountTestCase
                 '*' => [
                     'name',
                     'sport_id',
-                    'provider_id'
+                    'provider_id',
+                    'master_league_ids'
                 ]
             ]
         ]);
