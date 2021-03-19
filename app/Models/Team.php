@@ -37,13 +37,11 @@ class Team extends Model
         $where = $grouped ? "whereIn" : "whereNotIn";
 
         return DB::table('teams as t')
-            ->when(!$grouped, function ($q) {
-                $q->join('events as e', function($join) {
-                    $join->on('e.team_home_id', '=', 't.id')
-                        ->orOn('e.team_away_id', '=', 't.id');
-                })
-                ->join('league_groups as lg', 'lg.league_id', 'e.league_id');
+            ->join('events as e', function($join) {
+                $join->on('e.team_home_id', '=', 't.id')
+                    ->orOn('e.team_away_id', '=', 't.id');
             })
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
             ->{$where}('t.id', function ($q) {
                 $q->select('team_id')
                     ->from('team_groups');
@@ -59,7 +57,8 @@ class Team extends Model
             ->where('t.provider_id', $providerId)
             ->where('t.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('t.deleted_at')
-            ->select('t.id', 't.sport_id', 't.provider_id', 't.name')
+            ->select(['t.id', 't.sport_id', 't.provider_id', 't.name', DB::raw('array_to_string(array_agg(lg.master_league_id), \',\') as master_league_ids')])
+            ->groupBy('t.id')
             ->orderBy('name', $sortOrder)
             ->get();
     }

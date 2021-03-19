@@ -26,7 +26,8 @@ class EventsTest extends AdminAccountTestCase
                     'ref_schedule',
                     'league_name',
                     'team_home_name',
-                    'team_away_name'
+                    'team_away_name',
+                    'master_league_id'
                 ]
             ]
         ]);
