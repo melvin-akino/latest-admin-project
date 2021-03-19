@@ -15,7 +15,7 @@
     <v-data-table
       :headers="headers"
       :items="rawDataTable"
-      :options.sync="options"
+      :options.sync="tableOptions"
       :server-items-length="totalRawData"
       :items-per-page="10"
       :loading="isLoadingRawData"
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   name: 'MatchingTable',
@@ -47,11 +47,11 @@ export default {
         { text: '', value: 'actions', sortable: false },
       ],
       searchKey: '',
-      options: {}
+      tableOptions: {}
     }
   },
   computed: {
-    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData', 'totalRawData']),
+    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData', 'totalRawData', 'options']),
     dataType() {
       let path = this.$route.path.split('/')
       return path[2].charAt(0) + path[2].slice(1)
@@ -77,17 +77,28 @@ export default {
     }
   },
   watch: {
-    options: {
+    tableOptions: {
       handler(value) {
         this.setOptions({ option: 'page', data: value.page })  
         this.setOptions({ option: 'limit', data: value.itemsPerPage != -1 ? value.itemsPerPage : null })  
+        this.setOptions({ option: 'sortOrder', data: value.sortDesc[0] ? 'desc' : 'asc'  })  
       },
       deep: true
     },
     rawDataTable(value) {
       if(!value && this.options.page > 1) {
-        this.options.page = this.options.page - 1
+        this.tableOptions.page = this.tableOptions.page - 1
       }
+    },
+    options: {
+      handler(value, oldValue) {
+        if(value.type != oldValue.type || value.providerId != oldValue.providerId) {
+          this.tableOptions.page = 1
+          this.searchKey = ''
+          this.removeOptions('searchKey')
+        }
+      },
+      deep: true
     }
   },
   methods: {
@@ -98,7 +109,7 @@ export default {
       } else {
         this.removeOptions('searchKey')
       }
-      this.options.page = 1
+      this.tableOptions.page = 1
     }
   }
 }

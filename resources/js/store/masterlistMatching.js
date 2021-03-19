@@ -12,7 +12,8 @@ const state = {
     providerId: null,
     provider_alias: '',
     page: null, 
-    limit: null
+    limit: null,
+    sortOrder: null
   }
 } 
 
