@@ -32,7 +32,7 @@ class Team extends Model
      * 
      * @return object
      */
-    public static function getByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
+    public static function getByProvider(int $providerId, string $searchKey = '', string $sortOrder = 'asc', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -60,7 +60,7 @@ class Team extends Model
             ->where('t.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('t.deleted_at')
             ->select('t.id', 't.sport_id', 't.provider_id', 't.name')
-            ->orderBy('name')
+            ->orderBy('name', $sortOrder)
             ->get();
     }
 }

@@ -21,6 +21,7 @@ class RawListingService
         $searchKey = '';
         $page = 1;
         $limit = 10;
+        $sortOrder = 'asc';
 
         if ($request->has('searchKey')) $searchKey = $request->searchKey;
 
@@ -28,7 +29,9 @@ class RawListingService
 
         if ($request->has('limit')) $limit = $request->limit;
 
-        $data = $types[$type]::getByProvider($request->providerId, $searchKey, false);
+        if ($request->has('sortOrder')) $sortOrder = $request->sortOrder;
+
+        $data = $types[$type]::getByProvider($request->providerId, $searchKey, $sortOrder, false);
 
         $result = [
             'total' => $data->count(),
