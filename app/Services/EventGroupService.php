@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\EventGroupRequest;
 use Illuminate\Support\Facades\{DB, Log};
-use App\Models\{Events, EventGroup};
+use App\Models\{Event, EventGroup};
 use App\Services\MatchingService;
 use Exception;
 
@@ -21,7 +21,7 @@ class EventGroupService
             ]);
 
             if ($eventGroup->save()) {
-                $providerId = Events::find($request->match_event_id)->provider_id;
+                $providerId = Event::find($request->match_event_id)->provider_id;
 
                 MatchingService::removeFromUnmatchedData('event', $providerId, $request->match_event_id);
 

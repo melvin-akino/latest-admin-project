@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use App\Models\{League, Team};
 use Illuminate\Support\Facades\DB;
 
-class Events extends Model
+class Event extends Model
 {
     use SoftDeletes;
 
@@ -65,15 +65,30 @@ class Events extends Model
             ->get();
     }
 
-    public function league() {
+    public static function getGroupVerifiedUnmatchedEvent($eventId)
+    {
+        return DB::table('events as e')
+            ->join('unmatched_data as ue', 'ue.data_id', 'e.id')
+            ->join('team_groups as ht', 'ht.team_id', 'e.team_home_id')
+            ->join('team_groups as at', 'at.team_id', 'e.team_away_id')
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
+            ->where('ue.data_type', 'event')
+            ->where('ue.data_id', $eventId)
+            ->count();
+    }
+
+    public function league() 
+    {
         return $this->belongsTo(League::class);
     }
 
-    public function teamHome() {
+    public function teamHome() 
+    {
         return $this->belongsTo(Team::class, 'team_home_id', 'id');
     }
 
-    public function teamAway() {
+    public function teamAway() 
+    {
         return $this->belongsTo(Team::class, 'team_away_id', 'id');
     }
 }
