@@ -40,7 +40,7 @@ class Event extends Model
      * 
      * @return object
      */
-    public static function getByProvider(int $providerId, string $searchKey = '', bool $grouped = true)
+    public static function getByProvider(int $providerId, string $searchKey = '', string $sortOrder = 'asc', bool $grouped = true)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -73,7 +73,7 @@ class Event extends Model
             ->where('e.provider_id', $providerId)
             ->where(DB::raw('CONCAT(l.name, \' \', th.name, \' \', ta.name, \' \', e.ref_schedule)'), 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')
-            ->orderBy('e.ref_schedule', 'desc')
+            ->orderBy('e.ref_schedule', $sortOrder)
             ->get();
     }
 
