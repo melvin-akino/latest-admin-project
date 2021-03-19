@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Events, Provider, SystemConfiguration AS SC};
+use App\Models\{Event, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
@@ -24,7 +24,7 @@ class EventsController extends Controller
     public function getEvents()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $events    = Events::getByProvider($providerId);
+        $events     = Event::getByProvider($providerId);
 
         return response()->json($events);
     }
