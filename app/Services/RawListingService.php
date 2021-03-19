@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{League, Team, Events};
+use App\Models\{League, Team, Event};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -15,7 +15,7 @@ class RawListingService
         $types = [
             'league' => League::class,
             'team'   => Team::class,
-            'event'  => Events::class
+            'event'  => Event::class
         ];
 
         $searchKey = '';

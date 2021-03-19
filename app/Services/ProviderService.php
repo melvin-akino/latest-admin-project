@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderRequest;
-use App\Models\{Provider,SystemConfiguration,League,Team,Events};
+use App\Models\{Provider,SystemConfiguration,League,Team,Event};
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Carbon\Carbon;
@@ -50,7 +50,7 @@ class ProviderService
               'alias' => $provider->alias,
               'raw_leagues' => League::getByProvider($provider->id, '', false)->count(),
               'raw_teams'   => Team::getByProvider($provider->id, '', false)->count(),
-              'raw_events'  => Events::getByProvider($provider->id, 'event', false)->count()
+              'raw_events'  => Event::getByProvider($provider->id, '', false)->count()
             ];
           }
 
