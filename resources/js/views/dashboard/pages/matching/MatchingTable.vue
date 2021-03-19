@@ -3,18 +3,20 @@
     <v-card-title>
       <v-spacer></v-spacer>
       <v-text-field
-        v-model="search"
+        v-model="searchKey"
         append-icon="mdi-magnify"
         :label="`Search ${dataType}`"
         hide-details
         class="subtitle-1"
         style="max-width: 200px;"
+        @keyup="search"
       ></v-text-field>
     </v-card-title>
     <v-data-table
       :headers="headers"
       :items="rawDataTable"
-      :search="search"
+      :options.sync="tableOptions"
+      :server-items-length="totalRawData"
       :items-per-page="10"
       :loading="isLoadingRawData"
       :loading-text="`Loading ${dataType}`"
@@ -28,7 +30,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   name: 'MatchingTable',
@@ -44,11 +46,12 @@ export default {
         { text: '', value: 'add', sortable: false },
         { text: '', value: 'actions', sortable: false },
       ],
-      search: ''
+      searchKey: '',
+      tableOptions: {}
     }
   },
   computed: {
-    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData']),
+    ...mapState('masterlistMatching', ['rawData', 'isLoadingRawData', 'totalRawData', 'options']),
     dataType() {
       let path = this.$route.path.split('/')
       return path[2].charAt(0) + path[2].slice(1)
@@ -71,6 +74,42 @@ export default {
         })
         return rawDataTable
       }
+    }
+  },
+  watch: {
+    tableOptions: {
+      handler(value) {
+        this.setOptions({ option: 'page', data: value.page })  
+        this.setOptions({ option: 'limit', data: value.itemsPerPage != -1 ? value.itemsPerPage : null })  
+        this.setOptions({ option: 'sortOrder', data: value.sortDesc[0] ? 'desc' : 'asc'  })  
+      },
+      deep: true
+    },
+    rawDataTable(value) {
+      if(!value && this.options.page > 1) {
+        this.tableOptions.page = this.tableOptions.page - 1
+      }
+    },
+    options: {
+      handler(value, oldValue) {
+        if(value.type != oldValue.type || value.providerId != oldValue.providerId) {
+          this.tableOptions.page = 1
+          this.searchKey = ''
+          this.removeOptions('searchKey')
+        }
+      },
+      deep: true
+    }
+  },
+  methods: {
+    ...mapMutations('masterlistMatching', { setOptions: 'SET_OPTIONS', removeOptions: 'REMOVE_OPTIONS' }),
+    search() {
+      if(this.searchKey) {
+        this.setOptions({ option: 'searchKey', data: this.searchKey })  
+      } else {
+        this.removeOptions('searchKey')
+      }
+      this.tableOptions.page = 1
     }
   }
 }

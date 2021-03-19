@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
 import { requiredIf } from 'vuelidate/lib/validators'
 
@@ -100,7 +100,18 @@ export default {
     matchedDataSelection() {
       if(this.matchedData.length != 0) {
         let selection = []
-        this.matchedData.map(matched => {
+        let filteredMatchedData = this.matchedData.filter(match => {
+          if(this.dataType == 'teams' && match.hasOwnProperty('master_league_ids') && this.item.hasOwnProperty('master_league_ids')) {
+            let matchedLeagueIds = match.master_league_ids.split(',')
+            let rawLeagueIds = this.item.master_league_ids.split(',')
+            return matchedLeagueIds.some(matchLeagueId => rawLeagueIds.includes(matchLeagueId))
+          } else if(this.dataType == 'events' && match.hasOwnProperty('master_league_id') && this.item.hasOwnProperty('master_league_id')) {
+            return match.master_league_id == this.item.master_league_id
+          } else {
+            return match
+          }
+        })
+        filteredMatchedData.map(matched => {
           let item = { ...matched }
           if(this.dataType != 'events') {
             this.$set(item, 'data', matched.name)
@@ -128,7 +139,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('providers', { updateProviderCount: 'UPDATE_PROVIDER_COUNT' }),
+    ...mapActions('providers', ['getProviders']),
     ...mapActions('masterlistMatching', ['matchData']),
     initializeParams() {
       let params = {}
@@ -157,7 +168,7 @@ export default {
             id: this.item.id
           }
           await this.matchData(payload)
-          this.updateProviderCount({ type: this.dataType, provider_id: this.item.provider_id })
+          this.getProviders(true)
           bus.$emit("SHOW_SNACKBAR", {
             color: "success",
             text: `Matched ${this.dataTypeSingular} successfully.`
@@ -169,7 +180,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.errors[0] || err.response.data.message
+          text: err.response.data.errors[0] || err.response.data.message || err.response.data.errors[Object.keys(err.response.data.errors)[0]][0]
         });
       }
     }

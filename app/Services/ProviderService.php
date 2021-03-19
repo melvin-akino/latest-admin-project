@@ -7,6 +7,7 @@ use App\Models\{Provider,SystemConfiguration,League,Team,Event};
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Carbon\Carbon;
+use App\Facades\RawListingFacade;
 class ProviderService
 {
     public static function getAllProviders()
@@ -47,9 +48,9 @@ class ProviderService
               'id' => $provider->id,
               'name' => $provider->name,
               'alias' => $provider->alias,
-              'raw_leagues' => League::getLeaguesByProvider($provider->id, false)->count(),
-              'raw_teams' =>  Team::getTeamsByProvider($provider->id, false)->count(),
-              'raw_events' => Event::getEventsByProvider($provider->id, false)->count()
+              'raw_leagues' => League::getByProvider($provider->id, '', 'asc', false)->count(),
+              'raw_teams'   => Team::getByProvider($provider->id, '', 'asc', false)->count(),
+              'raw_events'  => Event::getByProvider($provider->id, '', 'asc', false)->count()
             ];
           }
 
