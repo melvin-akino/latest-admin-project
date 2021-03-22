@@ -21,6 +21,9 @@
       :loading="isLoadingRawData"
       :loading-text="`Loading ${dataType}`"
       class="mt-4 matchingTable"
+      @update:page="getProviders(true)"
+      @update:items-per-page="getProviders(true)"
+      @update:sort-desc="getProviders(true)"
     > 
       <template v-slot:item="{ item }">
         <matching-table-row :dataType="dataType" :dataTypeSingular="dataTypeSingular" :item="item" :key="item.id" ></matching-table-row>
@@ -30,7 +33,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'MatchingTable',
@@ -80,7 +83,7 @@ export default {
     tableOptions: {
       handler(value) {
         this.setOptions({ option: 'page', data: value.page })  
-        this.setOptions({ option: 'limit', data: value.itemsPerPage != -1 ? value.itemsPerPage : null })  
+        this.setOptions({ option: 'limit', data: value.itemsPerPage != -1 ? value.itemsPerPage : this.totalRawData })  
         this.setOptions({ option: 'sortOrder', data: value.sortDesc[0] ? 'desc' : 'asc'  })  
       },
       deep: true
@@ -103,6 +106,7 @@ export default {
   },
   methods: {
     ...mapMutations('masterlistMatching', { setOptions: 'SET_OPTIONS', removeOptions: 'REMOVE_OPTIONS' }),
+    ...mapActions('providers', ['getProviders']),
     search() {
       if(this.searchKey) {
         this.setOptions({ option: 'searchKey', data: this.searchKey })  
