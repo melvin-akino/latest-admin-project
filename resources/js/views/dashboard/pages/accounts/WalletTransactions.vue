@@ -137,7 +137,7 @@ export default {
     getTransactionUser() {
       return axios.get(`${this.$route.params.module}/uuid/${this.$route.params.uuid}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        this.transactionUser = response.data
+        this.transactionUser = response.data.data
       })
       .catch(err => {
         this.logoutOnError(err.response.status)
