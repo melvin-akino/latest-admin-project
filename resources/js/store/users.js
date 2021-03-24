@@ -173,7 +173,7 @@ const actions = {
     commit('SET_IS_LOADING_USER_TRANSACTIONS', true)
     axios.get('orders/user', { params: payload, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
-      commit('SET_USER_TRANSACTIONS', response.data)
+      commit('SET_USER_TRANSACTIONS', response.data.data)
       commit('SET_IS_LOADING_USER_TRANSACTIONS', false)
     })
     .catch(err => {
