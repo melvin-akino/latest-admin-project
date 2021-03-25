@@ -112,7 +112,7 @@ class WalletsController extends Controller
 
     public function walletUpdate(Request $request, WalletService $wallet)
     {
-      $user = User::getUserByUuid($request->uuid);
+      $user = User::where('uuid', $request->uuid)->first();
 
       if($request->transactionType == 'Deposit') {
         $update = $wallet->walletCredit($request);
