@@ -42,6 +42,11 @@ class MatchingService
                     ->where($type . '_id', $request->{ 'primary_provider_' . $type . '_id' })
                     ->first()
                     ->{ 'master_' . $type . '_id' };
+
+                if (!empty($request->{ 'master_' . $type . '_alias' })) {
+                    $types[$type]::find($masterId)
+                        ->update([ 'name' => $request->{ 'master_' . $type . '_alias' } ]);
+                }
             } else {
                 $sportId = DB::table($type . 's')
                     ->where('id', $request->{ 'match_' . $type . '_id' })
