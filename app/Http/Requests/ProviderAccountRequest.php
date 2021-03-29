@@ -30,7 +30,7 @@ class ProviderAccountRequest extends FormRequest
         if (!empty($accounts)) {
             foreach($accounts as $account) {
                 if ($account->id == $this->input('id')){
-                    $uniqueUsername = "|unique:provider_accounts,username,$account->id";
+                    $uniqueUsername = "|unique:provider_accounts,username,{$account->id},id,deleted_at,NULL";
                     break;
                 }
                 elseif (is_null($account->deleted_at) && empty($this->input('id'))) {
