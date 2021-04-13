@@ -16,16 +16,14 @@ use App\Models\{
     EventMarket,
     EventMarketGroup,
     MasterEventMarket
-}
+};
 
-class Matching extends Model
+class Matching
 {
     protected $models;
 
     public function __construct()
     {
-        parent::__construct();
-
         $models = [
             'League',
             'LeagueGroup',
@@ -42,7 +40,7 @@ class Matching extends Model
         ];
 
         foreach ($models as $model) {
-            $this->models[$model] = $model::class;
+            $this->models[$model] = "App\Models\\" . $model;
         }
     }
 
@@ -50,20 +48,20 @@ class Matching extends Model
     {
         //@TODO add the audit trail here
 
-        return $this->{$modelName}->firstOrCreate($searchData, $createData);
+        return $this->models[$modelName]::firstOrCreate($searchData, $createData);
     }
 
-    public function updateOrCreate($modelName, $searchData, $createData)
+    public function create($modelName, $createData)
+    {
+        //@TODO add the audit trail here
+
+        return $this->models[$modelName]::create($createData);
+    }
+
+    public static function updateOrCreate($modelName, $searchData, $createData)
     {
         //@TODO add the audit trail here
         
-        return $this->{$modelName}->firstOrCreate($searchData, $createData);
-    }
-
-    public function find($modelName, $primaryId)
-    {
-        //@TODO add the audit trail here
-        
-        return $this->{$modelName}->find($primaryId);
+        return $this->models[$modelName]::firstOrCreate($searchData, $createData);
     }
 }

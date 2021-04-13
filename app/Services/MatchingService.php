@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Matching};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{DB, Log};
 use Exception;
 use Validator;
 
@@ -101,6 +101,38 @@ class MatchingService
 
         if ($unmatched->count()) {
             $unmatched->delete();
+        }
+    }
+
+    public static function autoMatchPrimaryLeagues()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedLeagues = League::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedLeagues->count() > 0) {
+                foreach ($unmatchedLeagues as $unmatchedLeague) {
+                    $masterLeague = $matching->create('MasterLeague', [
+                        'sport_id' => $unmatchedLeague['sport_id'],
+                        'name'     => null
+                    ]);
+
+                    $matching->create('LeagueGroup', [
+                        'master_league_id' => $masterLeague->id,
+                        'league_id'        => $unmatchedLeague['id']
+                    ]);
+
+                    var_dump('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
+                    Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
+                    
+                }
+            } else {
+                var_dump('Matching: Nothing to match for league from primary provider');
+                Log::info('Matching: Nothing to match for league from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
         }
     }
 }

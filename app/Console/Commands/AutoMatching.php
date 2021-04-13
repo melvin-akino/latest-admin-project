@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Facades\MatchingFacade;
+use Illuminate\Console\Command;
+
 class AutoMatching extends Command
 {
     protected $signature   = 'automatch';
@@ -16,6 +19,8 @@ class AutoMatching extends Command
     {
         while (true) {
             //@TODO call leagues, teams, events and market auto matching
+
+            MatchingFacade::autoMatchPrimaryLeagues();
 
             usleep(1000000);
         }
