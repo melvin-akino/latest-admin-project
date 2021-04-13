@@ -21,6 +21,7 @@ class AutoMatching extends Command
             //@TODO call leagues, teams, events and market auto matching
 
             MatchingFacade::autoMatchPrimaryLeagues();
+            MatchingFacade::autoMatchPrimaryTeams();
 
             usleep(1000000);
         }

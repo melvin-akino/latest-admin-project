@@ -20,4 +20,9 @@ class MasterTeam extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function teamGroups()
+    {
+        return $this->hasMany(TeamGroup::class, 'master_team_id', 'id');
+    }
 }

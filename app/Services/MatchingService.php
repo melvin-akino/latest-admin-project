@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Matching};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, Matching};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
@@ -123,13 +123,41 @@ class MatchingService
                         'league_id'        => $unmatchedLeague['id']
                     ]);
 
-                    var_dump('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     
                 }
             } else {
-                var_dump('Matching: Nothing to match for league from primary provider');
                 Log::info('Matching: Nothing to match for league from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function autoMatchPrimaryTeams()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedTeams = Team::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedTeams->count() > 0) {
+                foreach ($unmatchedTeams as $unmatchedTeam) {
+                    $masterTeam = $matching->create('MasterTeam', [
+                        'sport_id' => $unmatchedTeam['sport_id'],
+                        'name'     => null
+                    ]);
+
+                    $matching->create('TeamGroup', [
+                        'master_team_id' => $masterTeam->id,
+                        'team_id'        => $unmatchedTeam['id']
+                    ]);
+
+                    Log::info('Matching: Team: ' . $unmatchedTeam['name'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for team from primary provider');
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
