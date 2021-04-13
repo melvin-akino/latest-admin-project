@@ -17,4 +17,14 @@ class LeagueGroup extends Model
 
     public $timestamps = false;
     public $incrementing = false;
+
+    public static function getByLeagueId($leagueId)
+    {
+        return self::where('league_id', $leagueId)->get();
+    }
+
+    public function leageGroup()
+    {
+        return $this->belongsTo(League::class, 'id', 'league_id');
+    }
 }

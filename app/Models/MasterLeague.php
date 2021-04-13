@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
+use App\Models\LeagueGroup;
 
 class MasterLeague extends Model
 {
@@ -20,4 +21,9 @@ class MasterLeague extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function leagueGroups()
+    {
+        return $this->hasMany(LeagueGroup::class, 'master_league_id', 'id');
+    }
 }

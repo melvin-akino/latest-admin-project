@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use Illuminate\Support\Facades\DB;
+use App\Models\LeagueGroup;
 
 class League extends Model
 {
@@ -53,5 +54,15 @@ class League extends Model
             ->select('id', 'sport_id', 'provider_id', 'name')
             ->orderBy('name', $sortOrder)
             ->get();
+    }
+
+    public static function getAllActiveNotExistInPivotByProviderId($providerId)
+    {
+        return self::where('provider_id', $providerId)->doesntHave('leageGroup')->get();
+    }
+
+    public function leageGroup()
+    {
+        return $this->hasOne(LeagueGroup::class, 'league_id', 'id');
     }
 }
