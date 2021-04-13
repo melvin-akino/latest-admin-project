@@ -104,4 +104,19 @@ class Event extends Model
     {
         return $this->belongsTo(Team::class, 'team_away_id', 'id');
     }
+
+    public static function getAllOtherProviderUnmatchedEvents(int $primaryProviderId, int $sportId)
+    {
+        return DB::table('events as e')
+            ->join('unmatched_data as ue', 'ue.data_id', 'e.id')
+            ->join('team_groups as ht', 'ht.team_id', 'e.team_home_id')
+            ->join('team_groups as at', 'at.team_id', 'e.team_away_id')
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
+            ->where('ue.data_type', 'event')
+            ->where('provider_id', '!=', $primaryProviderId)
+            ->where('e.sport_id', $sportId)
+            ->whereIsNull('e.deleted_at')
+            ->select('id', 'provider_id')
+            ->get();
+    }
 }

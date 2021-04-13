@@ -23,6 +23,16 @@ class League extends Model
         'updated_at',
     ];
 
+    public function leagueGroup() 
+    {
+        return $this->hasOne(LeagueGroup::class);
+    }
+
+    public function unmatchedData() 
+    {
+        return $this->hasOne(UnmatchedData::class);
+    }
+
     /**
      * Get `leagues` data by Provider, also allowing to choose from `raw` or `existing match`
      * 
@@ -52,6 +62,24 @@ class League extends Model
             ->where('name', 'ILIKE', '%'.$searchKey.'%')
             ->select('id', 'sport_id', 'provider_id', 'name')
             ->orderBy('name', $sortOrder)
+            ->get();
+    }
+
+    public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)
+    {
+        return self::where('provider_id', '!=',$primaryProviderId)
+            ->whereNotIn('id', function($notInUnmatched) {
+                $notInUnmatched->select('data_id')
+                    ->from('unmatched_data')
+                    ->where('data_type', 'league');
+            })
+            ->whereNotIn('id', function($notInLeagueGroups) use ($primaryProviderId) {
+                $notInLeagueGroups->select('league_id')
+                    ->from('league_groups')
+                    ->join('leagues')
+                    ->where('provider_id', '!=', $primaryProviderId);
+            })
+            ->select('id', 'provider_id')
             ->get();
     }
 }

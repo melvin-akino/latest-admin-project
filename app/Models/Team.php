@@ -62,4 +62,22 @@ class Team extends Model
             ->orderBy('name', $sortOrder)
             ->get();
     }
+
+    public static function getAllOtherProviderUnmatchedTeams(int $primaryProviderId)
+    {
+        return self::where('provider_id', '!=',$primaryProviderId)
+            ->whereNotIn('id', function($notInUnmatched) {
+                $notInUnmatched->select('data_id')
+                    ->from('unmatched_data')
+                    ->where('data_type', 'team');
+            })
+            ->whereNotIn('id', function($notInTeamGroups) use ($primaryProviderId) {
+                $notInTeamGroups->select('team_id')
+                    ->from('team_groups')
+                    ->join('teams')
+                    ->where('provider_id', '!=', $primaryProviderId);
+            })
+            ->select('id', 'provider_id')
+            ->get();
+    }
 }
