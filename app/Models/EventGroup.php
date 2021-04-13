@@ -18,6 +18,11 @@ class EventGroup extends Model
     public $timestamps = false;
     public $incrementing = false;
 
+    public static function getByEventId($eventId)
+    {
+        return self::where('event_id', $eventId)->get();
+    }
+
     public function events()
     {
         return $this->belongsTo(Event::class, 'id', 'event_id');

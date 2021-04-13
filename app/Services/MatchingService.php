@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, TeamGroup, Event, Matching, MasterEvent};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, TeamGroup, Event, EventGroup, EventMarket, Matching};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
@@ -188,8 +188,6 @@ class MatchingService
                         continue;
                     }
 
-                    //20210407-1-3-4780447
-                    //date('Ymd', strtotime($referenceSchedule)) . '-' . $sportId . '-' . $masterLeagueId . '-' . $eventIdentifier
                     $masterEventUniqueId = implode('-', [
                         date('Ymd', strtotime($unmatchedEvent['ref_schedule'])),
                         $unmatchedEvent['sport_id'],
@@ -217,6 +215,45 @@ class MatchingService
                 }
             } else {
                 Log::info('Matching: Nothing to match for event from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function autoMatchPrimaryEventMarkets()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedEventMarkets = EventMarket::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedEventMarkets->count() > 0) {
+                foreach ($unmatchedEventMarkets as $unmatchedEventMarket) {
+                    $eventGroupData = EventGroup::getByEventId($unmatchedEventMarket['event_id']);
+                    if ($eventGroupData->count() == 0) {
+                        continue;
+                    }
+
+                    $memUid = $unmatchedEventMarket['event_id'] . strtoupper($unmatchedEventMarket['market_flag']) . $unmatchedEventMarket['bet_identifier'];
+                    //md5($eventId . strtoupper($indicator) . $marketId)
+                    $masterEventMarket = $matching->updateOrCreate('MasterEventMarket', [
+                        'master_event_market_unique_id' => $memUid
+                    ], [
+                        'master_event_id' => $eventGroupData[0]->master_event_id,
+                        'name'     => null
+                    ]);
+
+                    $matching->create('EventMarketGroup', [
+                        'master_event_market_id' => $masterEventMarket->id,
+                        'event_market_id'        => $unmatchedEventMarket['id']
+                    ]);
+
+                    Log::info('Matching: Event Market: ' . $unmatchedEventMarket['bet_identifier'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for event market from primary provider');
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
