@@ -22,6 +22,7 @@ class AutoMatching extends Command
 
             MatchingFacade::autoMatchPrimaryLeagues();
             MatchingFacade::autoMatchPrimaryTeams();
+            MatchingFacade::autoMatchPrimaryEvents();
 
             usleep(1000000);
         }

@@ -58,10 +58,10 @@ class Matching
         return $this->models[$modelName]::create($createData);
     }
 
-    public static function updateOrCreate($modelName, $searchData, $createData)
+    public function updateOrCreate($modelName, $searchData, $createData)
     {
         //@TODO add the audit trail here
         
-        return $this->models[$modelName]::firstOrCreate($searchData, $createData);
+        return $this->models[$modelName]::updateOrCreate($searchData, $createData);
     }
 }

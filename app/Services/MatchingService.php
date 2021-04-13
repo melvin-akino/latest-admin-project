@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, Matching};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, TeamGroup, Event, Matching, MasterEvent};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
@@ -158,6 +158,65 @@ class MatchingService
                 }
             } else {
                 Log::info('Matching: Nothing to match for team from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function autoMatchPrimaryEvents()
+    {
+        try {
+            $primaryProviderId = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching          = new Matching;
+
+            $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedEvents->count() > 0) {
+                foreach ($unmatchedEvents as $unmatchedEvent) {
+                    $leagueGroupData = LeagueGroup::getByLeagueId($unmatchedEvent['league_id']);
+                    if ($leagueGroupData->count() == 0) {
+                        continue;
+                    }
+
+                    $teamGroupHomeData = TeamGroup::getByTeamId($unmatchedEvent['team_home_id']);
+                    if ($teamGroupHomeData->count() == 0) {
+                        continue;
+                    }
+
+                    $teamGroupAwayData = TeamGroup::getByTeamId($unmatchedEvent['team_away_id']);
+                    if ($teamGroupAwayData->count() == 0) {
+                        continue;
+                    }
+
+                    //20210407-1-3-4780447
+                    //date('Ymd', strtotime($referenceSchedule)) . '-' . $sportId . '-' . $masterLeagueId . '-' . $eventIdentifier
+                    $masterEventUniqueId = implode('-', [
+                        date('Ymd', strtotime($unmatchedEvent['ref_schedule'])),
+                        $unmatchedEvent['sport_id'],
+                        $leagueGroupData[0]->master_league_id,
+                        $unmatchedEvent['event_identifier']
+                    ]);
+
+                    $masterEvent = $matching->updateOrCreate('MasterEvent', [
+                        'master_event_unique_id' => $masterEventUniqueId
+                    ], [
+                        'sport_id'            => $unmatchedEvent['sport_id'],
+                        'master_league_id'    => $leagueGroupData[0]->master_league_id,
+                        'master_team_home_id' => $teamGroupHomeData[0]->master_team_id,
+                        'master_team_away_id' => $teamGroupAwayData[0]->master_team_id
+                    ]);
+                    
+
+                    $matching->create('EventGroup', [
+                        'master_event_id' => $masterEvent->id,
+                        'event_id'        => $unmatchedEvent['id']
+                    ]);
+
+                    Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for event from primary provider');
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);

@@ -17,4 +17,14 @@ class EventGroup extends Model
 
     public $timestamps = false;
     public $incrementing = false;
+
+    public function events()
+    {
+        return $this->belongsTo(Event::class, 'id', 'event_id');
+    }
+
+    public function masterEvents()
+    {
+        return $this->belongsTo(MasterEvent::class, 'id', 'master_event_id');
+    }
 }

@@ -90,6 +90,16 @@ class Event extends Model
             ->count();
     }
 
+    public static function getAllActiveNotExistInPivotByProviderId($providerId)
+    {
+        return self::where('provider_id', $providerId)->doesntHave('eventGroup')->get();
+    }
+
+    public function eventGroup()
+    {
+        return $this->hasOne(EventGroup::class, 'event_id', 'id');
+    }
+
     public function league() 
     {
         return $this->belongsTo(League::class);
