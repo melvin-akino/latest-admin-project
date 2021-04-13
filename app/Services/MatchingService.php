@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Matching};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Matching, UnmatchedData};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
@@ -130,6 +130,65 @@ class MatchingService
             } else {
                 var_dump('Matching: Nothing to match for league from primary provider');
                 Log::info('Matching: Nothing to match for league from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function createUnmatchedLeagues() 
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedLeagueList = League::getAllOtherProviderUnmatchedLeagues($primaryProviderId);
+
+            if (count($unmatchedLeagueList) > 0) {
+                foreach($unmatchedLeagueList as $league) {
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'league',
+                        'data_id'       => $league['id'],
+                        'provider_id'   => $league['provider_id']
+                    ]);
+                }
+            }
+            else {
+                var_dump('Matching: There are no more leagues to add in the unmatched_data table.');
+            }
+
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function automatchIdenticalLeagues()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+            $unmatchedLeagues = UnmatchedData::getUnmatchedLeagueData('league');
+
+            if (count($unmatchedLeagues) > 0) 
+            {
+                foreach($unmatchedLeagues as $league) {
+                    //get a league from raw leagues table where provider_id = primaryProviderId
+                    $masterLeague = League::getMasterLeagueId($league['name'], $league['sport_id'], $primaryProviderId);
+                    if (!empty($masterLeague))
+                    {
+                        var_dump('Found a league for automatching with master_league_id: ' . $masterLeague->master_league_id);    
+                        $matching->create('LeagueGroup', [
+                            'master_league_id' => $masterLeague->master_league_id,
+                            'league_id'        => $league['data_id']
+                        ]);
+
+                        self::removeFromUnmatchedData('league', $league['provider_id'], $league['data_id']);
+                        var_dump('Removed: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
+                    }
+                } 
+            }
+            else {
+                var_dump('Matching: There are no more other leagues to automatch.');
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);

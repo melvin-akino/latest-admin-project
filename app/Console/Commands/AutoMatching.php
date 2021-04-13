@@ -20,8 +20,15 @@ class AutoMatching extends Command
         while (true) {
             //@TODO call leagues, teams, events and market auto matching
 
-            MatchingFacade::autoMatchPrimaryLeagues();
+            //MatchingFacade::autoMatchPrimaryLeagues();
 
+            //usleep(1000000);
+
+            //@todo Get all leagues, teams and events that are not from the primary providers
+            //validate that these information does not have pivot table data and not exist in the unmatched_data table
+
+            //MatchingFacade::createUnmatchedLeagues(); - this is now working
+            MatchingFacade::automatchIdenticalLeagues();
             usleep(1000000);
         }
     }

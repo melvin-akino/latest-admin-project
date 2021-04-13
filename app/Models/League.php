@@ -24,11 +24,6 @@ class League extends Model
         'updated_at',
     ];
 
-    public function unmatchedData() 
-    {
-        return $this->hasOne(UnmatchedData::class, 'data_id', 'id');
-    }
-
     /**
      * Get `leagues` data by Provider, also allowing to choose from `raw` or `existing match`
      * 
@@ -69,14 +64,21 @@ class League extends Model
                     ->from('unmatched_data')
                     ->where('data_type', 'league');
             })
-            ->whereNotIn('id', function($notInLeagueGroups) use ($primaryProviderId) {
-                $notInLeagueGroups->select('league_id')
-                    ->from('league_groups')
-                    ->join('leagues')
-                    ->where('provider_id', '!=', $primaryProviderId);
-            })
+            ->doesntHave('leagueGroup')
             ->select('id', 'provider_id')
-            ->get();
+            ->get()
+            ->toArray();
+    }
+
+    public static function getMasterLeagueId($leagueName, int $sportId, int $primaryProviderId)
+    {
+        return self::select('master_league_id')
+            ->join('league_groups', 'league_groups.league_id', 'id')
+            ->where('name', $leagueName)
+            ->where('sport_id', $sportId)
+            ->where('provider_id', $primaryProviderId)
+            ->first();
+            
     }
 
     public static function getAllActiveNotExistInPivotByProviderId($providerId)

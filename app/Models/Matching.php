@@ -15,7 +15,8 @@ use App\Models\{
     MasterEvent,
     EventMarket,
     EventMarketGroup,
-    MasterEventMarket
+    MasterEventMarket,
+    UnmatchedData
 };
 
 class Matching
@@ -36,7 +37,8 @@ class Matching
             'MasterEvent',
             'EventMarket',
             'EventMarketGroup',
-            'MasterEventMarket'
+            'MasterEventMarket',
+            'UnmatchedData'
         ];
 
         foreach ($models as $model) {
