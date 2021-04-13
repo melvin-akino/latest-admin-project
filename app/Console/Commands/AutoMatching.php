@@ -14,6 +14,10 @@ class AutoMatching extends Command
 
     public function handle()
     {
-        //@TODO call leagues, teams, events and market auto matching
+        while (true) {
+            //@TODO call leagues, teams, events and market auto matching
+
+            usleep(1000000);
+        }
     }
 }
