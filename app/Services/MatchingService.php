@@ -94,6 +94,7 @@ class MatchingService
      */
     public static function removeFromUnmatchedData(string $type, int $providerId, int $id)
     {
+        DB::beginTransaction();
         $unmatched = DB::table('unmatched_data')
             ->where('data_type', strtolower($type))
             ->where('provider_id', $providerId)
@@ -102,6 +103,7 @@ class MatchingService
         if ($unmatched->count()) {
             $unmatched->delete();
         }
+        DB::commit();
     }
 
     public static function autoMatchPrimaryLeagues()
@@ -315,7 +317,8 @@ class MatchingService
             $matching = new Matching;
             $unmatchedLeagueList = League::getAllOtherProviderUnmatchedLeagues($primaryProviderId);
             var_dump('Matching: Trying to get leagues to add to unmatched_data table');
-            if (count($unmatchedLeagueList) > 0) {
+            if (!empty($unmatchedLeagueList)) {
+                var_dump('Matching: There are leagues that needs to be added into unmatched_data table.');
                 foreach($unmatchedLeagueList as $league) {
                     $matching->create('UnmatchedData', [
                         'data_type'     => 'league',
@@ -344,7 +347,7 @@ class MatchingService
             $matching = new Matching;
             $unmatchedTeamsList = Team::getAllOtherProviderUnmatchedTeams($primaryProviderId);
             var_dump('Matching: Trying to get teams to add to unmatched_data table');
-            if (count($unmatchedTeamsList) > 0) {
+            if (!empty($unmatchedTeamsList)) {
                 foreach($unmatchedTeamsList as $team) {
                     $matching->create('UnmatchedData', [
                         'data_type'     => 'team',
@@ -467,7 +470,7 @@ class MatchingService
         }
     }
 
-    public static function automatchIdenticalEvent()
+    public static function automatchIdenticalEvents()
     {
         DB::beginTransaction();
         try {
