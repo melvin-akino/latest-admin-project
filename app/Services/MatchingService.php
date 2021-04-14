@@ -393,7 +393,7 @@ class MatchingService
                         ]);
 
                         self::removeFromUnmatchedData('league', $league['provider_id'], $league['data_id']);
-                        var_dump('Removed: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
+                        var_dump('Removed from Unmatched: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
                     }
                 }
             }
@@ -430,12 +430,49 @@ class MatchingService
                         ]);
 
                         self::removeFromUnmatchedData('team', $team['provider_id'], $team['data_id']);
-                        var_dump('Removed: team_id:'.$team['data_id'].' - provider_id:'.$team['provider_id'].' - teamname:'.$team['name']);
+                        var_dump('Removed from Unmatched: team_id:'.$team['data_id'].' - provider_id:'.$team['provider_id'].' - teamname:'.$team['name']);
                     }
                 }
             }
             else {
                 var_dump('Matching: There are no more other teams to automatch.');
+            }
+            DB::commit(); 
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function automatchIdenticalEvent()
+    {
+        DB::beginTransaction();
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedEvents = UnmatchedData::getUnmatchedEventData('event');
+
+            if (count($unmatchedEvents) > 0) 
+            {
+                foreach($unmatchedEvents as $event) {
+                    //get a league from raw leagues table where provider_id = primaryProviderId
+                    $masterEvent = Event::getMasterEventId($event['id'], $primaryProviderId);
+                    if (!empty($masterEvent))
+                    {
+                        var_dump('Found a team for automatching with master_team_id: ' . $masterEvent->master_event_id);    
+                        $matching->create('EventGroup', [
+                            'master_event_id' => $masterEvent->master_event_id,
+                            'event_id'        => $event['data_id']
+                        ]);
+
+                        self::removeFromUnmatchedData('event', $event['provider_id'], $event['data_id']);
+                        var_dump('Removed from Unmatched: event_id:'.$event['data_id'].' - provider_id:'.$event['provider_id']);
+                    }
+                }
+            }
+            else {
+                var_dump('Matching: There are no more other events to automatch.');
             }
             DB::commit(); 
         } catch (Exception $e) {
