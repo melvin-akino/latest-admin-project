@@ -32,10 +32,11 @@ class AutoMatching extends Command
             //validate that these information does not have pivot table data and not exist in the unmatched_data table
 
             MatchingFacade::createUnmatchedLeagues(); 
-            //MatchingFacade::createUnmatchedTeams();
-            //MatchingFacade::createUnmatchedEvents();
-            //MatchingFacade::automatchIdenticalLeagues();
-            //MatchingFacade::automatchIdenticalTeams();
+            MatchingFacade::createUnmatchedTeams();
+            MatchingFacade::createUnmatchedEvents();
+            MatchingFacade::automatchIdenticalLeagues();
+            MatchingFacade::automatchIdenticalTeams();
+            MatchingFacade::automatchIdenticalEvents();
             
         }
     }
