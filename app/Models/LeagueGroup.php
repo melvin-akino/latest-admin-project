@@ -23,8 +23,13 @@ class LeagueGroup extends Model
         return self::where('league_id', $leagueId)->get();
     }
 
-    public function leagueGroup()
+    public function leagues()
     {
         return $this->belongsTo(League::class, 'id', 'league_id');
+    }
+
+    public function masterLeagues()
+    {
+        return $this->belongsTo(MasterLeague::class, 'id', 'league_id');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use Illuminate\Support\Facades\DB;
+use App\Models\TeamGroup;
 
 class Team extends Model
 {
@@ -79,5 +80,14 @@ class Team extends Model
             })
             ->select('id', 'provider_id')
             ->get();
+    }
+    public static function getAllActiveNotExistInPivotByProviderId($providerId)
+    {
+        return self::where('provider_id', $providerId)->doesntHave('teamGroup')->get();
+    }
+
+    public function teamGroup()
+    {
+        return $this->hasOne(TeamGroup::class, 'team_id', 'id');
     }
 }

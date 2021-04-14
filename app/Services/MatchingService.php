@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Matching, UnmatchedData};
+use App\Models\{MasterLeague, MasterTeam, Provider, SystemConfiguration, League, LeagueGroup, Team, TeamGroup, Event, EventGroup, EventMarket, Matching, UnmatchedData};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use Exception;
@@ -123,12 +123,10 @@ class MatchingService
                         'league_id'        => $unmatchedLeague['id']
                     ]);
 
-                    var_dump('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     
                 }
             } else {
-                var_dump('Matching: Nothing to match for league from primary provider');
                 Log::info('Matching: Nothing to match for league from primary provider');
             }
         } catch (Exception $e) {
@@ -138,10 +136,10 @@ class MatchingService
 
     public static function createUnmatchedLeagues() 
     {
-        try {
+        try
+        {
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
-
             $unmatchedLeagueList = League::getAllOtherProviderUnmatchedLeagues($primaryProviderId);
 
             if (count($unmatchedLeagueList) > 0) {
@@ -156,6 +154,92 @@ class MatchingService
             else {
                 var_dump('Matching: There are no more leagues to add in the unmatched_data table.');
             }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function autoMatchPrimaryTeams()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+            $unmatchedTeams = Team::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedTeams->count() > 0) {
+                foreach ($unmatchedTeams as $unmatchedTeam) {
+                    $masterTeam = $matching->create('MasterTeam', [
+                        'sport_id' => $unmatchedTeam['sport_id'],
+                        'name'     => null
+                    ]);
+
+                    $matching->create('TeamGroup', [
+                        'master_team_id' => $masterTeam->id,
+                        'team_id'        => $unmatchedTeam['id']
+                    ]);
+
+                    Log::info('Matching: Team: ' . $unmatchedTeam['name'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for team from primary provider');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function autoMatchPrimaryEvents()
+    {
+        try {
+            $primaryProviderId = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching          = new Matching;
+
+            $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedEvents->count() > 0) {
+                foreach ($unmatchedEvents as $unmatchedEvent) {
+                    $leagueGroupData = LeagueGroup::getByLeagueId($unmatchedEvent['league_id']);
+                    if ($leagueGroupData->count() == 0) {
+                        continue;
+                    }
+
+                    $teamGroupHomeData = TeamGroup::getByTeamId($unmatchedEvent['team_home_id']);
+                    if ($teamGroupHomeData->count() == 0) {
+                        continue;
+                    }
+
+                    $teamGroupAwayData = TeamGroup::getByTeamId($unmatchedEvent['team_away_id']);
+                    if ($teamGroupAwayData->count() == 0) {
+                        continue;
+                    }
+
+                    $masterEventUniqueId = implode('-', [
+                        date('Ymd', strtotime($unmatchedEvent['ref_schedule'])),
+                        $unmatchedEvent['sport_id'],
+                        $leagueGroupData[0]->master_league_id,
+                        $unmatchedEvent['event_identifier']
+                    ]);
+
+                    $masterEvent = $matching->updateOrCreate('MasterEvent', [
+                        'master_event_unique_id' => $masterEventUniqueId
+                    ], [
+                        'sport_id'            => $unmatchedEvent['sport_id'],
+                        'master_league_id'    => $leagueGroupData[0]->master_league_id,
+                        'master_team_home_id' => $teamGroupHomeData[0]->master_team_id,
+                        'master_team_away_id' => $teamGroupAwayData[0]->master_team_id
+                    ]);
+                    
+
+                    $matching->create('EventGroup', [
+                        'master_event_id' => $masterEvent->id,
+                        'event_id'        => $unmatchedEvent['id']
+                    ]);
+
+                    Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for event from primary provider');
+            }
 
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
@@ -167,6 +251,7 @@ class MatchingService
         try {
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
+
             $unmatchedLeagues = UnmatchedData::getUnmatchedLeagueData('league');
 
             if (count($unmatchedLeagues) > 0) 
@@ -189,6 +274,45 @@ class MatchingService
             }
             else {
                 var_dump('Matching: There are no more other leagues to automatch.');
+            }
+        } catch (Exception $e) {
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+    public static function autoMatchPrimaryEventMarkets()
+    {
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedEventMarkets = EventMarket::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            if ($unmatchedEventMarkets->count() > 0) {
+                foreach ($unmatchedEventMarkets as $unmatchedEventMarket) {
+                    $eventGroupData = EventGroup::getByEventId($unmatchedEventMarket['event_id']);
+                    if ($eventGroupData->count() == 0) {
+                        continue;
+                    }
+
+                    $memUid = $unmatchedEventMarket['event_id'] . strtoupper($unmatchedEventMarket['market_flag']) . $unmatchedEventMarket['bet_identifier'];
+                    //md5($eventId . strtoupper($indicator) . $marketId)
+                    $masterEventMarket = $matching->updateOrCreate('MasterEventMarket', [
+                        'master_event_market_unique_id' => $memUid
+                    ], [
+                        'master_event_id' => $eventGroupData[0]->master_event_id,
+                        'name'     => null
+                    ]);
+
+                    $matching->create('EventMarketGroup', [
+                        'master_event_market_id' => $masterEventMarket->id,
+                        'event_market_id'        => $unmatchedEventMarket['id']
+                    ]);
+
+                    Log::info('Matching: Event Market: ' . $unmatchedEventMarket['bet_identifier'] . ' is now matched');
+                    
+                }
+            } else {
+                Log::info('Matching: Nothing to match for event market from primary provider');
+
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
