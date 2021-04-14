@@ -107,6 +107,8 @@ class MatchingService
     public static function autoMatchPrimaryLeagues()
     {
         try {
+            DB::beginTransaction();
+            
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
 
@@ -129,14 +131,20 @@ class MatchingService
             } else {
                 Log::info('Matching: Nothing to match for league from primary provider');
             }
+
+            DB::commit();
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
+
+            DB::rollBack();
         }
     }
 
     public static function autoMatchPrimaryTeams()
     {
         try {
+            DB::beginTransaction();
+
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
 
@@ -159,14 +167,20 @@ class MatchingService
             } else {
                 Log::info('Matching: Nothing to match for team from primary provider');
             }
+
+            DB::commit();
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
+
+            DB::rollBack();
         }
     }
 
     public static function autoMatchPrimaryEvents()
     {
         try {
+            DB::beginTransaction();
+
             $primaryProviderId = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching          = new Matching;
 
@@ -216,14 +230,20 @@ class MatchingService
             } else {
                 Log::info('Matching: Nothing to match for event from primary provider');
             }
+
+            DB::commit();
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
+
+            DB::rollBack();
         }
     }
 
     public static function autoMatchPrimaryEventMarkets()
     {
         try {
+            DB::beginTransaction();
+
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
 
@@ -255,8 +275,12 @@ class MatchingService
             } else {
                 Log::info('Matching: Nothing to match for event market from primary provider');
             }
+
+            DB::commit();
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
+
+            DB::rollBack();
         }
     }
 }
