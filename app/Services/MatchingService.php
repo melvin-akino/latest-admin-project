@@ -483,7 +483,7 @@ class MatchingService
             {
                 foreach($unmatchedEvents as $event) {
                     //get a league from raw leagues table where provider_id = primaryProviderId
-                    $masterEvent = Event::getMasterEventId($event['id'], $primaryProviderId);
+                    $masterEvent = Event::getMasterEventId($event['data_id'], $primaryProviderId);
                     if (!empty($masterEvent))
                     {
                         var_dump('Found a team for automatching with master_team_id: ' . $masterEvent->master_event_id);    
