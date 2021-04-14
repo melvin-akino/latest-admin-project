@@ -21,10 +21,10 @@ class AutoMatching extends Command
             //@TODO call leagues, teams, events and market auto matching
 
 
-            MatchingFacade::autoMatchPrimaryLeagues();
-            MatchingFacade::autoMatchPrimaryTeams();
-            MatchingFacade::autoMatchPrimaryEvents();
-            MatchingFacade::autoMatchPrimaryEventMarkets();
+            // MatchingFacade::autoMatchPrimaryLeagues();
+            // MatchingFacade::autoMatchPrimaryTeams();
+            // MatchingFacade::autoMatchPrimaryEvents();
+            // MatchingFacade::autoMatchPrimaryEventMarkets();
 
             //usleep(1000000);
 
@@ -32,8 +32,11 @@ class AutoMatching extends Command
             //validate that these information does not have pivot table data and not exist in the unmatched_data table
 
             MatchingFacade::createUnmatchedLeagues(); 
-            MatchingFacade::automatchIdenticalLeagues();
-            usleep(1000000);
+            //MatchingFacade::createUnmatchedTeams();
+            //MatchingFacade::createUnmatchedEvents();
+            //MatchingFacade::automatchIdenticalLeagues();
+            //MatchingFacade::automatchIdenticalTeams();
+            
         }
     }
 }

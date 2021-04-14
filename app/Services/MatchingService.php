@@ -291,7 +291,7 @@ class MatchingService
             $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching = new Matching;
             $unmatchedLeagueList = League::getAllOtherProviderUnmatchedLeagues($primaryProviderId);
-
+            var_dump('Matching: Trying to get leagues to add to unmatched_data table');
             if (count($unmatchedLeagueList) > 0) {
                 foreach($unmatchedLeagueList as $league) {
                     $matching->create('UnmatchedData', [
@@ -299,12 +299,71 @@ class MatchingService
                         'data_id'       => $league['id'],
                         'provider_id'   => $league['provider_id']
                     ]);
+                    var_dump('Matching: Creating unmatched data league_id:'.$league['id'].' - provider_id:'.$league['provider_id']);
                 }
-                DB::commit();
             }
             else {
                 var_dump('Matching: There are no more leagues to add in the unmatched_data table.');
             }
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function createUnmatchedTeams() 
+    {
+        DB::beginTransaction();
+        try
+        {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+            $unmatchedTeamsList = Team::getAllOtherProviderUnmatchedTeams($primaryProviderId);
+            var_dump('Matching: Trying to get teams to add to unmatched_data table');
+            if (count($unmatchedTeamsList) > 0) {
+                foreach($unmatchedTeamsList as $team) {
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'team',
+                        'data_id'       => $team['id'],
+                        'provider_id'   => $team['provider_id']
+                    ]);
+                    var_dump('Matching: Creating unmatched data team_id:'.$team['id'].' - provider_id:'.$team['provider_id']);
+                }
+            }
+            else {
+                var_dump('Matching: There are no more teams to add in the unmatched_data table.');
+            }
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function createUnmatchedEvents() 
+    {
+        DB::beginTransaction();
+        try
+        {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+            $unmatchedEventsList = Event::getAllOtherProviderUnmatchedEvents($primaryProviderId);
+            var_dump('Matching: Trying to get events to add to unmatched_data table');
+            if (count($unmatchedEventsList) > 0) {
+                foreach($unmatchedEventsList as $event) {
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'event',
+                        'data_id'       => $event['id'],
+                        'provider_id'   => $event['provider_id']
+                    ]);
+                    var_dump('Matching: Creating unmatched data event_id:'.$event['id'].' - provider_id:'.$event['provider_id']);
+                }
+            }
+            else {
+                var_dump('Matching: There are no more events to add in the unmatched_data table.');
+            }
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
@@ -337,11 +396,48 @@ class MatchingService
                         var_dump('Removed: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
                     }
                 }
-                DB::commit(); 
             }
             else {
                 var_dump('Matching: There are no more other leagues to automatch.');
             }
+            DB::commit(); 
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function automatchIdenticalTeams()
+    {
+        DB::beginTransaction();
+        try {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            $matching = new Matching;
+
+            $unmatchedTeams = UnmatchedData::getUnmatchedTeamData('team');
+
+            if (count($unmatchedTeams) > 0) 
+            {
+                foreach($unmatchedTeams as $team) {
+                    //get a league from raw leagues table where provider_id = primaryProviderId
+                    $masterTeam = Team::getMasterTeamId($team['name'], $team['sport_id'], $primaryProviderId);
+                    if (!empty($masterTeam))
+                    {
+                        var_dump('Found a team for automatching with master_team_id: ' . $masterTeam->master_team_id);    
+                        $matching->create('TeamGroup', [
+                            'master_team_id' => $masterTeam->master_team_id,
+                            'team_id'        => $team['data_id']
+                        ]);
+
+                        self::removeFromUnmatchedData('team', $team['provider_id'], $team['data_id']);
+                        var_dump('Removed: team_id:'.$team['data_id'].' - provider_id:'.$team['provider_id'].' - teamname:'.$team['name']);
+                    }
+                }
+            }
+            else {
+                var_dump('Matching: There are no more other teams to automatch.');
+            }
+            DB::commit(); 
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);

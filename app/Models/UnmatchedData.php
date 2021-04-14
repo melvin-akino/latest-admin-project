@@ -27,4 +27,13 @@ class UnmatchedData extends Model
             ->get()
             ->toArray();
     }
+
+    public static function getUnmatchedTeamData($type) 
+    {
+        return self::where('data_type', $type)
+            ->join('teams', 'teams.id', 'data_id')
+            ->select('data_id', 'teams.provider_id', 'sport_id', 'name')
+            ->get()
+            ->toArray();
+    }
 }

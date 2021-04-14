@@ -126,8 +126,8 @@ class Event extends Model
             ->whereNotIn('id', function($notInEventGroups) use ($primaryProviderId) {
                 $notInEventGroups->select('event_id')
                     ->from('event_groups')
-                    ->join('events')
-                    ->where('provider_id', '!=', $primaryProviderId)
+                    ->join('events', 'events.id', 'event_groups.event_id')
+                    ->where('provider_id', '!=', $primaryProviderId);
             })
             ->select('id', 'provider_id')
             ->get();

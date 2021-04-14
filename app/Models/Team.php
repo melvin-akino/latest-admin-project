@@ -75,11 +75,23 @@ class Team extends Model
             ->whereNotIn('id', function($notInTeamGroups) use ($primaryProviderId) {
                 $notInTeamGroups->select('team_id')
                     ->from('team_groups')
-                    ->join('teams')
+                    ->join('teams','teams.id','team_groups.team_id')
                     ->where('provider_id', '!=', $primaryProviderId);
             })
             ->select('id', 'provider_id')
-            ->get();
+            ->get()
+            ->toArray();
+    }
+
+    public static function getMasterTeamId($teamName, int $sportId, int $primaryProviderId)
+    {
+        return self::select('master_team_id')
+            ->join('team_groups', 'team_groups.team_id', 'id')
+            ->where('name', $teamName)
+            ->where('sport_id', $sportId)
+            ->where('provider_id', $primaryProviderId)
+            ->first();
+            
     }
     public static function getAllActiveNotExistInPivotByProviderId($providerId)
     {

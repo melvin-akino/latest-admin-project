@@ -64,7 +64,12 @@ class League extends Model
                     ->from('unmatched_data')
                     ->where('data_type', 'league');
             })
-            ->doesntHave('leagueGroup')
+            ->whereNotIn('id', function($notInLeagueGroup) use ($primaryProviderId) {
+                $notInLeagueGroup->select('league_id')
+                    ->from('league_groups')
+                    ->join('leagues','leagues.id','league_groups.league_id')
+                    ->where('provider_id', '!=', $primaryProviderId);
+            })
             ->select('id', 'provider_id')
             ->get()
             ->toArray();
