@@ -67,7 +67,7 @@ class League extends Model
               ->join('providers as p', 'p.id', 'leagues.provider_id')
               ->where('ml.id', $id)
               ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
-              ->orderBy('ml.id')
+              ->orderBy('leagues.id')
               ->get();
     }
 

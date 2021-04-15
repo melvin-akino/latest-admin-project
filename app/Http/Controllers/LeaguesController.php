@@ -41,7 +41,7 @@ class LeaguesController extends Controller
 
     public function getMatchedLeagues()
     {
-        $masterLeagues = MasterLeague::all();
+        $masterLeagues = MasterLeague::orderBy('id')->get();
         $data = [];
 
         foreach($masterLeagues as $masterLeague) {
