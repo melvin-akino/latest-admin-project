@@ -153,7 +153,7 @@ class Event extends Model
                     'e.ref_schedule', 
                     'l.name as league_name', 
                     'ht.name as home_team',
-                    'at.name as away_name',
+                    'at.name as away_team',
                     'e.sport_id'
                 )
                 ->first();
@@ -168,7 +168,7 @@ class Event extends Model
                 ->where('master_team_away_id', $unmatchedEventInfo->master_away_team)
                 ->where('master_league_id', $unmatchedEventInfo->master_league_id)
                 ->where('e.provider_id', $primaryProviderId)
-                ->whereIsNull('me.deleted_at')
+                ->whereNull('me.deleted_at')
                 ->select(
                     'me.id as master_event_id', 
                     'e.sport_id', 
@@ -178,7 +178,6 @@ class Event extends Model
                     'e.ref_schedule'
                 )
                 ->first();
-
             if ($masterEventInfo) {
                 if ($masterEventInfo->sport_id == $unmatchedEventInfo->sport_id
                     && $masterEventInfo->league_name == $unmatchedEventInfo->league_name
