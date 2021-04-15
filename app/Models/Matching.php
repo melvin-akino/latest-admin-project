@@ -38,9 +38,7 @@ class Matching
             'EventMarket',
             'EventMarketGroup',
             'MasterEventMarket',
-            'UnmatchedData',
-            'SystemConfiguration'
-
+            'UnmatchedData'
         ];
 
         foreach ($models as $model) {
