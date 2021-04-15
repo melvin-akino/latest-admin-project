@@ -83,34 +83,15 @@ class Team extends Model
             ->toArray();
     }
 
-    public static function getMasterTeamId($teamId, $teamName, int $sportId, int $primaryProviderId)
+    public static function getMasterTeamId($teamName, int $sportId, int $primaryProviderId)
     {
-        $masterTeamId = null;
-        $masterTeam = self::select('master_team_id', 'team_id')
+        return self::select('master_team_id')
             ->join('team_groups', 'team_groups.team_id', 'id')
             ->where('name', $teamName)
             ->where('sport_id', $sportId)
             ->where('provider_id', $primaryProviderId)
             ->first();
-
-        if (!empty($masterTeam)) {
-
-            $teams = [$teamId, $masterTeam->team_id];
-
-            $masterLeagues = DB::table('events as e')
-                ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
-                ->whereNull('e.deleted_at')
-                ->whereOr('e.team_home_id', $teams)
-                ->whereOr('e.team_away_id', $teams)
-                ->select('lg.master_league_id')
-                ->get()
-                ->toArray();
             
-            if(in_array(count($teams),array_count_values($masterLeagues))) {
-                $masterTeamId = $masterTeam->master_team_id;
-            }            
-        }
-        return $masterTeamId;    
     }
     public static function getAllActiveNotExistInPivotByProviderId($providerId)
     {
