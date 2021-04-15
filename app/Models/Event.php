@@ -183,7 +183,7 @@ class Event extends Model
                     && $masterEventInfo->league_name == $unmatchedEventInfo->league_name
                     && $masterEventInfo->home_team == $unmatchedEventInfo->home_team
                     && $masterEventInfo->away_team == $unmatchedEventInfo->away_team
-                    && $masterEventInfo->ref_schedule == $unmatchedEventInfo->ref_schedule) 
+                    && abs(strtotime($masterEventInfo->ref_schedule) - strtotime($unmatchedEventInfo->ref_schedule)) < 60) 
                 {
                     $masterEventId = $masterEventInfo->master_event_id;
                 }

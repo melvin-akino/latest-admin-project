@@ -446,12 +446,12 @@ class MatchingService
             {
                 foreach($unmatchedTeams as $team) {
                     //get a league from raw leagues table where provider_id = primaryProviderId
-                    $masterTeam = Team::getMasterTeamId($team['name'], $team['sport_id'], $primaryProviderId);
-                    if (!empty($masterTeam))
+                    $masterTeamId = Team::getMasterTeamId($team['data_id'], $team['name'], $team['sport_id'], $primaryProviderId);
+                    if (!empty($masterTeamId))
                     {
-                        Log::info('Found a team for automatching with master_team_id: ' . $masterTeam->master_team_id);    
+                        Log::info('Found a team for automatching with master_team_id: ' . $masterTeamId);    
                         $matching->create('TeamGroup', [
-                            'master_team_id' => $masterTeam->master_team_id,
+                            'master_team_id' => $masterTeamId,
                             'team_id'        => $team['data_id']
                         ]);
 
