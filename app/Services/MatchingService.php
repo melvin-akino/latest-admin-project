@@ -125,12 +125,6 @@ class MatchingService
                         'league_id'        => $unmatchedLeague['id']
                     ]);
 
-                    $matching->updateOrCreate('SystemConfiguration', [
-                        'type' => 'MATCHED_PROCESS',
-                    ], [
-                        'value' => '1'
-                    ]);
-
                     Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     
                 }
@@ -165,12 +159,6 @@ class MatchingService
                     $matching->create('TeamGroup', [
                         'master_team_id' => $masterTeam->id,
                         'team_id'        => $unmatchedTeam['id']
-                    ]);
-
-                    $matching->updateOrCreate('SystemConfiguration', [
-                        'type' => 'MATCHED_PROCESS',
-                    ], [
-                        'value' => '1'
                     ]);
 
                     Log::info('Matching: Team: ' . $unmatchedTeam['name'] . ' is now matched');
@@ -236,12 +224,6 @@ class MatchingService
                         'event_id'        => $unmatchedEvent['id']
                     ]);
 
-                    $matching->updateOrCreate('SystemConfiguration', [
-                        'type' => 'MATCHED_PROCESS',
-                    ], [
-                        'value' => '1'
-                    ]);
-
                     Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
                     
                 }
@@ -284,12 +266,6 @@ class MatchingService
                     $matching->create('EventMarketGroup', [
                         'master_event_market_id' => $masterEventMarket->id,
                         'event_market_id'        => $unmatchedEventMarket['id']
-                    ]);
-
-                    $matching->updateOrCreate('SystemConfiguration', [
-                        'type' => 'MATCHED_PROCESS',
-                    ], [
-                        'value' => '1'
                     ]);
 
                     Log::info('Matching: Event Market: ' . $unmatchedEventMarket['bet_identifier'] . ' is now matched');
