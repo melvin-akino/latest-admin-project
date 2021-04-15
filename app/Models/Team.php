@@ -64,6 +64,35 @@ class Team extends Model
             ->get();
     }
 
+    public static function getAllOtherProviderUnmatchedTeams(int $primaryProviderId)
+    {
+        return self::where('provider_id', '!=',$primaryProviderId)
+            ->whereNotIn('id', function($notInUnmatched) {
+                $notInUnmatched->select('data_id')
+                    ->from('unmatched_data')
+                    ->where('data_type', 'team');
+            })
+            ->whereNotIn('id', function($notInTeamGroups) use ($primaryProviderId) {
+                $notInTeamGroups->select('team_id')
+                    ->from('team_groups')
+                    ->join('teams','teams.id','team_groups.team_id')
+                    ->where('provider_id', '!=', $primaryProviderId);
+            })
+            ->select('id', 'provider_id')
+            ->get()
+            ->toArray();
+    }
+
+    public static function getMasterTeamId($teamName, int $sportId, int $primaryProviderId)
+    {
+        return self::select('master_team_id')
+            ->join('team_groups', 'team_groups.team_id', 'id')
+            ->where('name', $teamName)
+            ->where('sport_id', $sportId)
+            ->where('provider_id', $primaryProviderId)
+            ->first();
+            
+    }
     public static function getAllActiveNotExistInPivotByProviderId($providerId)
     {
         return self::where('provider_id', $providerId)->doesntHave('teamGroup')->get();
