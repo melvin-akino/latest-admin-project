@@ -197,6 +197,7 @@ class MatchingService
             $primaryProviderId = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
             $matching          = new Matching;
 
+            //check if event doesnt exist in event groups
             $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
             if ($unmatchedEvents->count() > 0) {
                 foreach ($unmatchedEvents as $unmatchedEvent) {
@@ -213,27 +214,42 @@ class MatchingService
                     $teamGroupAwayData = TeamGroup::getByTeamId($unmatchedEvent['team_away_id']);
                     if ($teamGroupAwayData->count() == 0) {
                         continue;
-                    }
-
-                    $masterEventUniqueId = implode('-', [
-                        date('Ymd', strtotime($unmatchedEvent['ref_schedule'])),
-                        $unmatchedEvent['sport_id'],
-                        $leagueGroupData[0]->master_league_id,
-                        $unmatchedEvent['event_identifier']
-                    ]);
-
-                    $masterEvent = $matching->updateOrCreate('MasterEvent', [
-                        'master_event_unique_id' => $masterEventUniqueId
-                    ], [
-                        'sport_id'            => $unmatchedEvent['sport_id'],
-                        'master_league_id'    => $leagueGroupData[0]->master_league_id,
-                        'master_team_home_id' => $teamGroupHomeData[0]->master_team_id,
-                        'master_team_away_id' => $teamGroupAwayData[0]->master_team_id
-                    ]);
+                    }                                       
                     
+                    //if not, check if event has similar league, home team, away team and ref sched filtered by hour and currently soft deleted and hasEventGroups
+                    $event = Event::getSoftDeletedEvent($unmatchedEvent);
+                    //if yes, reuse master event 
+                    if ($event) {
+                        $masterEventId = $event->master_event_id;
+                        
+                        $matching->delete('EventGroup', [
+                            'master_event_id' => $event->master_event_id,
+                            'event_id'        => $event->id
+                        ]);
+                    }
+                    else {                   
+                        //if no, create master event
+                        $masterEventUniqueId = implode('-', [
+                            date('Ymd', strtotime($unmatchedEvent['ref_schedule'])),
+                            $unmatchedEvent['sport_id'],
+                            $leagueGroupData[0]->master_league_id,
+                            $unmatchedEvent['event_identifier']
+                        ]);
 
+                        $masterEvent = $matching->updateOrCreate('MasterEvent', [
+                            'master_event_unique_id' => $masterEventUniqueId
+                        ], [
+                            'sport_id'            => $unmatchedEvent['sport_id'],
+                            'master_league_id'    => $leagueGroupData[0]->master_league_id,
+                            'master_team_home_id' => $teamGroupHomeData[0]->master_team_id,
+                            'master_team_away_id' => $teamGroupAwayData[0]->master_team_id
+                        ]);
+
+                        $masterEventId = $masterEvent->id;
+                    }
+                    //create event groups
                     $matching->create('EventGroup', [
-                        'master_event_id' => $masterEvent->id,
+                        'master_event_id' => $masterEventId,
                         'event_id'        => $unmatchedEvent['id']
                     ]);
 

@@ -68,4 +68,11 @@ class Matching
         
         return $this->models[$modelName]::updateOrCreate($searchData, $createData);
     }
+
+    public function delete($modelName, $condition)
+    {
+        //@TODO add the audit trail here
+        
+        return $this->models[$modelName]::delete($condition);
+    }
 }
