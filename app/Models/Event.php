@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use App\Models\{League, Team};
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{DB, Log};
 use Carbon\Carbon;
 
 class Event extends Model
@@ -195,24 +195,30 @@ class Event extends Model
 
     public static function getSoftDeletedEvent($event)
     {
+        $eventGroup = null;
+        $softDeletedRefSchedule = null;
+        $newEventRefSchedule = Carbon::parse($event['ref_schedule'])->format('YmdH');
         //check if event has similar league, home team, away team and ref sched filtered by hour and currently soft deleted and hasEventGroups
-        $softDeletedEvent = self::select('master_event_id','id')
+        $softDeletedEvent = self::select('event_groups.master_event_id','id','ref_schedule')
             ->join('event_groups', 'event_groups.event_id', 'id')
             ->where('team_home_id', $event['team_home_id'])
             ->where('team_away_id', $event['team_away_id'])
             ->where('league_id', $event['league_id'])
             ->where('sport_id', $event['sport_id'])
             ->where('provider_id', $event['provider_id'])
-            ->where(DB::raw('TO_TIMESTAMP(ref_schedule, YYYY-MM-DD HH24) = ' . Carbon::createFromFormat('YYYY-MM-DD HH', $event['ref_schedule'])))
             ->whereNotNull('events.deleted_at')
             ->orderBy('events.id', 'desc')
             ->first();
-        //now check if this event has a matched data in the event_groups table
-        $eventGroup = DB::table('event_groups')
-            ->where('master_event_id', $softDeletedEvent->master_event_id)
-            ->count();
+        if (!empty($softDeletedEvent)) {
+            $softDeletedRefSchedule = Carbon::parse($softDeletedEvent->ref_schedule)->format('YmdH');
+            
+            //now check if this event has a matched data in the event_groups table
+            $eventGroup = DB::table('event_groups')
+                ->where('master_event_id', $softDeletedEvent->master_event_id)
+                ->count();
+        }
 
-        if ($eventGroup > 1) {
+        if ($softDeletedRefSchedule == $newEventRefSchedule &&  $eventGroup > 1) {
             return $softDeletedEvent;
         }
 
