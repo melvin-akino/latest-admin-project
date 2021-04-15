@@ -203,7 +203,7 @@ class Event extends Model
             ->where('league_id', $event['league_id'])
             ->where('sport_id', $event['sport_id'])
             ->where('provider_id', $event['provider_id'])
-            ->where(DB::raw('TO_DATE(ref_schedule, YYYY-MM-DD HH24) = ' . Carbon::createFromFormat('YYYY-MM-DD HH', $event['ref_schedule'])))
+            ->where(DB::raw('TO_TIMESTAMP(ref_schedule, YYYY-MM-DD HH24) = ' . Carbon::createFromFormat('YYYY-MM-DD HH', $event['ref_schedule'])))
             ->whereNotNull('events.deleted_at')
             ->orderBy('events.id', 'desc')
             ->first();
