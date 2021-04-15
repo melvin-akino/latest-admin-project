@@ -45,8 +45,11 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/providers/non-primary', 'ProvidersController@getNonPrimaryProviders')->name('non-primary-providers.api');
     
     // Leagues routes
-    Route::get('/raw-leagues', 'LeaguesController@getRawLeagues')->name('leagues.api');
-    Route::get('/matched-leagues', 'LeaguesController@getLeagues')->name('matched-leagues.api');
+    Route::prefix('leagues')->group(function() {
+        Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
+        Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
+        Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
+    });
     Route::post('/leagues/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
         
     // Teams routes

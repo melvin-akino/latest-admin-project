@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{League, Provider, SystemConfiguration AS SC};
+use App\Models\{MasterLeague, League, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
@@ -16,17 +16,46 @@ class LeaguesController extends Controller
      * 
      * @return json
      */
-    public function getRawLeagues(RawListRequest $request)
+    public function getUnmatchedLeagues($providerId = null)
     {
-        return RawListingFacade::getByProvider($request, 'league');
+        $leagues = League::getLeagues($providerId, false);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'data'        => $leagues
+        ]);
     }
 
-    public function getLeagues()
+    public function getPrimaryProviderMatchedLeagues()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagues    = League::getByProvider($providerId);
+        $leagues = League::getLeagues($providerId);
 
-        return response()->json($leagues);
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'data'        => $leagues
+        ]);
+    }
+
+    public function getMatchedLeagues()
+    {
+        $masterLeagues = MasterLeague::all();
+        $data = [];
+
+        foreach($masterLeagues as $masterLeague) {
+            $data[] = [
+                'master_league_id' => $masterLeague->id,
+                'leagues' => League::getMatchedLeaguesById($masterLeague->id)->toArray()
+            ];
+        }
+
+        return response()->json([
+          'status'      => true,
+          'status_code' => 200,
+          'data'        => $data
+      ]);
     }
 
     /**
