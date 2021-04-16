@@ -30,6 +30,6 @@ class LeagueGroup extends Model
 
     public function masterLeagues()
     {
-        return $this->belongsTo(MasterLeague::class, 'id', 'league_id');
+        return $this->belongsTo(MasterLeague::class, 'id', 'master_league_id');
     }
 }

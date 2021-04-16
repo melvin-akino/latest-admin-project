@@ -61,6 +61,15 @@ class League extends Model
             ->orderBy('leagues.name', $sortOrder);
     }
 
+    public static function getMatchedLeaguesByMasterLeagueId(int $masterLeagueId)
+    {
+        return self::join('league_groups as lg', 'lg.league_id', 'leagues.id')
+                ->join('providers as p', 'p.id', 'leagues.provider_id')
+                ->where('lg.master_league_id', $masterLeagueId)
+                ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+                ->get();
+    }
+
     public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)
     {
         return self::where('provider_id', '!=',$primaryProviderId)

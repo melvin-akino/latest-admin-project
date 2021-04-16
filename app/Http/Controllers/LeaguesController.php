@@ -59,14 +59,25 @@ class LeaguesController extends Controller
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
 
-        $matchedLeagues = MasterLeague::getMatchedLeagues();
+        $masterLeagues = MasterLeague::orderBy('id');
+        $total = $masterLeagues->count();
+        $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
+
+        $result = [];
+
+        foreach($pageData as $data) {
+            $result[] = [
+                'master_league_id' => $data->id,
+                'leagues' => League::getMatchedLeaguesByMasterLeagueId($data->id)->toArray()
+            ];
+        }
 
         return response()->json([
             'status'      => true,
             'status_code' => 200,
-            'total'       => $matchedLeagues->count(),
+            'total'       => $total,
             'pageNum'     => $page,
-            'pageData'    => $matchedLeagues->offset(($page - 1) * $limit)->limit($limit)->get()
+            'pageData'    => $result
         ]);
     }
 
