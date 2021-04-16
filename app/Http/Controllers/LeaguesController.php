@@ -16,14 +16,29 @@ class LeaguesController extends Controller
      * 
      * @return json
      */
-    public function getUnmatchedLeagues($providerId = null)
+    public function getUnmatchedLeagues(Request $request, $providerId = null)
     {
-        $leagues = League::getLeagues($providerId, false);
+        $searchKey = '';
+        $page = 1;
+        $limit = 10;
+        $sortOrder = 'asc';
+
+        if ($request->has('searchKey')) $searchKey = $request->searchKey;
+
+        if ($request->has('page')) $page = $request->page;
+
+        if ($request->has('limit')) $limit = $request->limit;
+
+        if ($request->has('sortOrder')) $sortOrder = $request->sortOrder;
+
+        $leagues = League::getLeagues($providerId, false, $searchKey, $sortOrder);
 
         return response()->json([
             'status'      => true,
             'status_code' => 200,
-            'data'        => $leagues
+            'total'       => $leagues->count(),
+            'pageNum'     => $page,
+            'pageData'    => $leagues->skip(($page - 1) * $limit)->take($limit)->values()
         ]);
     }
 
@@ -39,23 +54,24 @@ class LeaguesController extends Controller
         ]);
     }
 
-    public function getMatchedLeagues()
+    public function getMatchedLeagues(Request $request)
     {
-        $masterLeagues = MasterLeague::orderBy('id')->get();
-        $data = [];
+        $page = 1;
+        $limit = 10;
+        
+        if ($request->has('page')) $page = $request->page;
 
-        foreach($masterLeagues as $masterLeague) {
-            $data[] = [
-                'master_league_id' => $masterLeague->id,
-                'leagues' => League::getMatchedLeaguesById($masterLeague->id)->toArray()
-            ];
-        }
+        if ($request->has('limit')) $limit = $request->limit;
+
+        $matchedLeagues = MasterLeague::getMatchedLeagues();
 
         return response()->json([
-          'status'      => true,
-          'status_code' => 200,
-          'data'        => $data
-      ]);
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $matchedLeagues->count(),
+            'pageNum'     => $page,
+            'pageData'    => $matchedLeagues->skip(($page - 1) * $limit)->take($limit)->values()
+        ]);
     }
 
     /**

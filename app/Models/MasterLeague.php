@@ -28,6 +28,25 @@ class MasterLeague extends Model
         return $this->hasMany(LeagueGroup::class, 'master_league_id', 'id');
     }
 
+    public function leagues()
+    {
+        return $this->belongsToMany(League::class, 'league_groups', 'master_league_id', 'league_id');
+    }
+
+    public static function getMatchedLeagues()
+    {
+        return MasterLeague::with(array('leagues' => function($query) {
+                  $query->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+                      ->join('providers as p', 'p.id', 'leagues.provider_id');
+                  }))
+                  ->select('id')
+                  ->whereIn('id', function($query) {
+                      $query->select('master_league_id')->from('league_groups');
+                  })
+                  ->orderBy('id')
+                  ->get();
+    }
+
     public static function getSideBarLeaguesBySportAndGameSchedule(int $sportId, int $primaryProviderId, int $maxMissingCount, string $gameSchedule)
     {
         $sql = "SELECT name, COUNT(name) AS match_count, master_league_id

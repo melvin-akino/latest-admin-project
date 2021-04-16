@@ -22,6 +22,7 @@ class League extends Model
         'deleted_at',
         'created_at',
         'updated_at',
+        'pivot'
     ];
 
     /**
@@ -59,16 +60,6 @@ class League extends Model
             ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
             ->orderBy('leagues.name', $sortOrder)
             ->get();
-    }
-
-    public static function getMatchedLeaguesById(int $id) {
-        return self::join('league_groups as lg', 'leagues.id', 'lg.league_id')
-              ->join('master_leagues as ml', 'ml.id', 'lg.master_league_id')
-              ->join('providers as p', 'p.id', 'leagues.provider_id')
-              ->where('ml.id', $id)
-              ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
-              ->orderBy('leagues.id')
-              ->get();
     }
 
     public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)
