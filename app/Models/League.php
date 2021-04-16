@@ -33,27 +33,40 @@ class League extends Model
      * 
      * @return object
      */
-    public static function getByProvider(int $providerId, string $searchKey = '', string $sortOrder = 'asc', bool $grouped = true)
+    public static function getLeagues($providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc')
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
-        return self::{$where}('id', function ($query) {
+        return self::{$where}('leagues.id', function ($query) {
                 $query->select('league_id')
                     ->from('league_groups');
             })
+            ->join('providers as p', 'p.id', 'leagues.provider_id')
             ->when(!$grouped, function ($query) use ($providerId) {
-                $query->whereIn('id', function ($where) use ($providerId) {
+                $query->whereIn('leagues.id', function ($where) use ($providerId) {
                     $where->select('data_id')
-                        ->from('unmatched_data')
-                        ->where('data_type', 'league')
-                        ->where('provider_id', $providerId);
+                    ->from('unmatched_data')
+                    ->where('data_type', 'league')
+                    ->when($providerId, function ($query) use ($providerId) {
+                        $query->where('provider_id', $providerId);
+                    });
                 });
             })
-            ->where('provider_id', $providerId)
-            ->where('name', 'ILIKE', '%'.$searchKey.'%')
-            ->select('id', 'sport_id', 'provider_id', 'name')
-            ->orderBy('name', $sortOrder)
-            ->get();
+            ->when($providerId, function ($query) use ($providerId) {
+                $query->where('provider_id', $providerId);
+            })
+            ->where('leagues.name', 'ILIKE', '%'.$searchKey.'%')
+            ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+            ->orderBy('leagues.name', $sortOrder);
+    }
+
+    public static function getMatchedLeaguesByMasterLeagueId(int $masterLeagueId)
+    {
+        return self::join('league_groups as lg', 'lg.league_id', 'leagues.id')
+                ->join('providers as p', 'p.id', 'leagues.provider_id')
+                ->where('lg.master_league_id', $masterLeagueId)
+                ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+                ->get();
     }
 
     public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)

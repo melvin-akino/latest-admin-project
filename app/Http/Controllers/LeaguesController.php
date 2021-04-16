@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{League, Provider, SystemConfiguration AS SC};
+use App\Models\{MasterLeague, League, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\RawListRequest;
 use Illuminate\Support\Facades\Validator;
@@ -16,17 +16,69 @@ class LeaguesController extends Controller
      * 
      * @return json
      */
-    public function getRawLeagues(RawListRequest $request)
+    public function getUnmatchedLeagues(Request $request, $providerId = null)
     {
-        return RawListingFacade::getByProvider($request, 'league');
+        $searchKey = '';
+        $page = 1;
+        $limit = 10;
+        $sortOrder = 'asc';
+
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+
+        $leagues = League::getLeagues($providerId, false, $searchKey, $sortOrder);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $leagues->count(),
+            'pageNum'     => $page,
+            'pageData'    => $leagues->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
     }
 
-    public function getLeagues()
+    public function getPrimaryProviderMatchedLeagues()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagues    = League::getByProvider($providerId);
+        $leagues = League::getLeagues($providerId)->get();
 
-        return response()->json($leagues);
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'data'        => $leagues
+        ]);
+    }
+
+    public function getMatchedLeagues(Request $request)
+    {
+        $page = 1;
+        $limit = 10;
+        
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+
+        $masterLeagues = MasterLeague::orderBy('id');
+        $total = $masterLeagues->count();
+        $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
+
+        $result = [];
+
+        foreach($pageData as $data) {
+            $result[] = [
+                'master_league_id' => $data->id,
+                'leagues' => League::getMatchedLeaguesByMasterLeagueId($data->id)->toArray()
+            ];
+        }
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $total,
+            'pageNum'     => $page,
+            'pageData'    => $result
+        ]);
     }
 
     /**
