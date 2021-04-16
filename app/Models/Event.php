@@ -140,11 +140,8 @@ class Event extends Model
         $unmatchedEventInfo = DB::table('unmatched_data as ue')
                 ->join('events as e', 'e.id', 'ue.data_id')
                 ->join('team_groups as htg', 'htg.team_id', 'e.team_home_id')
-                ->join('teams as ht', 'ht.id', 'e.team_home_id')
                 ->join('team_groups as atg', 'atg.team_id', 'e.team_away_id')
-                ->join('teams as at', 'at.id', 'e.team_away_id')
                 ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
-                ->join('leagues as l', 'l.id', 'e.league_id')
                 ->where('ue.data_type', 'event')
                 ->where('ue.data_id', $eventId)
                 ->select(
@@ -152,9 +149,6 @@ class Event extends Model
                     'atg.master_team_id as master_away_team', 
                     'lg.master_league_id', 
                     'e.ref_schedule', 
-                    'l.name as league_name', 
-                    'ht.name as home_team',
-                    'at.name as away_team',
                     'e.sport_id'
                 )
                 ->first();
@@ -162,29 +156,19 @@ class Event extends Model
             $masterEventInfo = DB::table('master_events as me')
                 ->join('event_groups as eg', 'eg.master_event_id', 'me.id')
                 ->join('events as e', 'e.id', 'eg.event_id')
-                ->join('teams as ht', 'ht.id', 'e.team_home_id')
-                ->join('teams as at', 'at.id', 'e.team_away_id')
-                ->join('leagues as l', 'l.id', 'e.league_id')
                 ->where('master_team_home_id', $unmatchedEventInfo->master_home_team)
                 ->where('master_team_away_id', $unmatchedEventInfo->master_away_team)
                 ->where('master_league_id', $unmatchedEventInfo->master_league_id)
                 ->where('e.provider_id', $primaryProviderId)
+                ->where('e.sport_id', $unmatchedEventInfo->sport_id)
                 ->whereNull('me.deleted_at')
                 ->select(
                     'me.id as master_event_id', 
-                    'e.sport_id', 
-                    'l.name as league_name', 
-                    'ht.name as home_team', 
-                    'at.name as away_team', 
                     'e.ref_schedule'
                 )
                 ->first();
             if ($masterEventInfo) {
-                if ($masterEventInfo->sport_id == $unmatchedEventInfo->sport_id
-                    && $masterEventInfo->league_name == $unmatchedEventInfo->league_name
-                    && $masterEventInfo->home_team == $unmatchedEventInfo->home_team
-                    && $masterEventInfo->away_team == $unmatchedEventInfo->away_team
-                    && Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH') == Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH')) 
+                if (Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH') == Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH')) 
                 {
                     $masterEventId = $masterEventInfo->master_event_id;
                 }
