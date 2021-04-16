@@ -23,13 +23,10 @@ class LeaguesController extends Controller
         $limit = 10;
         $sortOrder = 'asc';
 
-        if ($request->has('searchKey')) $searchKey = $request->searchKey;
-
-        if ($request->has('page')) $page = $request->page;
-
-        if ($request->has('limit')) $limit = $request->limit;
-
-        if ($request->has('sortOrder')) $sortOrder = $request->sortOrder;
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
 
         $leagues = League::getLeagues($providerId, false, $searchKey, $sortOrder);
 
@@ -59,9 +56,8 @@ class LeaguesController extends Controller
         $page = 1;
         $limit = 10;
         
-        if ($request->has('page')) $page = $request->page;
-
-        if ($request->has('limit')) $limit = $request->limit;
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
 
         $matchedLeagues = MasterLeague::getMatchedLeagues();
 
