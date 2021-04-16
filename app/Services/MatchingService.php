@@ -94,7 +94,6 @@ class MatchingService
      */
     public static function removeFromUnmatchedData(string $type, int $providerId, int $id)
     {
-        DB::beginTransaction();
         $unmatched = DB::table('unmatched_data')
             ->where('data_type', strtolower($type))
             ->where('provider_id', $providerId)
@@ -103,7 +102,6 @@ class MatchingService
         if ($unmatched->count()) {
             $unmatched->delete();
         }
-        DB::commit();
     }
 
     public static function autoMatchPrimaryLeagues()
