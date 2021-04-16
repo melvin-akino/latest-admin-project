@@ -58,8 +58,7 @@ class League extends Model
             })
             ->where('leagues.name', 'ILIKE', '%'.$searchKey.'%')
             ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
-            ->orderBy('leagues.name', $sortOrder)
-            ->get();
+            ->orderBy('leagues.name', $sortOrder);
     }
 
     public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)

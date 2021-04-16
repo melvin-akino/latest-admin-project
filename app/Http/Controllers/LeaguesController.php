@@ -38,14 +38,14 @@ class LeaguesController extends Controller
             'status_code' => 200,
             'total'       => $leagues->count(),
             'pageNum'     => $page,
-            'pageData'    => $leagues->skip(($page - 1) * $limit)->take($limit)->values()
+            'pageData'    => $leagues->offset(($page - 1) * $limit)->limit($limit)->get()
         ]);
     }
 
     public function getPrimaryProviderMatchedLeagues()
     {
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagues = League::getLeagues($providerId);
+        $leagues = League::getLeagues($providerId)->get();
 
         return response()->json([
             'status'      => true,
@@ -70,7 +70,7 @@ class LeaguesController extends Controller
             'status_code' => 200,
             'total'       => $matchedLeagues->count(),
             'pageNum'     => $page,
-            'pageData'    => $matchedLeagues->skip(($page - 1) * $limit)->take($limit)->values()
+            'pageData'    => $matchedLeagues->offset(($page - 1) * $limit)->limit($limit)->get()
         ]);
     }
 

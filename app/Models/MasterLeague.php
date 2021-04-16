@@ -43,8 +43,7 @@ class MasterLeague extends Model
                   ->whereIn('id', function($query) {
                       $query->select('master_league_id')->from('league_groups');
                   })
-                  ->orderBy('id')
-                  ->get();
+                  ->orderBy('id');
     }
 
     public static function getSideBarLeaguesBySportAndGameSchedule(int $sportId, int $primaryProviderId, int $maxMissingCount, string $gameSchedule)
