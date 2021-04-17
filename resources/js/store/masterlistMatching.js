@@ -3,54 +3,50 @@ import { getToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
-  rawData: [],
-  isLoadingRawData: false,
-  totalRawData: 0,
+  primaryProviderLeagues: [],
+  unmatchedData: [],
+  isLoadingUnmatchedData: false,
+  totalUnmatchedData: 0,
+  primaryProviderData: [],
   matchedData: [],
-  options: {
-    type: '',
-    providerId: null,
-    provider_alias: '',
-    page: null, 
-    limit: null,
-    sortOrder: null
-  }
+  isLoadingMatchedData: false,
+  totalMatchedData: 0,
 } 
 
 const mutations = {
-  SET_RAW_DATA: (state, data) => {
-    state.rawData = data
+  SET_UNMATCHED_DATA: (state, data) => {
+    state.unmatchedData = data
   },
-  SET_IS_LOADING_RAW_DATA: (state, loadingState) => {
-    state.isLoadingRawData = loadingState
+  SET_IS_LOADING_UNMATCHED_DATA: (state, loadingState) => {
+    state.isLoadingUnmatchedData = loadingState
   },
-  SET_TOTAL_RAW_DATA: (state, total) => {
-    state.totalRawData = total
-  },
-  SET_OPTIONS: (state, data) => {
-    Vue.set(state.options, data.option, data.data)
-  },
-  REMOVE_OPTIONS: (state, key) => {
-    Vue.delete(state.options, key)
+  SET_TOTAL_UNMATCHED_DATA: (state, total) => {
+    state.totalUnmatchedData = total
   },
   SET_MATCHED_DATA: (state, data) => {
     state.matchedData = data
   },
-  REMOVE_MATCHED_DATA: (state, id) => {
-    state.rawData = state.rawData.filter(data => data.id != id)
+  SET_IS_LOADING_MATCHED_DATA: (state, loadingState) => {
+    state.isLoadingMatchedData = loadingState
+  },
+  SET_TOTAL_MATCHED_DATA: (state, total) => {
+    state.totalMatchedData = total
+  },
+  SET_PRIMARY_PROVIDER_LEAGUES: (state, data) => {
+    state.primaryProviderLeagues = data
   }
 }
 
 const actions = {
-  getRawData({commit, dispatch, state}) {
-    axios.get(`raw-${state.options.type}`, { params: state.options, headers: { 'Authorization': `Bearer ${getToken()}` } })
+  getUnmatchedLeagues({commit, dispatch}, params) {
+    axios.get('leagues/unmatched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
-      commit('SET_RAW_DATA', response.data.pageData)
-      commit('SET_TOTAL_RAW_DATA', response.data.total)
-      commit('SET_IS_LOADING_RAW_DATA', false)
+      commit('SET_UNMATCHED_DATA', response.data.pageData)
+      commit('SET_TOTAL_UNMATCHED_DATA', response.data.total)
+      commit('SET_IS_LOADING_UNMATCHED_DATA', false)
     })
     .catch(err => {
-      commit('SET_RAW_DATA', [])
+      commit('SET_UNMATCHED_DATA', [])
       if(!axios.isCancel(err)) {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
         bus.$emit("SHOW_SNACKBAR", {
@@ -60,11 +56,12 @@ const actions = {
       }
     })
   },
-  getMatchedData({commit, dispatch, state}) {
-    commit('SET_MATCHED_DATA', [])
-    axios.get(`matched-${state.options.type}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+  getMatchedLeagues({commit, dispatch, state}, params) {
+    axios.get('leagues/matched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
-      commit('SET_MATCHED_DATA', response.data)
+      commit('SET_MATCHED_DATA', response.data.pageData)
+      commit('SET_TOTAL_MATCHED_DATA', response.data.total)
+      commit('SET_IS_LOADING_MATCHED_DATA', false)
     })
     .catch(err => {
       commit('SET_MATCHED_DATA', [])
@@ -77,17 +74,20 @@ const actions = {
       }
     })
   },
-  matchData({commit, dispatch}, payload) {
-    return new Promise((resolve, reject) => {
-      axios.post(`${payload.type}/match`, payload.data, { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        dispatch('getRawData')
-        resolve()
-      })
-      .catch(err => {
-        reject(err)
+  getPrimaryProviderMatchedLeagues({commit, dispatch}) {
+    axios.get('leagues/matched/primary', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_PRIMARY_PROVIDER_LEAGUES', response.data.data)
+    })
+    .catch(err => {
+      commit('SET_PRIMARY_PROVIDER_LEAGUES', [])
+      if(!axios.isCancel(err)) {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
-      })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     })
   }
 }

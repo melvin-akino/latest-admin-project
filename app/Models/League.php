@@ -33,7 +33,7 @@ class League extends Model
      * 
      * @return object
      */
-    public static function getLeagues($providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc')
+    public static function getLeagues($providerId, bool $grouped = true, $searchKey = '', string $sortOrder = 'asc')
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 

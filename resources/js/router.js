@@ -115,23 +115,25 @@ const router = new Router({
           component: () => import('./views/dashboard/pages/MasterlistMatching'),
           children: [
             {
-              path: '',
-              redirect: 'leagues'
-            },
-            {
               name: 'Leagues Matching',
               path: 'leagues',
-              component: () => import('./views/dashboard/pages/matching/MatchingTable')
+              component: () => import('./views/dashboard/pages/matching/LeaguesMatching'),
+              meta: {
+                type: 'leagues'
+              }
             },
+            // {
+            //   name: 'Team Matching',
+            //   path: 'teams',
+            //   component: () => import('./views/dashboard/pages/matching/MatchingTable')
+            // },
             {
-              name: 'Team Matching',
-              path: 'teams',
-              component: () => import('./views/dashboard/pages/matching/MatchingTable')
-            },
-            {
-              name: 'Event Matching',
+              name: 'Events Matching',
               path: 'events',
-              component: () => import('./views/dashboard/pages/matching/MatchingTable')
+              component: () => import('./views/dashboard/pages/matching/EventsMatching'),
+              meta: {
+                type: 'events'
+              }
             },
           ]
         },
