@@ -22,6 +22,7 @@ class UnmatchedData extends Model
     public static function getUnmatchedLeagueData($type) 
     {
         return self::where('data_type', $type)
+            ->where('is_failed', false)
             ->join('leagues', 'leagues.id', 'data_id')
             ->select('data_id', 'leagues.provider_id', 'sport_id', 'name')
             ->get()
@@ -31,6 +32,7 @@ class UnmatchedData extends Model
     public static function getUnmatchedTeamData($type) 
     {
         return self::where('data_type', $type)
+            ->where('is_failed', false)
             ->join('teams', 'teams.id', 'data_id')
             ->select('data_id', 'teams.provider_id', 'sport_id', 'name')
             ->get()
@@ -40,6 +42,7 @@ class UnmatchedData extends Model
     public static function getUnmatchedEventData($type) 
     {
         return self::where('data_type', $type)
+            ->where('is_failed', false)
             ->join('events as e', 'e.id', 'data_id')
             ->join('team_groups as htg', 'htg.team_id', 'e.team_home_id')
             ->join('team_groups as atg', 'atg.team_id', 'e.team_away_id')

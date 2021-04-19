@@ -125,8 +125,10 @@ class MatchingService
                     Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
                     DB::commit();
                 }
+                return 0;
             } else {
                 Log::info('Matching: Nothing to match for league from primary provider');
+                return 1;
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
@@ -156,8 +158,10 @@ class MatchingService
                     Log::info('Matching: Team: ' . $unmatchedTeam['name'] . ' is now matched');
                     DB::commit();                    
                 }
+                return 0;
             } else {
                 Log::info('Matching: Nothing to match for team from primary provider');
+                return 1;
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
@@ -230,8 +234,10 @@ class MatchingService
                     Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
                     DB::commit();
                 }
+                return 0;
             } else {
                 Log::info('Matching: Nothing to match for event from primary provider');
+                return 1;
             }
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
@@ -259,9 +265,11 @@ class MatchingService
                     Log::info('Matching: Creating unmatched data league_id:'.$league['id'].' - provider_id:'.$league['provider_id']);
                     DB::commit();
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more leagues to add in the unmatched_data table.');
+                return 2;
             }
         } catch (Exception $e) {
             DB::rollback();
@@ -287,9 +295,11 @@ class MatchingService
                     Log::info('Matching: Creating unmatched data team_id:'.$team['id'].' - provider_id:'.$team['provider_id']);
                     DB::commit();
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more teams to add in the unmatched_data table.');
+                return 2;
             }
         } catch (Exception $e) {
             DB::rollback();
@@ -315,9 +325,11 @@ class MatchingService
                     Log::info('Matching: Creating unmatched data event_id:'.$event['id'].' - provider_id:'.$event['provider_id']);
                     DB::commit();
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more events to add in the unmatched_data table.');
+                return 2;
             }
         } catch (Exception $e) {
             DB::rollback();
@@ -352,11 +364,25 @@ class MatchingService
                             Log::info('Removed from Unmatched: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
                             DB::commit();
                         }
+                        else {
+                            //update the is_failed to true here
+                            DB::beginTransaction();
+                            Log::info('No primary league found for automatching league_id: ' . $league['data_id'] . ' setting is_failed TRUE');    
+                            $matching->updateOrCreate('UnmatchedData', [
+                                'data_type'     => 'league',
+                                'data_id'       => $league['data_id'],
+                                'provider_id'   => $league['provider_id']
+                            ],
+                            ['is_failed'     => true]);
+                            DB::commit();
+                        }
                     }
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more other leagues to automatch.');
+                return 2;
             }            
         } catch (Exception $e) {
             DB::rollback();
@@ -391,11 +417,25 @@ class MatchingService
                             Log::info('Removed from Unmatched: team_id:'.$team['data_id'].' - provider_id:'.$team['provider_id'].' - teamname:'.$team['name']);
                             DB::commit();
                         }
+                        else {
+                            //update the is_failed to true here
+                            DB::beginTransaction();
+                            Log::info('No primay team found for automatching team_id: ' . $team['data_id'] . ' setting is_failed TRUE');    
+                            $matching->updateOrCreate('UnmatchedData', [
+                                'data_type'     => 'team',
+                                'data_id'       => $team['data_id'],
+                                'provider_id'   => $team['provider_id']
+                            ],
+                            ['is_failed'     => true]);
+                            DB::commit();
+                        }
                     }
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more other teams to automatch.');
+                return 2;
             }
             DB::commit(); 
         } catch (Exception $e) {
@@ -431,10 +471,24 @@ class MatchingService
                         Log::info('Removed from Unmatched: event_id:'.$event['data_id'].' - provider_id:'.$event['provider_id']);
                         DB::commit(); 
                     }
+                    else {
+                        //update the is_failed to true here
+                        DB::beginTransaction();
+                        Log::info('No primary event found for automatching for event_id: ' . $event['data_id'] . ' setting is_failed TRUE');    
+                        $matching->updateOrCreate('UnmatchedData', [
+                            'data_type'     => 'event',
+                            'data_id'       => $event['data_id'],
+                            'provider_id'   => $event['provider_id']
+                        ],
+                        ['is_failed'     => true]);
+                        DB::commit();
+                    }
                 }
+                return 0;
             }
             else {
                 Log::info('Matching: There are no more other events to automatch.');
+                return 3;
             }
         } catch (Exception $e) {
             DB::rollback();
