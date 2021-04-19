@@ -203,7 +203,24 @@ class Event extends Model
         return null;
     }
 
-    public static function unmatch(int $eventId) {
-        
+    public static function getLeagueEvents($leagueId, $providerId, $sportId)
+    {
+        return DB::table('event_groups as eg')
+            ->join('events as e', 'e.id', 'eg.event_id')
+            ->join('team_groups as ht', 'ht.team_id', 'e.team_home_id')
+            ->join('team_groups as at', 'at.team_id', 'e.team_away_id')
+            ->where('e.league_id', $leagueId)
+            ->where('e.provider_id', $providerId)
+            ->where('e.sport_id', $sportId)
+            ->select(
+                'ht.master_team_id as team_master_home_id',
+                'team_home_id', 
+                'at.master_team_id as team_master_away_id', 
+                'team_away_id',
+                'eg.master_event_id', 
+                'e.id'
+            )
+            ->get()
+            ->toArray();
     }
 }
