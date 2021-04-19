@@ -13,7 +13,8 @@ class UnmatchedData extends Model
     protected $fillable = [
         'data_type',
         'data_id',
-        'provider_id'
+        'provider_id',
+        'is_failed'
     ];
 
     public $timestamps = false;
