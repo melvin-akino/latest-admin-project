@@ -3,6 +3,19 @@ import { getToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
+  matchingFilters: {
+    leagues: {
+      matched: null,
+      unmatched: null
+    },
+    events: {
+      league: null,
+      schedule: null,
+      inplay: null,
+      today: null,
+      early: null
+    }
+  },
   primaryProviderLeagues: [],
   unmatchedData: [],
   isLoadingUnmatchedData: false,
@@ -34,6 +47,9 @@ const mutations = {
   },
   SET_PRIMARY_PROVIDER_LEAGUES: (state, data) => {
     state.primaryProviderLeagues = data
+  },
+  SET_FILTER: (state, data) => {
+    Vue.set(state.matchingFilters[data.type], data.filter, data.data)
   }
 }
 

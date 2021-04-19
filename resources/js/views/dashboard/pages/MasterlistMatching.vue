@@ -11,9 +11,11 @@ export default {
   name: 'MasterlistMatching',
   mounted() {
     this.getPrimaryProviderMatchedLeagues()
+    this.getProviders(true)
   },
   methods: {
-    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues'])
+    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues']),
+    ...mapActions('providers', ['getProviders']),
   }
 }
 </script>
@@ -39,10 +41,16 @@ export default {
   }
 
   .badge {
-    padding: 3px 5px;
-    margin-left: 24px;
     color: #ffffff;
     border-radius: 0.25rem;
+    display:inline-block;
+    width: 40px;
+    text-align:center;
+    font-weight: 600;
+  }
+
+  .matched {
+    width: 50px;
   }
 
   .hg {

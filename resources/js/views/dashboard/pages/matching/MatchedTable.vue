@@ -16,13 +16,16 @@
     </template>
     <template v-slot:[`item.data`]="{ item }">
       <div class="ma-2" v-for="league in item.leagues" :key="league.id">
-        <span class="badge" :class="[`${league.provider.toLowerCase()}`]">{{league.provider}}</span> {{league.name}} 
+        <span class="badge matched mr-4" :class="[`${league.provider.toLowerCase()}`]">
+          {{league.provider}} <v-icon v-if="nonPrimaryProviders.includes(league.provider)" color="#ffffff" small class="unmatchBtn">mdi-close</v-icon>
+        </span> 
+        {{league.name}} 
       </div>
     </template>
     <template v-slot:[`item.data-table-expand`]="{ expand, isExpanded }">
-      <v-btn @click="expand(!isExpanded)" small dark class="success">See Events</v-btn>
+      <v-btn @click="expand(!isExpanded)" small dark class="seeEvents success text-capitalize">See Events</v-btn>
     </template>
-    <template v-slot:expanded-item="{ headers }" v-if="type=='leagues'">
+    <template v-slot:expanded-item="{ headers }">
       <td :colspan="headers.length">
         <!-- events here -->
       </td>
@@ -46,16 +49,23 @@ export default {
     }
   },
   computed: {
-    ...mapState('masterlistMatching', ['matchedData', 'isLoadingMatchedData', 'totalMatchedData'])
+    ...mapState('masterlistMatching', ['matchedData', 'isLoadingMatchedData', 'totalMatchedData']),
+    ...mapState('providers', ['providers']),
+    nonPrimaryProviders() {
+      return this.providers.map(provider => provider.alias)
+    }
   },
   watch: {
-    options(value) {
-      let params = {
-        page: value.page,
-        limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
-        sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
+    options: {
+      deep: true,
+      handler(value) {
+        let params = {
+          page: value.page,
+          limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+          sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
+        }
+        this.getMatchedLeagues(params)
       }
-      this.getMatchedLeagues(params)
     }
   },
   methods: {
@@ -66,5 +76,11 @@ export default {
 </script>
 
 <style>
+  .seeEvents .v-btn__content, .unmatchBtn {
+    font-size: 12px !important;
+  }
 
+  .unmatchBtn {
+    cursor: pointer;
+  }
 </style>

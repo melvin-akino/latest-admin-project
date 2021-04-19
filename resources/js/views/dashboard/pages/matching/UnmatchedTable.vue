@@ -25,12 +25,32 @@
     </template>
     <template v-slot:[`item.data`]="{ item }">
       <div class="leagueData" v-if="type=='leagues'">
-        {{item.name}} <span class="badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
+        {{item.name}} <span class="ml-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
       </div>
     </template>
     <template v-slot:expanded-item="{ headers }" v-if="type=='leagues'">
-      <td :colspan="headers.length">
-        <!-- events here -->
+      <td :colspan="headers.length" class="expanded">
+        <!-- make this dynamic after intergrating API -->
+        <!-- <div class="events">
+          <div class="px-4 py-2 event" @click="selectEvent">
+            <p>League 1</p>
+            <p>Home Team 1</p>
+            <p>Away Team 2</p>
+            <p>2021-04-19 00:00:00</p>
+          </div>
+          <div class="px-4 py-2 event" @click="selectEvent">
+            <p>League 2</p>
+            <p>Home Team 2</p>
+            <p>Away Team 2</p>
+            <p>2021-04-19 00:00:00</p>
+          </div>
+          <div class="px-4 py-2 event" @click="selectEvent">
+            <p>League 3</p>
+            <p>Home Team 3</p>
+            <p>Away Team 3</p>
+            <p>2021-04-19 00:00:00</p>
+          </div>
+        </div> -->
       </td>
     </template>
   </v-data-table>
@@ -56,14 +76,17 @@ export default {
     ...mapState('masterlistMatching', ['unmatchedData', 'isLoadingUnmatchedData', 'totalUnmatchedData'])
   },
   watch: {
-    options(value) {
-      let params = {
-        page: value.page,
-        limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
-        sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
-        searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
+    options: {
+      deep: true,
+      handler(value) {
+        let params = {
+          page: value.page,
+          limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+          sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
+          searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
+        }
+        this.getUnmatchedData(params)
       }
-      this.getUnmatchedData(params)
     }
   },
   methods: {
@@ -86,8 +109,37 @@ export default {
 </script>
 
 <style>
+  .unmatchedSearch .v-label, .unmatchedSearch input {
+    font-size: 13px !important;
+  }
+
   .unmatchedSearch {
     padding-top: 0;
     max-width: 240px;
+  }
+
+  .expanded {
+    padding: 0 !important;
+  }
+
+  .events {
+    height: 190px;
+    overflow-y: scroll;
+  }
+
+  .event {
+    cursor: pointer;
+  }
+
+  .event:hover {
+    background-color: #cce2ff;
+  }
+
+  .event:not(:last-child) {
+    border-bottom: solid rgba(0, 0, 0, 0.12) 1px;
+  }
+
+  .event p {
+    margin: 0;
   }
 </style>

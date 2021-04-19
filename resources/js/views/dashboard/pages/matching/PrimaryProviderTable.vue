@@ -1,6 +1,7 @@
 <template>
   <v-data-table
     :items="[]"
+    :hide-default-footer="type=='leagues' ? true : false"
   >
     <template v-slot:top>
       <div class="matchingTableHeader">
@@ -16,8 +17,14 @@
           v-model="leagueId"
           label="Select Primary Provider League"
           dense
+          class="primaryProviderDropdown"
         ></v-select>
       </div> 
+    </template>
+    <template v-slot:[`body.append`] v-if="type=='leagues'">
+      <div class="ma-4 matchBtn">
+        <v-btn small dark class="matchBtn success text-capitalize">Match</v-btn>
+      </div>
     </template>
   </v-data-table>
 </template>
@@ -41,5 +48,16 @@ export default {
 </script>
 
 <style>
+  .primaryProviderDropdown, .primaryProviderDropdown .v-label {
+    font-size: 13px !important;
+  }
 
+  .matchBtn {
+    display: flex;
+    justify-content: center;
+  }
+
+  .matchBtn .v-btn__content {
+    font-size: 12px !important;
+  }
 </style>
