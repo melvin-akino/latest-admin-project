@@ -160,7 +160,7 @@ class Event extends Model
         if ($unmatchedEventInfo) {
             $matching = new Matching();
             //check first if this event is already existing in the db but soft deleted, and if so, re-use the existing master_event_id
-            $event = self::getSoftDeletedEvent($unmatchedEventInfo);
+            $event = self::getSoftDeletedEvent((array) $unmatchedEventInfo);
             if (!empty($event)) {
                 //delete the soft deleted event_groups entry for this soft deleted but return the existing masterEventId
                 $matching->delete('EventGroup', [
