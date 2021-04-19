@@ -253,51 +253,6 @@ class MatchingService
         }
     }
 
-    public static function autoMatchPrimaryEventMarkets()
-    {
-        try {
-            DB::beginTransaction();
-
-            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
-            $matching = new Matching;
-
-            $unmatchedEventMarkets = EventMarket::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
-            if ($unmatchedEventMarkets->count() > 0) {
-                foreach ($unmatchedEventMarkets as $unmatchedEventMarket) {
-                    $eventGroupData = EventGroup::getByEventId($unmatchedEventMarket['event_id']);
-                    if ($eventGroupData->count() == 0) {
-                        continue;
-                    }
-
-                    $memUid = $unmatchedEventMarket['event_id'] . strtoupper($unmatchedEventMarket['market_flag']) . $unmatchedEventMarket['bet_identifier'];
-                    $masterEventMarket = $matching->updateOrCreate('MasterEventMarket', [
-                        'master_event_market_unique_id' => $memUid
-                    ], [
-                        'master_event_id' => $eventGroupData[0]->master_event_id,
-                        'name'     => null
-                    ]);
-
-                    $matching->create('EventMarketGroup', [
-                        'master_event_market_id' => $masterEventMarket->id,
-                        'event_market_id'        => $unmatchedEventMarket['id']
-                    ]);
-
-                    Log::info('Matching: Event Market: ' . $unmatchedEventMarket['bet_identifier'] . ' is now matched');
-                    
-                }
-            } else {
-                Log::info('Matching: Nothing to match for event market from primary provider');
-
-            }
-
-            DB::commit();
-        } catch (Exception $e) {
-            Log::error('Something went wrong', (array) $e);
-
-            DB::rollBack();
-        }
-    }
-
     public static function createUnmatchedLeagues() 
     {
         DB::beginTransaction();
