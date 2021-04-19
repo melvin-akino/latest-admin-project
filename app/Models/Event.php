@@ -153,7 +153,8 @@ class Event extends Model
                     'e.team_home_id',
                     'e.team_away_id',
                     'e.league_id',
-                    'e.provider_id'
+                    'e.provider_id',
+                    'e.ref_schedule'
                 )
                 ->first();
         if ($unmatchedEventInfo) {
