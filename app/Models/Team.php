@@ -98,6 +98,14 @@ class Team extends Model
         return self::where('provider_id', $providerId)->doesntHave('teamGroup')->get();
     }
 
+    public static function getPrimaryTeams($primaryProviderId)
+    {
+        return self::where('teams.provider_id', $primaryProviderId)
+            ->join('team_groups', 'team_groups.team_id', 'teams.id')
+            ->get()
+            ->toArray();
+    }
+
     public function teamGroup()
     {
         return $this->hasOne(TeamGroup::class, 'team_id', 'id');

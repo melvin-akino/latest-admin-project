@@ -32,4 +32,5 @@ class TeamGroup extends Model
     {
         return $this->belongsTo(MasterTeam::class, 'id', 'master_team_id');
     }
+
 }

@@ -108,4 +108,12 @@ class League extends Model
     {
         return $this->hasOne(LeagueGroup::class, 'league_id', 'id');
     }
+
+    public static function getPrimaryLeagues($primaryProviderId)
+    {
+        return self::where('leagues.provider_id', $primaryProviderId)
+            ->join('league_groups', 'league_groups.league_id', 'leagues.id')
+            ->get()
+            ->toArray();
+    }
 }

@@ -40,8 +40,21 @@ class UnmatchedData extends Model
     public static function getUnmatchedEventData($type) 
     {
         return self::where('data_type', $type)
-            ->join('events', 'events.id', 'data_id')
-            ->select('data_id', 'events.provider_id')
+            ->join('events as e', 'e.id', 'data_id')
+            ->join('team_groups as htg', 'htg.team_id', 'e.team_home_id')
+            ->join('team_groups as atg', 'atg.team_id', 'e.team_away_id')
+            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
+            ->select('data_id', 
+                'e.provider_id', 
+                'htg.master_team_id as master_home_team',
+                'atg.master_team_id as master_away_team',
+                'lg.master_league_id',
+                'e.sport_id',
+                'e.team_home_id',
+                'e.team_away_id',
+                'e.league_id',
+                'e.ref_schedule'
+            )
             ->get()
             ->toArray();
     }

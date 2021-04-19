@@ -134,67 +134,42 @@ class Event extends Model
             ->get();
     }
 
-    public static function getMasterEventId($eventId, int $primaryProviderId)
-    {
-        $masterEventId = null;
-        $unmatchedEventInfo = DB::table('unmatched_data as ue')
-                ->join('events as e', 'e.id', 'ue.data_id')
-                ->join('team_groups as htg', 'htg.team_id', 'e.team_home_id')
-                ->join('team_groups as atg', 'atg.team_id', 'e.team_away_id')
-                ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
-                ->where('ue.data_type', 'event')
-                ->where('ue.data_id', $eventId)
-                ->select(
-                    'htg.master_team_id as master_home_team', 
-                    'atg.master_team_id as master_away_team', 
-                    'lg.master_league_id', 
-                    'e.ref_schedule', 
-                    'e.sport_id',
-                    'e.team_home_id',
-                    'e.team_away_id',
-                    'e.league_id',
-                    'e.provider_id',
+    public static function getMikeMasterEventId($unmatchedEventInfo, int $primaryProviderId) {
+		$masterEventId=null;
+		$matching=new Matching();
+	  //check first if this event is already existing in the db but soft deleted, and if so, re-use the existing master_event_id
+		$event=self::getSoftDeletedEvent((array)$unmatchedEventInfo);
+		if(!empty($event)) {
+			//delete the soft deleted event_groups entry for this soft deleted but return the existing masterEventId
+			$matching->delete('EventGroup', [
+				'master_event_id' => $event->master_event_id,
+				'event_id'    => $event->id
+			]);
+			$masterEventId=$event->master_event_id;
+		}
+		else {
+			$masterEventInfo=DB::table('master_events as me')
+				->join('event_groups as eg', 'eg.master_event_id', 'me.id')
+				->join('events as e', 'e.id', 'eg.event_id')
+				->where('master_team_home_id', $unmatchedEventInfo['master_home_team'])
+				->where('master_team_away_id', $unmatchedEventInfo['master_away_team'])
+				->where('master_league_id', $unmatchedEventInfo['master_league_id'])
+				->where('e.provider_id', $primaryProviderId)
+				->where('e.sport_id', $unmatchedEventInfo['sport_id'])
+				->whereNull('me.deleted_at')
+				->select(
+                    'me.id as master_event_id',
                     'e.ref_schedule'
                 )
-                ->first();
-        if ($unmatchedEventInfo) {
-            $matching = new Matching();
-            //check first if this event is already existing in the db but soft deleted, and if so, re-use the existing master_event_id
-            $event = self::getSoftDeletedEvent((array) $unmatchedEventInfo);
-            if (!empty($event)) {
-                //delete the soft deleted event_groups entry for this soft deleted but return the existing masterEventId
-                $matching->delete('EventGroup', [
-                    'master_event_id' => $event->master_event_id,
-                    'event_id'        => $event->id
-                ]);
-
-                $masterEventId = $event->master_event_id;
-            }
-            else {
-                $masterEventInfo = DB::table('master_events as me')
-                    ->join('event_groups as eg', 'eg.master_event_id', 'me.id')
-                    ->join('events as e', 'e.id', 'eg.event_id')
-                    ->where('master_team_home_id', $unmatchedEventInfo->master_home_team)
-                    ->where('master_team_away_id', $unmatchedEventInfo->master_away_team)
-                    ->where('master_league_id', $unmatchedEventInfo->master_league_id)
-                    ->where('e.provider_id', $primaryProviderId)
-                    ->where('e.sport_id', $unmatchedEventInfo->sport_id)
-                    ->whereNull('me.deleted_at')
-                    ->select(
-                        'me.id as master_event_id', 
-                        'e.ref_schedule'
-                    )
-                    ->first();
-                if ($masterEventInfo) {
-                    if (Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH') == Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH')) 
-                    {
-                        $masterEventId = $masterEventInfo->master_event_id;
-                    }
-                }
-            }
-        }
-        return $masterEventId;
-    }
+			    ->first();
+			if($masterEventInfo) {
+				if(Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH')==Carbon::parse($masterEventInfo->ref_schedule)->format('YmdH')) {
+					$masterEventId=$masterEventInfo->master_event_id;
+				}
+			}
+		}
+		return $masterEventId;
+	}
 
     public static function getSoftDeletedEvent($event)
     {
@@ -226,5 +201,9 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    public static function unmatch(int $eventId) {
+        
     }
 }

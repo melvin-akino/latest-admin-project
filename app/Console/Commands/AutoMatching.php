@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Facades\MatchingFacade;
 use Illuminate\Console\Command;
+use App\Models\{Provider, SystemConfiguration};
 
 class AutoMatching extends Command
 {
@@ -19,23 +20,26 @@ class AutoMatching extends Command
     {
         while (true) {
             //@TODO call leagues, teams, events and market auto matching
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
 
-
-            MatchingFacade::autoMatchPrimaryLeagues();
-            MatchingFacade::autoMatchPrimaryTeams();
-            MatchingFacade::autoMatchPrimaryEvents();
-            usleep(1000000);
-
-            //@todo Get all leagues, teams and events that are not from the primary providers
-            //validate that these information does not have pivot table data and not exist in the unmatched_data table
-
-            MatchingFacade::createUnmatchedLeagues(); 
-            MatchingFacade::createUnmatchedTeams();
-            MatchingFacade::createUnmatchedEvents();
-            MatchingFacade::automatchIdenticalLeagues();
-            MatchingFacade::automatchIdenticalTeams();
-            MatchingFacade::automatchIdenticalEvents();
-            
+            MatchingFacade::autoMatchPrimaryLeagues($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::autoMatchPrimaryTeams($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::autoMatchPrimaryEvents($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::createUnmatchedLeagues($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::createUnmatchedTeams($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::createUnmatchedEvents($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::automatchIdenticalLeagues($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::automatchIdenticalTeams($primaryProviderId);
+            usleep(500000);
+            MatchingFacade::automatchIdenticalEvents($primaryProviderId);
+            usleep(500000);
         }
     }
 }
