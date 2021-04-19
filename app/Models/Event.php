@@ -134,7 +134,7 @@ class Event extends Model
             ->get();
     }
 
-    public static function getMikeMasterEventId($unmatchedEventInfo, int $primaryProviderId) {
+    public static function getMasterEventId($unmatchedEventInfo, int $primaryProviderId) {
 		$masterEventId=null;
 		$matching=new Matching();
 	  //check first if this event is already existing in the db but soft deleted, and if so, re-use the existing master_event_id
