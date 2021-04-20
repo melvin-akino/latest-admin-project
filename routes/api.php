@@ -20,6 +20,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // public routes
     Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
 });
+
 Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // our routes to be protected will go in here
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
@@ -46,11 +47,11 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     
     // Leagues routes
     Route::prefix('leagues')->group(function() {
+        Route::post('/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
         Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
         Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
         Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
     });
-    Route::post('/leagues/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
         
     // Teams routes
     Route::get('/raw-teams', 'TeamsController@getRawTeams')->name('teams.api');
@@ -58,9 +59,10 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
 
     // Events routes
-    Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
     Route::prefix('events')->group(function() {
-        Route::get('/unmatched/{leagueId}', 'EventsController@getUnmatchedEvents')->name('unmatched-events.api');
+        Route::post('/match', 'EventGroupsController@match')->name('events-match.api');
+        Route::get('/unmatched/league/{leagueId}', 'EventsController@getUnmatchedEventsByLeague')->name('unmatched-league-events.api');
+        Route::get('/unmatched/master-league/{masterLeagueId}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
         Route::get('/matched/league/{leagueId}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
         Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
     });

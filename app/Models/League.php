@@ -35,20 +35,27 @@ class League extends Model
      */
     public static function getLeagues($providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc')
     {
-        $where = $grouped ? "whereIn" : "whereNotIn";
+        $where = "whereIn";
+        $select = ['leagues.id', 'leagues.name', 'lg.master_league_id','provider_id', 'p.alias as provider'];
+        if (!$grouped) {
+            $where = "whereNotIn";
+            $select = ['leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider'];
+        }
 
-        return self::{$where}('leagues.id', function ($query) {
-                $query->select('league_id')
-                    ->from('league_groups');
+        return self::join('providers as p', 'p.id', 'leagues.provider_id')
+            ->when($grouped, function ($query) {
+                $query->join('league_groups as lg', 'lg.league_id', 'leagues.id');
             })
-            ->join('providers as p', 'p.id', 'leagues.provider_id')
             ->when(!$grouped, function ($query) use ($providerId) {
-                $query->whereIn('leagues.id', function ($where) use ($providerId) {
-                    $where->select('data_id')
-                    ->from('unmatched_data')
-                    ->where('data_type', 'league')
-                    ->when($providerId, function ($query) use ($providerId) {
-                        $query->where('provider_id', $providerId);
+                $query->whereNotIn('leagues.id', function ($q) {
+                        $q->select('league_id')->from('league_groups');
+                    })
+                    ->whereIn('leagues.id', function ($where) use ($providerId) {
+                        $where->select('data_id')
+                        ->from('unmatched_data')
+                        ->where('data_type', 'league')
+                        ->when($providerId, function ($query) use ($providerId) {
+                            $query->where('provider_id', $providerId);
                     });
                 });
             })
@@ -56,7 +63,7 @@ class League extends Model
                 $query->where('provider_id', $providerId);
             })
             ->where('leagues.name', 'ILIKE', '%'.$searchKey.'%')
-            ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+            ->select($select)
             ->orderBy('leagues.name', $sortOrder);
     }
 
