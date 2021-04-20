@@ -33,15 +33,17 @@ class Event extends Model
     ];
 
     /**
-     * Get `events` data by Provider, also allowing to choose from `raw` or `existing match`
+     * Get `events` data by League, also allowing to choose from `raw` or `existing match`
      * 
+     * @param  int          $leagueId
      * @param  int          $providerId
-     * @param  string       $searchKey
      * @param  bool|boolean $grouped
+     * @param  string       $searchKey
+     * @param  string       $sortOrder
      * 
      * @return object
      */
-    public static function getByProvider(int $providerId, string $searchKey = '', string $sortOrder = 'asc', bool $grouped = true)
+    public static function getEvents($leagueId, $providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc')
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -49,34 +51,20 @@ class Event extends Model
             ->join('leagues as l', 'l.id', 'e.league_id')
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
-            ->join('league_groups as lg', 'lg.league_id', 'e.league_id')
-            ->select(['e.id', 'e.sport_id', 'e.provider_id', 'e.ref_schedule', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'lg.master_league_id as master_league_id'])
+            ->select(['e.id', 'e.provider_id', 'e.sport_id', 'e.event_identifier', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule'])
             ->{$where}('e.id', function ($q) {
                 $q->select('event_id')
                     ->from('event_groups');
             })
-            ->when(!$grouped, function ($q) use ($providerId) {
-                $q->whereIn('e.id', function ($where) use ($providerId) {
-                    $where->select('ud.data_id')
-                        ->from('unmatched_data AS ud')
-                        ->where('ud.data_type', 'event')
-                        ->where('ud.provider_id', $providerId);
-                })
-                ->whereIn('e.team_home_id', function($q) {
-                    $q->select('team_id')->from('team_groups');
-                })
-                ->whereIn('e.team_away_id', function($q) {
-                    $q->select('team_id')->from('team_groups');
-                })
-                ->whereIn('e.league_id', function($q) {
-                    $q->select('league_id')->from('league_groups');
-                });
+            ->when($leagueId, function ($query) use ($leagueId) {
+                $query->where('e.league_id', $leagueId);
             })
-            ->where('e.provider_id', $providerId)
-            ->where(DB::raw('CONCAT(l.name, \' \', th.name, \' \', ta.name, \' \', e.ref_schedule)'), 'ILIKE', '%'.$searchKey.'%')
+            ->when($providerId, function ($query) use ($providerId) {
+                $query->where('e.provider_id', $providerId);
+            })
+            ->where('l.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')
-            ->orderBy('e.ref_schedule', $sortOrder)
-            ->get();
+            ->orderBy('e.ref_schedule', $sortOrder);
     }
 
     public static function getGroupVerifiedUnmatchedEvent($eventId)
