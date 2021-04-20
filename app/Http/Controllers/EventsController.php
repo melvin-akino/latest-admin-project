@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
+use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC};
 use Illuminate\Http\Request;
 
 class EventsController extends Controller
@@ -15,7 +15,7 @@ class EventsController extends Controller
      * 
      * @return json
      */
-    public function getUnmatchedEvents(Request $request, $leagueId = null)
+    public function getUnmatchedEventsByLeague(Request $request, $leagueId = null)
     {
         $searchKey = '';
         $page = 1;
@@ -27,7 +27,41 @@ class EventsController extends Controller
         $limit     = $request->has('limit') ? $request->limit : 10;
         $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
 
-        $events = Event::getEvents($leagueId, null, false, $searchKey, $sortOrder);
+        $events = Event::getEvents([$leagueId], null, false, $searchKey, $sortOrder);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $events->count(),
+            'pageNum'     => $page,
+            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
+    }
+
+    /**
+     * Get unmatched `events` from parameter master league id
+     * 
+     * @param  Request $request
+     * @param  int     $masterLeagueId
+     * 
+     * @return json
+     */
+    public function getUnmatchedEventsByMasterLeague(Request $request, $masterLeagueId = null)
+    {
+        $searchKey = '';
+        $page = 1;
+        $limit = 10;
+        $sortOrder = 'asc';
+
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $leagueIds = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
+
+        $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder);
 
         return response()->json([
             'status'      => true,
@@ -53,7 +87,7 @@ class EventsController extends Controller
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
 
-        $events = Event::getEvents($leagueId, null);
+        $events = Event::getEvents([$leagueId], null);
 
         return response()->json([
             'status'      => true,
