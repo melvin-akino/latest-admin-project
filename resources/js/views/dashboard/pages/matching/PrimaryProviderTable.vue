@@ -5,6 +5,10 @@
     :hide-default-header="type=='leagues' ? true : false"
     :hide-default-footer="type=='leagues' ? true : false"
     :disable-pagination="type=='leagues' ? true : false"
+    :server-items-length="type=='events' ? totalPrimaryProviderData : -1"
+    :options.sync="options"
+    :loading="type=='events' ? isLoadingPrimaryProviderData : false"
+    :loading-text="`Loading ${type}`"
     class="primaryProviderTable"
   >
     <template v-slot:top>
@@ -41,7 +45,7 @@
         </tr>
       </tbody>
     </template>
-    <template v-slot:footer>
+    <template v-slot:footer v-if="type=='leagues'">
       <div class="matchBtn">
         <v-btn small dark class="my-4 success text-capitalize" :class="{ 'match': !matchId || !primaryProviderId }" :disabled="!matchId || !primaryProviderId">Match</v-btn>
         <confirm-dialog
@@ -74,11 +78,12 @@ export default {
       headers: [
         { text: 'Sort', value: 'data' }
       ],
+      options: {},
       leagueId: null
     }
   },  
   computed: {
-    ...mapState('masterlistMatching', ['primaryProviderLeagues', 'primaryProviderData', 'unmatchedData', 'primaryProviderId', 'matchId']),
+    ...mapState('masterlistMatching', ['primaryProviderLeagues', 'primaryProviderData', 'totalPrimaryProviderData', 'isLoadingPrimaryProviderData',  'unmatchedData', 'primaryProviderId', 'matchId']),
     unmatch() {
       if(this.matchId) {
         return this.unmatchedData.filter(data => data.id == this.matchId)[0]
@@ -95,6 +100,18 @@ export default {
       this.setPrimaryProviderId(value)
       if(!value) {
         this.setPrimaryProviderData([])
+      }
+    },
+    options: {
+      deep: true,
+      handler(value) {
+        let params = {
+          page: value.page,
+          limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+          sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
+          paginated: true
+        }
+        this.getPrimaryProviderEventsByLeague(params)
       }
     }
   },

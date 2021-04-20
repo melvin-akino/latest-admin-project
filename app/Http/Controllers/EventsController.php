@@ -21,11 +21,13 @@ class EventsController extends Controller
         $page = 1;
         $limit = 10;
         $sortOrder = 'asc';
+        $paginated = false;
 
         $searchKey = $request->has('searchKey') ? $request->searchKey : '';
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
         $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $paginated = $request->has('paginated') ? $request->paginated : false;
 
         $events = Event::getEvents([$leagueId], null, false, $searchKey, $sortOrder);
 
@@ -34,7 +36,7 @@ class EventsController extends Controller
             'status_code' => 200,
             'total'       => $events->count(),
             'pageNum'     => $page,
-            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+            'pageData'    => $paginated ? $events->offset(($page - 1) * $limit)->limit($limit)->get() : $events->get()
         ]);
     }
 
@@ -61,14 +63,20 @@ class EventsController extends Controller
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
         $leagueIds = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
 
-        $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder);
+        $events = [];
+        $total  = 0;
+
+        if(!empty($leagueIds)) {
+            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder)->offset(($page - 1) * $limit)->limit($limit)->get();
+            $total  = $events->count();
+        }
 
         return response()->json([
             'status'      => true,
             'status_code' => 200,
-            'total'       => $events->count(),
+            'total'       => $total,
             'pageNum'     => $page,
-            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+            'pageData'    => $events
         ]);
     }
 
@@ -83,18 +91,22 @@ class EventsController extends Controller
     public function getMatchedEventsByLeague(Request $request, $leagueId = null) {
         $page = 1;
         $limit = 10;
+        $sortOrder = 'asc';
+        $paginated = false;
 
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $paginated = $request->has('paginated') ? $request->paginated : false;
 
-        $events = Event::getEvents([$leagueId], null);
+        $events = Event::getEvents([$leagueId], null, true, '', $sortOrder);
 
         return response()->json([
             'status'      => true,
             'status_code' => 200,
             'total'       => $events->count(),
             'pageNum'     => $page,
-            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+            'pageData'    => $paginated ? $events->offset(($page - 1) * $limit)->limit($limit)->get() : $events->get()
         ]);
     }
 

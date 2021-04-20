@@ -43,7 +43,7 @@ class Event extends Model
      * 
      * @return object
      */
-    public static function getEvents($leagueIds, $providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc')
+    public static function getEvents($leagueIds, $providerId, bool $grouped = true, $searchKey = '', string $sortOrder = 'asc')
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -51,7 +51,8 @@ class Event extends Model
             ->join('leagues as l', 'l.id', 'e.league_id')
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
-            ->select(['e.id', 'e.provider_id', 'e.sport_id', 'e.event_identifier', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule'])
+            ->join('providers as p', 'p.id', 'e.provider_id')
+            ->select(['e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'e.event_identifier', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule'])
             ->{$where}('e.id', function ($q) {
                 $q->select('event_id')
                     ->from('event_groups');

@@ -10,11 +10,9 @@ import { mapActions } from 'vuex'
 export default {
   name: 'MasterlistMatching',
   mounted() {
-    this.getPrimaryProviderMatchedLeagues()
     this.getProviders(true)
   },
   methods: {
-    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues']),
     ...mapActions('providers', ['getProviders']),
   }
 }

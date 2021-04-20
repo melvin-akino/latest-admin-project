@@ -28,18 +28,19 @@
           @change="updateFilter('league', filters.league)"
         ></v-checkbox>
         <div class="subFilter mb-2">
-          <v-select
+          <v-autocomplete
             :items="primaryProviderLeagues"
             item-text="name"
             item-value="id"
-            v-model="leagueId"
+            v-model="filters.leagueId"
             label="Select League"
             outlined
             dense
             background-color="#fff"
             class="filterInput leagueDropdown"
             :disabled="!filters.league"
-          ></v-select>
+            @change="getEvents"
+          ></v-autocomplete>
         </div>
         <v-checkbox
           v-model="filters.schedule"
@@ -76,7 +77,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import Cookies from 'js-cookie'
 
 export default {
@@ -88,32 +89,71 @@ export default {
         matched: null,
         unmatched: null,
         league: null,
+        leagueId: null,
+        masterLeagueId: null,
         schedule: null,
         inplay: null,
         today: null,
         early: null
       },
-      leagueId: null
     }
   },
   computed: {
     ...mapState('masterlistMatching', ['primaryProviderLeagues', 'matchingFilters'])
+  },
+  watch: {
+    primaryProviderLeagues: {
+      deep: true,
+      handler(value) {
+        if(this.filters.league && value.length != 0) {
+          let initialSelected = value[0]
+          this.filters.leagueId = initialSelected.id
+          this.filters.masterLeagueId = initialSelected.master_league_id
+          this.setFilter({ type: this.type, filter: 'leagueId', data: this.filters.leagueId })
+          this.setFilter({ type: this.type, filter: 'masterLeagueId', data: this.filters.masterLeagueId })
+        }
+      }
+    },
+    'matchingFilters.events.masterLeagueId'() {
+      this.getUnmatchedEventsByMasterLeague()
+    },
+    'matchingFilters.events.leagueId'(value) {
+      this.getPrimaryProviderEventsByLeague({ paginated: true })
+    }
   },
   mounted() {
     this.loadFilters()
   },
   methods: {
     ...mapMutations('masterlistMatching', { setFilter: 'SET_FILTER' }),
+    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues', 'getUnmatchedEventsByMasterLeague', 'getPrimaryProviderEventsByLeague']),
     loadFilters() {
       Object.keys(this.matchingFilters[this.type]).map(key => {
-        let data = Cookies.get(key) ? JSON.parse(Cookies.get(key)) : true
-        this.filters[key] = data
-        this.setFilter({ type: this.type, filter: key, data })
+        let exemptedKeys = ['leagueId', 'masterLeagueId']
+        if(!exemptedKeys.includes(key)) {
+          let data = Cookies.get(key) ? JSON.parse(Cookies.get(key)) : true
+          this.filters[key] = data
+          this.setFilter({ type: this.type, filter: key, data })
+        }
       })
+
+      if(this.type == 'events') {
+        this.getPrimaryProviderMatchedLeagues()
+      }
     },
     updateFilter(filter, data) {
       this.setFilter({ type: this.type, filter, data })
       Cookies.set(filter, data, { expires: 3650 })
+    },
+    getEvents() {
+      if(this.filters.league) {
+        this.filters.masterLeagueId = this.primaryProviderLeagues.filter(league => league.id == this.filters.leagueId)[0].master_league_id
+        this.setFilter({ type: this.type, filter: 'leagueId', data: this.filters.leagueId })
+        this.setFilter({ type: this.type, filter: 'masterLeagueId', data: this.filters.masterLeagueId })
+      } else {
+        this.filters.leagueId = null
+        this.filters.masterLeagueId = null
+      }
     }
   }
 }

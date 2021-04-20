@@ -27,10 +27,10 @@
         ></v-text-field>
       </div>
     </template>
-    <template v-slot:item="{ item, expand, isExpanded }">
-      <tr class="leagueRow" :class="{ 'selected' : leagueId == item.id }" @click="expand(!isExpanded)">
+    <template v-slot:item="{ headers, item, expand, isExpanded }">
+      <tr class="leagueRow" :class="{ 'selected' : leagueId == item.id }" @click="expand(!isExpanded)" v-if="type=='leagues'">
         <td>
-          <div class="leagueData" v-if="type=='leagues'">
+          <div class="leagueData">
             {{item.name}} <span class="ml-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
           </div>
         </td>
@@ -39,6 +39,18 @@
             <v-icon small v-if="isExpanded">mdi-chevron-up</v-icon>
             <v-icon small v-else>mdi-chevron-down</v-icon>
           </v-btn>
+        </td>
+      </tr>
+      <tr class="eventRow" v-else>
+        <td :colspan="headers.length">
+          <div class="px-4 py-2 event">
+            <p>provider: {{item.provider}}</p>
+            <p>event id: {{item.event_identifier}}</p>
+            <p>league: {{item.league_name}}</p>
+            <p>home: {{item.team_home_name}}</p>
+            <p>away: {{item.team_away_name}}</p>
+            <p>ref schedule: {{item.ref_schedule}}</p>
+          </div>
         </td>
       </tr>
     </template>
@@ -98,10 +110,13 @@ export default {
   },
   methods: {
     ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID' }),
-    ...mapActions('masterlistMatching', ['getUnmatchedLeagues', 'getUnmatchedEventsByLeague']),
+    ...mapActions('masterlistMatching', ['getUnmatchedLeagues', 'getPrimaryProviderMatchedLeagues', 'getUnmatchedEventsByLeague', 'getUnmatchedEventsByMasterLeague']),
     getUnmatchedData(params) {
       if(this.type == 'leagues') {
         this.getUnmatchedLeagues(params)
+        this.getPrimaryProviderMatchedLeagues()
+      } else {
+        this.getUnmatchedEventsByMasterLeague(params)
       }
     },
     getEvents(data) {
@@ -158,7 +173,7 @@ export default {
     overflow-y: scroll;
   }
 
-  .leagueRow {
+  .leagueRow, .eventRow {
     cursor: pointer;
   }
 
