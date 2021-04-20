@@ -64,4 +64,16 @@ export default {
   .pin {
     background-color: #ed8936;
   }
+
+  .event {
+    cursor: pointer;
+  }
+
+  .event:not(:last-child) {
+    border-bottom: solid rgba(0, 0, 0, 0.12) 1px;
+  }
+
+  .event p {
+    margin: 0;
+  }
 </style>

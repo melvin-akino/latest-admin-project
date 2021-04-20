@@ -24,6 +24,8 @@ const state = {
   matchedData: [],
   isLoadingMatchedData: false,
   totalMatchedData: 0,
+  primaryProviderId: null,
+  matchId: null
 } 
 
 const mutations = {
@@ -50,6 +52,29 @@ const mutations = {
   },
   SET_FILTER: (state, data) => {
     Vue.set(state.matchingFilters[data.type], data.filter, data.data)
+  },
+  SET_UNMATCHED_EVENTS_FOR_LEAGUE: (state, data) => {
+    state.unmatchedData.map(league => {
+      if(league.id == data.leagueId) {
+        Vue.set(league, 'events', data.data)
+      }
+    })
+  },
+  REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE: (state, leagueId) => {
+    state.unmatchedData.map(league => {
+      if(league.id == leagueId) {
+        Vue.delete(league, 'events')
+      }
+    })
+  },
+  SET_PRIMARY_PROVIDER_DATA: (state, data) => {
+    state.primaryProviderData = data
+  },
+  SET_PRIMARY_PROVIDER_ID: (state, id) => {
+    state.primaryProviderId = id
+  },
+  SET_MATCH_ID: (state, id) => {
+    state.matchId = id
   }
 }
 
@@ -72,7 +97,7 @@ const actions = {
       }
     })
   },
-  getMatchedLeagues({commit, dispatch, state}, params) {
+  getMatchedLeagues({commit, dispatch}, params) {
     axios.get('leagues/matched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_MATCHED_DATA', response.data.pageData)
@@ -104,6 +129,61 @@ const actions = {
           text: err.response.data.message
         });
       }
+    })
+  },
+  getUnmatchedEventsByLeague({commit, dispatch}, data) {
+    let { leagueId, paginated } = data
+    if(leagueId) {
+      axios.get(`events/unmatched/${leagueId}`, { params: { paginated }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('SET_UNMATCHED_EVENTS_FOR_LEAGUE', { leagueId, data: response.data.pageData })
+      })
+      .catch(err => {
+        if(!axios.isCancel(err)) {
+          dispatch('auth/logoutOnError', err.response.status, { root: true })
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
+        }
+      })
+    }
+  },
+  getPrimaryProviderEventsByLeague({commit, dispatch}, data) {
+    let { leagueId, paginated } = data
+    if(leagueId) {
+      axios.get(`events/matched/league/${leagueId}`, { params: { paginated }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('SET_PRIMARY_PROVIDER_DATA', response.data.pageData)
+      })
+      .catch(err => {
+        commit('SET_PRIMARY_PROVIDER_DATA', [])
+        if(!axios.isCancel(err)) {
+          dispatch('auth/logoutOnError', err.response.status, { root: true })
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "error",
+            text: err.response.data.message
+          });
+        }
+      })
+    }
+  },
+  matchLeague({dispatch, state}) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        primary_provider_league_id: state.primaryProviderId,
+        match_league_id: state.matchId
+      }
+      axios.post('leagues/match', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedLeagues')
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
     })
   }
 }

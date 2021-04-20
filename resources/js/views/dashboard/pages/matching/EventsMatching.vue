@@ -16,12 +16,13 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('masterlistMatching', { setUnmatchedData: 'SET_UNMATCHED_DATA', setIsLoadingUnmatchedData: 'SET_IS_LOADING_UNMATCHED_DATA', setTotalUnmatchedData: 'SET_TOTAL_UNMATCHED_DATA' })
+    ...mapMutations('masterlistMatching', { setUnmatchedData: 'SET_UNMATCHED_DATA', setIsLoadingUnmatchedData: 'SET_IS_LOADING_UNMATCHED_DATA', setTotalUnmatchedData: 'SET_TOTAL_UNMATCHED_DATA', setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA' })
   },
   beforeRouteLeave(to, from, next) {
     this.setUnmatchedData([])
     this.setIsLoadingUnmatchedData(true)
     this.setTotalUnmatchedData(0)
+    this.setPrimaryProviderData([])
     next()
   }
 }

@@ -124,10 +124,6 @@ export default {
             to: "events"
           },
           {
-            icon: "mdi-account-group",
-            title: "Teams",
-          },
-          {
             icon: "mdi-history",
             title: "History",
           }

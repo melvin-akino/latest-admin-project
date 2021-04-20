@@ -6,6 +6,10 @@
     :server-items-length="totalUnmatchedData"
     :options.sync="options"
     show-expand
+    single-expand
+    :expanded.sync="expanded"
+    @item-expanded="getEvents"
+    @pagination="clearSelected"
     :loading="isLoadingUnmatchedData"
     :loading-text="`Loading ${type}`"
   >
@@ -23,41 +27,38 @@
         ></v-text-field>
       </div>
     </template>
-    <template v-slot:[`item.data`]="{ item }">
-      <div class="leagueData" v-if="type=='leagues'">
-        {{item.name}} <span class="ml-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
-      </div>
+    <template v-slot:item="{ item, expand, isExpanded }">
+      <tr class="leagueRow" :class="{ 'selected' : leagueId == item.id }" @click="expand(!isExpanded)">
+        <td>
+          <div class="leagueData" v-if="type=='leagues'">
+            {{item.name}} <span class="ml-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
+          </div>
+        </td>
+        <td>
+          <v-btn icon small>
+            <v-icon small v-if="isExpanded">mdi-chevron-up</v-icon>
+            <v-icon small v-else>mdi-chevron-down</v-icon>
+          </v-btn>
+        </td>
+      </tr>
     </template>
-    <template v-slot:expanded-item="{ headers }" v-if="type=='leagues'">
-      <td :colspan="headers.length" class="expanded">
-        <!-- make this dynamic after intergrating API -->
-        <!-- <div class="events">
-          <div class="px-4 py-2 event" @click="selectEvent">
-            <p>League 1</p>
-            <p>Home Team 1</p>
-            <p>Away Team 2</p>
-            <p>2021-04-19 00:00:00</p>
+    <template v-slot:expanded-item="{ headers, item }" v-if="type=='leagues'">
+      <td :colspan="headers.length" class="expanded" v-if="item.hasOwnProperty('events') && item.events.length != 0">        
+        <div class="events" :class="{ 'mutiple' : item.events.length > 1 }">
+          <div class="px-4 py-2 event" v-for="event in item.events" :key="event.id">
+            <p>event id: {{event.event_identifier}}</p>
+            <p>home: {{event.team_home_name}}</p>
+            <p>away: {{event.team_away_name}}</p>
+            <p>ref schedule: {{event.ref_schedule}}</p>
           </div>
-          <div class="px-4 py-2 event" @click="selectEvent">
-            <p>League 2</p>
-            <p>Home Team 2</p>
-            <p>Away Team 2</p>
-            <p>2021-04-19 00:00:00</p>
-          </div>
-          <div class="px-4 py-2 event" @click="selectEvent">
-            <p>League 3</p>
-            <p>Home Team 3</p>
-            <p>Away Team 3</p>
-            <p>2021-04-19 00:00:00</p>
-          </div>
-        </div> -->
+        </div>
       </td>
     </template>
   </v-data-table>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   props: ['type'],
@@ -69,7 +70,9 @@ export default {
         { text: '', value: 'data-table-expand' }
       ],
       options: {},
-      searchKey: ''
+      searchKey: '',
+      leagueId: null,
+      expanded: []
     }
   },
   computed: {
@@ -86,15 +89,39 @@ export default {
           searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
         }
         this.getUnmatchedData(params)
+        this.leagueId = null
       }
+    },
+    leagueId(value) {
+      this.setMatchId(value)
     }
   },
   methods: {
-    ...mapActions('masterlistMatching', ['getUnmatchedLeagues']),
+    ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID' }),
+    ...mapActions('masterlistMatching', ['getUnmatchedLeagues', 'getUnmatchedEventsByLeague']),
     getUnmatchedData(params) {
       if(this.type == 'leagues') {
         this.getUnmatchedLeagues(params)
       }
+    },
+    getEvents(data) {
+      let { item, value } = data
+      if(value) {
+        this.getUnmatchedEventsByLeague({ leagueId: item.id, paginated: false })
+        this.leagueId = item.id
+      } else {
+        this.removeUnmatchedEventsForLeague(item.id)
+        this.leagueId = null
+        this.expanded = []
+      }
+    },
+    clearSelected() {
+      this.expanded = []
+      this.unmatchedData.map(data => {
+        if(this.type=='leagues') {
+          this.removeUnmatchedEventsForLeague(data.id)
+        }
+      })
     },
     search() {
       if(this.searchKey) {
@@ -123,23 +150,19 @@ export default {
   }
 
   .events {
+    background-color: #cce2ff;
+  }
+
+  .events.multiple {
     height: 190px;
     overflow-y: scroll;
   }
 
-  .event {
+  .leagueRow {
     cursor: pointer;
   }
 
-  .event:hover {
-    background-color: #cce2ff;
-  }
-
-  .event:not(:last-child) {
-    border-bottom: solid rgba(0, 0, 0, 0.12) 1px;
-  }
-
-  .event p {
-    margin: 0;
+  .selected {
+  background-color: #cce2ff;
   }
 </style>
