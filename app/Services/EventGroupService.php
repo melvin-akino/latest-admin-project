@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\EventGroupRequest;
 use Illuminate\Support\Facades\{DB, Log};
-use App\Models\{Event, EventGroup};
+use App\Models\{Event, EventGroup, LeagueGroup, TeamGroup};
 use App\Services\MatchingService;
 use Exception;
 
@@ -15,15 +15,75 @@ class EventGroupService
         DB::beginTransaction();
 
         try {
+            $primaryProviderEventId = $request->primary_provider_event_id;
+            $matchEventId = $request->match_event_id;
+
+            $primaryProviderEvent = Event::find($primaryProviderEventId)
+            $matchEvent = Event::find($matchEventId);
+
+            // check if league is already matched
+            $matchLeagueId = $matchEvent->league_id;
+            $matchMasterLeagueId = self::getMasterLeagueId($matchLeagueId);
+            if (!$matchMasterLeagueId) {
+                $leagueGroup = new LeagueGroup([
+                    'master_league_id' => self::getMasterLeagueId($primaryProviderEvent->league_id),
+                    'league_id'        => $matchLeagueId
+                ]);
+
+                if ($leagueGroup->save()) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('league', $providerId, $matchLeagueId);
+    
+                    DB::commit();
+                }
+            }
+
+            // check if team home is already matched
+            $matchTeamHomeId = $matchEvent->team_home_id;
+            $matchMasterTeamHomeId = self::getMasterTeamId($matchTeamHomeId);
+            if (!$matchMasterTeamHomeId) {
+                $teamGroup = new TeamGroup([
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_home_id),
+                    'team_id'        => $matchTeamHomeId
+                ]);
+
+                if ($teamGroup->save()) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamHomeId);
+    
+                    DB::commit();
+                }
+            }
+
+            // check if team away is already matched
+            $matchTeamAwayId = $matchEvent->team_away_id;
+            $matchMasterTeamAwayId = self::getMasterTeamId($matchTeamAwayId);
+            if (!$matchMasterTeamAwayId) {
+                $teamGroup = new TeamGroup([
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_away_id),
+                    'team_id'        => $matchTeamAwayId
+                ]);
+
+                if ($teamGroup->save()) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamAwayId);
+    
+                    DB::commit();
+                }
+            }
+
             $eventGroup = new EventGroup([
-                'master_event_id' => self::getMasterEventId($request->primary_provider_event_id),
-                'event_id'        => $request->match_event_id
+                'master_event_id' => self::getMasterEventId($primaryProviderEventId),
+                'event_id'        => $matchEventId
             ]);
 
             if ($eventGroup->save()) {
-                $providerId = Event::find($request->match_event_id)->provider_id;
+                $providerId = $matchEvent->provider_id;
 
-                MatchingService::removeFromUnmatchedData('event', $providerId, $request->match_event_id);
+                MatchingService::removeFromUnmatchedData('event', $providerId, $matchEventId);
 
                 DB::commit();
 
@@ -45,6 +105,14 @@ class EventGroupService
                 'error'       => trans('responses.internal-error')
             ], 500);
         }
+    }
+
+    private static function getMasterLeagueId($leagueId) {
+        return LeagueGroup::where('league_id', $leagueId)->first()->master_league_id;
+    }
+
+    private static function getMasterTeamId($teamId) {
+        return TeamGroup::where('team_id', $teamId)->first()->master_team_id;
     }
 
     private static function getMasterEventId($primaryProviderEventId) {
