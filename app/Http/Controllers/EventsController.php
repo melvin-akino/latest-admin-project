@@ -2,30 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Event, Provider, SystemConfiguration AS SC};
-use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\RawListRequest;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Event;
+use Illuminate\Http\Request;
 
 class EventsController extends Controller
 {
     /**
-     * Get raw `events` from parameter Provider
+     * Get unmatched `events` from parameter league id
      * 
-     * @param  RawListRequest $request
+     * @param  Request $request
+     * @param  int     $leagueId
      * 
      * @return json
      */
-    public function getRawEvents(RawListRequest $request)
+    public function getUnmatchedEvents(Request $request, $leagueId = null)
     {
-        return RawListingFacade::getByProvider($request, 'event');
+        $searchKey = '';
+        $page = 1;
+        $limit = 10;
+        $sortOrder = 'asc';
+
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+
+        $events = Event::getEvents($leagueId, null, false, $searchKey, $sortOrder);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $events->count(),
+            'pageNum'     => $page,
+            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
     }
 
-    public function getEvents()
-    {
-        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $events     = Event::getByProvider($providerId);
+    /**
+     * Get matched `events` from parameter league id
+     * 
+     * @param  Request $request
+     * @param  int     $leagueId
+     * 
+     * @return json
+     */
+    public function getMatchedEventsByLeague(Request $request, $leagueId = null) {
+        $page = 1;
+        $limit = 10;
 
-        return response()->json($events);
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+
+        $events = Event::getEvents($leagueId, null);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $events->count(),
+            'pageNum'     => $page,
+            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
+    }
+
+    /**
+     * Get matched `events` from parameter provider id
+     * 
+     * @param  Request $request
+     * @param  int     $providerId
+     * 
+     * @return json
+     */
+    public function getMatchedEventsByProvider(Request $request, $providerId = null) {
+        $page = 1;
+        $limit = 10;
+
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+
+        $events = Event::getEvents(null, $providerId);
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $events->count(),
+            'pageNum'     => $page,
+            'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
     }
 }

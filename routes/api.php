@@ -58,9 +58,12 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
 
     // Events routes
-    Route::get('/raw-events', 'EventsController@getRawEvents')->name('events.api');
-    Route::get('/matched-events', 'EventsController@getEvents')->name('matched-events.api');
     Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
+    Route::prefix('events')->group(function() {
+        Route::get('/unmatched/{leagueId}', 'EventsController@getUnmatchedEvents')->name('unmatched-events.api');
+        Route::get('/matched/league/{leagueId}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
+        Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
+    });
 
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
