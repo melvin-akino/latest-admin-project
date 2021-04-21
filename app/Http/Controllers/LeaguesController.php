@@ -55,11 +55,13 @@ class LeaguesController extends Controller
     {
         $page = 1;
         $limit = 10;
+        $sortOrder = 'asc';
         
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
 
-        $masterLeagues = MasterLeague::orderBy('id');
+        $masterLeagues = MasterLeague::orderBy('id', $sortOrder);
         $total = $masterLeagues->count();
         $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
 

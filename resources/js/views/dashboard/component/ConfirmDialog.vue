@@ -10,8 +10,11 @@
           <v-icon dark>mdi-close-circle</v-icon>
         </v-btn>
       </v-toolbar>
-      <v-card-text>
+      <v-card-text v-if="message">
         {{message}}
+      </v-card-text>
+      <v-card-text v-else>
+        <slot></slot>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
