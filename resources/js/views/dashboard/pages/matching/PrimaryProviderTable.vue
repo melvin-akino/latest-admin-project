@@ -1,6 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
+    v-model="selected"
     :items="type=='leagues' ? primaryProviderData : primaryProviderGroupedHourly"
     hide-default-header
     :hide-default-footer="type=='leagues' ? true : false"
@@ -10,6 +11,8 @@
     :options.sync="options"
     :loading="type=='events' ? isLoadingPrimaryProviderData : false"
     :loading-text="`Loading ${type}`"
+    single-select
+    @item-selected="selectEvent"
     class="primaryProviderTable"
   >
     <template v-slot:top>
@@ -58,28 +61,22 @@
         <div class="px-4 py-2">{{group}}</div>
       </td>
     </template>
-    <template v-slot:[`item.data`]="{ item }"  v-if="type=='events'">
-      <div class="px-4 py-2 event">
-        <p>event id: {{item.event_identifier}}</p>
-        <p>league: {{item.league_name}}</p>
-        <p>home: {{item.team_home_name}}</p>
-        <p>away: {{item.team_away_name}}</p>
-        <p>ref schedule: {{item.ref_schedule}}</p>
-      </div>
+    <template v-slot:item="{ headers, item, select, isSelected }"  v-if="type=='events'">
+      <tr slot="activator" :class="{ 'selected' : eventId == item.id, 'match' : eventId == item.id }" @click="select(!isSelected)">
+        <td :colspan="headers.length">
+          <div class="px-4 py-2 event">
+            <p>event id: {{item.event_identifier}}</p>
+            <p>league: {{item.league_name}}</p>
+            <p>home: {{item.team_home_name}}</p>
+            <p>away: {{item.team_away_name}}</p>
+            <p>ref schedule: {{item.ref_schedule}}</p>
+          </div>
+        </td>
+      </tr>
     </template>
     <template v-slot:footer v-if="type=='leagues'">
       <div class="matchBtn">
-        <v-btn small dark class="my-4 success text-capitalize" :class="{ 'match': !matchId || !primaryProviderId }" :disabled="!matchId || !primaryProviderId">Match</v-btn>
-        <confirm-dialog
-          :title="`Confirm Matching of ${type}`"
-          activator=".match"
-          @confirm="match"
-        >
-          <div class="matchSummary" v-if="unmatch && primaryProvider">
-            <p>league id: <span>{{unmatch.id}}</span> >> <span>{{primaryProvider.id}}</span></p>
-            <p>name: <span>{{unmatch.name}}</span> >> <span>{{primaryProvider.name}}</span></p>
-          </div>
-        </confirm-dialog>
+        <v-btn small dark class="my-4 success text-capitalize match" :disabled="!matchId || !primaryProviderId" @click="confirmMatching">Match</v-btn>
       </div>
     </template>
   </v-data-table>
@@ -93,16 +90,15 @@ import moment from 'moment'
 export default {
   props: ['type'],
   name: 'PrimaryProviderTable',
-  components: {
-    ConfirmDialog: () => import('../../component/ConfirmDialog')
-  },
   data() {
     return {
       headers: [
         { text: 'Sort', value: 'data' }
       ],
       options: {},
-      leagueId: null
+      leagueId: null,
+      eventId: null,
+      selected: []
     }
   },  
   computed: {
@@ -114,7 +110,11 @@ export default {
     },
     primaryProvider() {
       if(this.primaryProviderId) {
-        return this.primaryProviderLeagues.filter(data => data.id == this.primaryProviderId)[0]
+        if(this.type=='leagues') {
+          return this.primaryProviderLeagues.filter(data => data.id == this.primaryProviderId)[0]
+        } else {
+          return this.primaryProviderData.filter(data => data.id == this.primaryProviderId)[0]
+        }
       }
     },
     primaryProviderGroupedHourly() {
@@ -130,12 +130,6 @@ export default {
     }
   },
   watch: {
-    leagueId(value) {
-      this.setPrimaryProviderId(value)
-      if(!value) {
-        this.setPrimaryProviderData([])
-      }
-    },
     options: {
       deep: true,
       handler(value) {
@@ -147,29 +141,52 @@ export default {
         }
         this.getPrimaryProviderEventsByLeague(params)
       }
+    },
+    primaryProviderData: {
+      deep: true,
+      handler() {
+        if(this.type=='events') {
+          this.eventId = null
+        }
+      }
+    },
+    leagueId(value) {
+      this.setPrimaryProviderId(value)
+      if(!value) {
+        this.setPrimaryProviderData([])
+      }
+    },
+    eventId(value) {
+      this.setPrimaryProviderId(value)
+      if(!value) {
+        this.selected = []
+      }
+    },
+    primaryProviderId(value) {
+      if(value && this.matchId && this.type=='events') {
+        this.confirmMatching()
+      } else {
+        if(this.type=='leagues') {
+          this.leagueId = value
+        } else {
+          this.eventId = value
+        }
+      }
     }
   },
   methods: {
     ...mapMutations('masterlistMatching', { setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA' }),
     ...mapActions('masterlistMatching', ['getPrimaryProviderEventsByLeague', 'matchLeague']),
-    closeDialog() {
-      bus.$emit("CLOSE_DIALOG")
-    },
-    async match() {
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Matching data...'
-      });
-      if(this.type=='leagues') {
-        await this.matchLeague()
+    selectEvent(data) {
+      let { item, value } = data
+      if(value) {
+        this.eventId = item.id
+      } else {
+        this.eventId = null
       }
-      this.closeDialog()
-      this.leagueId = null
-      this.setPrimaryProviderData([])
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Matched data succesfully!'
-      });
+    },
+    confirmMatching() {
+      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider })
     }
   }
 
@@ -209,15 +226,6 @@ export default {
 
   .matchBtn .v-btn__content {
     font-size: 12px !important;
-  }
-
-  .matchSummary p {
-    margin: 0;
-    font-size: 14px !important;
-  }
-
-  .matchSummary span {
-    font-weight: 600;
   }
 
   #hourlyGroupHeader {

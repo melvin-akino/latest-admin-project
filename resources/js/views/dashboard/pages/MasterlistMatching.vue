@@ -67,11 +67,24 @@ export default {
     cursor: pointer;
   }
 
-  .multiple > .event:not(:last-child), .noEvent {
+  .event:not(:last-child) {
     border-bottom: solid rgba(0, 0, 0, 0.12) 1px;
   }
 
   .event p {
     margin: 0;
+  }
+
+  .selected {
+    background-color: #cce2ff;
+  }
+
+  .matchSummary p {
+    margin: 0;
+    font-size: 14px !important;
+  }
+
+  .matchSummary span {
+    font-weight: 600;
   }
 </style>

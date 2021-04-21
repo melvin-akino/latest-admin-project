@@ -18,7 +18,7 @@ class EventGroupService
             $primaryProviderEventId = $request->primary_provider_event_id;
             $matchEventId = $request->match_event_id;
 
-            $primaryProviderEvent = Event::find($primaryProviderEventId)
+            $primaryProviderEvent = Event::find($primaryProviderEventId);
             $matchEvent = Event::find($matchEventId);
 
             // check if league is already matched
@@ -26,7 +26,7 @@ class EventGroupService
             $matchMasterLeagueId = self::getMasterLeagueId($matchLeagueId);
             if (!$matchMasterLeagueId) {
                 $leagueGroup = new LeagueGroup([
-                    'master_league_id' => self::getMasterLeagueId($primaryProviderEvent->league_id),
+                    'master_league_id' => self::getMasterLeagueId($primaryProviderEvent->league_id)->master_league_id,
                     'league_id'        => $matchLeagueId
                 ]);
 
@@ -44,7 +44,7 @@ class EventGroupService
             $matchMasterTeamHomeId = self::getMasterTeamId($matchTeamHomeId);
             if (!$matchMasterTeamHomeId) {
                 $teamGroup = new TeamGroup([
-                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_home_id),
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_home_id)->master_team_id,
                     'team_id'        => $matchTeamHomeId
                 ]);
 
@@ -62,7 +62,7 @@ class EventGroupService
             $matchMasterTeamAwayId = self::getMasterTeamId($matchTeamAwayId);
             if (!$matchMasterTeamAwayId) {
                 $teamGroup = new TeamGroup([
-                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_away_id),
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_away_id)->master_team_id,
                     'team_id'        => $matchTeamAwayId
                 ]);
 
@@ -76,7 +76,7 @@ class EventGroupService
             }
 
             $eventGroup = new EventGroup([
-                'master_event_id' => self::getMasterEventId($primaryProviderEventId),
+                'master_event_id' => self::getMasterEventId($primaryProviderEventId)->master_event_id,
                 'event_id'        => $matchEventId
             ]);
 
@@ -108,14 +108,14 @@ class EventGroupService
     }
 
     private static function getMasterLeagueId($leagueId) {
-        return LeagueGroup::where('league_id', $leagueId)->first()->master_league_id;
+        return LeagueGroup::where('league_id', $leagueId)->first();
     }
 
     private static function getMasterTeamId($teamId) {
-        return TeamGroup::where('team_id', $teamId)->first()->master_team_id;
+        return TeamGroup::where('team_id', $teamId)->first();
     }
 
     private static function getMasterEventId($primaryProviderEventId) {
-        return EventGroup::where('event_id', $primaryProviderEventId)->first()->master_event_id;
+        return EventGroup::where('event_id', $primaryProviderEventId)->first();
     }
 }
