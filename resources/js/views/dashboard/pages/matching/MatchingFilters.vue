@@ -180,6 +180,7 @@ export default {
 
   .leagueMatchingFilters, .eventMatchingFilters {
     justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .eventMatchingFilters {

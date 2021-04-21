@@ -218,6 +218,25 @@ const actions = {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
+  },
+  matchEvent({dispatch, state}) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        primary_provider_event_id: state.primaryProviderId,
+        match_event_id: state.matchId
+      }
+      axios.post('events/match', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedEventsByMasterLeague')
+        dispatch('getPrimaryProviderEventsByLeague')
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
   }
 }
 
