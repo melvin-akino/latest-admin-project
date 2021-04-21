@@ -54,6 +54,7 @@
     <template v-slot:[`item.data`]="{ item }"  v-if="type=='events'">
       <div class="px-4 py-2 event">
         <p>event id: {{item.event_identifier}}</p>
+        <p>league: {{item.league_name}}</p>
         <p>home: {{item.team_home_name}}</p>
         <p>away: {{item.team_away_name}}</p>
         <p>ref schedule: {{item.ref_schedule}}</p>
