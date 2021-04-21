@@ -98,4 +98,19 @@ class LeaguesController extends Controller
     {
         return MatchingFacade::postMatch($request, 'league');
     }
+
+    /**
+    * Remove Grouped Leagues, teams and events from the Database, recreate the delete records into the unmatched_data table
+    * 
+    * @param  object   Illuminate\Http\Request $request
+    *     $request->league_id               int         league id
+    *     $request->provider_id             int         provider id of the league
+    *     $request->sport_id                int         sport id of the league
+    * 
+    * @return json
+    */
+    public function postUnmatchLeague(Request $request)
+    {
+        return MatchingFacade::unmatchSecondaryLeague($request);
+    }
 }
