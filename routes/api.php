@@ -53,6 +53,8 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
         Route::post('/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
     });
+    Route::post('/leagues/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
+    Route::post('/leagues/unmatch', 'LeaguesController@postUnmatchLeague')->name('unmatch-leagues.api');
         
     // Teams routes
     Route::get('/raw-teams', 'TeamsController@getRawTeams')->name('teams.api');
@@ -60,6 +62,11 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
 
     // Events routes
+    Route::get('/raw-events', 'EventsController@getRawEvents')->name('events.api');
+    Route::get('/matched-events', 'EventsController@getEvents')->name('matched-events.api');
+    Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
+    Route::post('/events/unmatch', 'EventsController@postUnmatchEvent')->name('unmatch-events.api');
+
     Route::prefix('events')->group(function() {
         Route::post('/match', 'EventGroupsController@match')->name('events-match.api');
         Route::get('/unmatched/league/{leagueId}', 'EventsController@getUnmatchedEventsByLeague')->name('unmatched-league-events.api');
@@ -67,6 +74,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/matched/league/{leagueId}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
         Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
     });
+
 
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');

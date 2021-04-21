@@ -71,6 +71,6 @@ class Matching
     {
         //@TODO add the audit trail here
         
-        return $this->models[$modelName]::delete($condition);
+        return $this->models[$modelName]::where($condition)->delete();
     }
 }

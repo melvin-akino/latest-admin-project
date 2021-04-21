@@ -446,8 +446,7 @@ class MatchingService
     }
 
     public static function automatchIdenticalEvents($primaryProviderId)
-    {
-        
+    {        
         try {
             
             $matching = new Matching;
@@ -494,6 +493,179 @@ class MatchingService
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
+        }
+    }
+
+    public static function unmatchSecondaryLeague(Request $request) 
+    {
+        DB::beginTransaction();
+        try
+        {
+            $leagueInfo = League::getLeagueInfo($request->league_id, $request->provider_id, $request->sport_id);
+            
+            $matching = new Matching;
+
+            //Delete this league from the groups table
+            $matching->delete('LeagueGroup', [
+                'master_league_id' => $leagueInfo->master_league_id,
+                'league_id'        => $request->league_id
+            ]);
+            Log::info('Matching: Removing this league_id:'.$request->league_id.' from league_groups table');
+
+            //Add this league into the unmatched_table
+            $matching->create('UnmatchedData', [
+                'data_type'     => 'league',
+                'data_id'       => $request->league_id,
+                'provider_id'   => $request->provider_id
+            ]);
+            Log::info('Matching: Recreating unmatched data for league_id:'.$request->league_id.' - provider_id:'.$request->provider_id);
+
+            //Now let's get all associated events and teams for this league and unmatch them too
+            $events = Event::getLeagueEvents($request->league_id, $request->provider_id, $request->sport_id);
+            if ($events) {
+                foreach($events as $event) {
+                    //Delete this home team from the team groups table
+                    $matching->delete('TeamGroup', [
+                        'master_team_id' => $event['team_master_home_id'],
+                        'team_id'        => $event['team_home_id']
+                    ]);
+                    Log::info('Matching: Removing this home_team_id:'.$event['team_home_id'].' from team_groups table with master_team_id:'.$event['team_master_home_id']);
+
+                    //Add this home team into the unmatched_table
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'team',
+                        'data_id'       => $event['team_home_id'],
+                        'provider_id'   => $request->provider_id,
+                        'is_failed'     => false
+                    ]);
+                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+
+                    //Delete this away team from the team groups table
+                    $matching->delete('TeamGroup', [
+                        'master_team_id' => $event['team_master_away_id'],
+                        'team_id'        => $event['team_away_id']
+                    ]);
+                    Log::info('Matching: Removing this home_team_id:'.$event['team_away_id'].' from team_groups table with master_team_id:'.$event['team_master_away_id']);
+
+                    //Add this home team into the unmatched_table
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'team',
+                        'data_id'       => $event['team_away_id'],
+                        'provider_id'   => $request->provider_id,
+                        'is_failed'     => false
+                    ]);
+                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+
+                    //Delete this event from the event groups table
+                    $matching->delete('EventGroup', [
+                        'master_event_id' => $event['master_event_id'],
+                        'event_id'        => $event['id']
+                    ]);
+                    Log::info('Matching: Removing this event_id:'.$event['id'].' from team_groups table with master_team_id:'.$event['master_event_id']);
+
+                    //Add this home team into the unmatched_table
+                    $matching->create('UnmatchedData', [
+                        'data_type'     => 'event',
+                        'data_id'       => $event['id'],
+                        'provider_id'   => $request->provider_id,
+                        'is_failed'     => false
+                    ]);
+                    Log::info('Matching: Recreating unmatched data for event_id:'.$event['id'].' - provider_id:'.$request->provider_id);
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'message'     => 'success'
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public static function unmatchSecondaryEvent(Request $request) 
+    {
+        try
+        {           
+            $matching = new Matching;
+
+            //Get event information
+            $event = Event::getEventInfo($request->event_id, $request->provider_id, $request->sport_id);
+
+            if (!empty($event))
+            {
+                DB::beginTransaction();
+                //Delete this home team from the team groups table
+                $matching->delete('TeamGroup', [
+                    'master_team_id' => $event['team_master_home_id'],
+                    'team_id'        => $event['team_home_id']
+                ]);
+                Log::info('Matching: Removing this home_team_id:'.$event['team_home_id'].' from team_groups table with master_team_id:'.$event['team_master_home_id']);
+
+                //Add this home team into the unmatched_table
+                $matching->create('UnmatchedData', [
+                    'data_type'     => 'team',
+                    'data_id'       => $event['team_home_id'],
+                    'provider_id'   => $request->provider_id,
+                    'is_failed'     => false
+                ]);
+                Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+
+                //Delete this away team from the team groups table
+                $matching->delete('TeamGroup', [
+                    'master_team_id' => $event['team_master_away_id'],
+                    'team_id'        => $event['team_away_id']
+                ]);
+                Log::info('Matching: Removing this home_team_id:'.$event['team_away_id'].' from team_groups table with master_team_id:'.$event['team_master_away_id']);
+
+                //Add this home team into the unmatched_table
+                $matching->create('UnmatchedData', [
+                    'data_type'     => 'team',
+                    'data_id'       => $event['team_away_id'],
+                    'provider_id'   => $request->provider_id,
+                    'is_failed'     => false
+                ]);
+                Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+
+                //Delete this event from the event groups table
+                $matching->delete('EventGroup', [
+                    'master_event_id' => $event['master_event_id'],
+                    'event_id'        => $event['id']
+                ]);
+                Log::info('Matching: Removing this event_id:'.$event['id'].' from team_groups table with master_team_id:'.$event['master_event_id']);
+
+                //Add this home team into the unmatched_table
+                $matching->create('UnmatchedData', [
+                    'data_type'     => 'event',
+                    'data_id'       => $event['id'],
+                    'provider_id'   => $request->provider_id,
+                    'is_failed'     => false
+                ]);
+                Log::info('Matching: Recreating unmatched data for event_id:'.$event['id'].' - provider_id:'.$request->provider_id);
+
+                DB::commit();
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'success'
+                ], 200);
+            }
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
         }
     }
 }

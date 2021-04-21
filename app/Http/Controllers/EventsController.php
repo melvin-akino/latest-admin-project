@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC};
+use App\Facades\{RawListingFacade, MatchingFacade};
+use App\Http\Requests\RawListRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class EventsController extends Controller
 {
@@ -134,5 +137,20 @@ class EventsController extends Controller
             'pageNum'     => $page,
             'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
         ]);
+    }
+
+    /**
+    * Remove Grouped teams and events from the Database, recreate the delete records into the unmatched_data table
+    * 
+    * @param  object   Illuminate\Http\Request $request
+    *     $request->event_id                int         event id
+    *     $request->provider_id             int         provider id of the league
+    *     $request->sport_id                int         sport id of the league
+    * 
+    * @return json
+    */
+    public function postUnmatchEvent(Request $request)
+    {
+        return MatchingFacade::unmatchSecondaryEvent($request);
     }
 }

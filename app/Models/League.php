@@ -112,6 +112,16 @@ class League extends Model
         return self::where('provider_id', $providerId)->doesntHave('leagueGroup')->get();
     }
 
+    public static function getLeagueInfo($leagueId, $providerId, $sportId)
+    {
+        return self::select('master_league_id', 'id')
+                ->join('league_groups', 'league_groups.league_id', 'id')
+                ->where('id', $leagueId)
+                ->where('provider_id', $providerId)
+                ->where('sport_id', $sportId)
+                ->first();
+    }
+
     public function leagueGroup()
     {
         return $this->hasOne(LeagueGroup::class, 'league_id', 'id');
