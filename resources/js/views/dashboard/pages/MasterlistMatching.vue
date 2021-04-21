@@ -67,7 +67,7 @@ export default {
     cursor: pointer;
   }
 
-  .event:not(:last-child) {
+  .multiple > .event:not(:last-child), .noEvent {
     border-bottom: solid rgba(0, 0, 0, 0.12) 1px;
   }
 
