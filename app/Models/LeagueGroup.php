@@ -23,6 +23,13 @@ class LeagueGroup extends Model
         return self::where('league_id', $leagueId)->get();
     }
 
+    public static function getNonPrimaryLeagueIds(int $masterLeagueId, int $primaryProviderId) {
+        return self::join('leagues as l', 'l.id', 'league_groups.league_id')
+            ->where('league_groups.master_league_id', $masterLeagueId)
+            ->where('l.provider_id', '!=', $primaryProviderId)
+            ->pluck('l.id');
+    }
+
     public function leagues()
     {
         return $this->belongsTo(League::class, 'id', 'league_id');

@@ -20,6 +20,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // public routes
     Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
 });
+
 Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // our routes to be protected will go in here
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
@@ -46,9 +47,11 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     
     // Leagues routes
     Route::prefix('leagues')->group(function() {
+        Route::post('/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
         Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
         Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
         Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
+        Route::post('/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
     });
     Route::post('/leagues/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
     Route::post('/leagues/unmatch', 'LeaguesController@postUnmatchLeague')->name('unmatch-leagues.api');
@@ -63,6 +66,15 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/matched-events', 'EventsController@getEvents')->name('matched-events.api');
     Route::post('/events/match', 'EventGroupsController@match')->name('events-match.api');
     Route::post('/events/unmatch', 'EventsController@postUnmatchEvent')->name('unmatch-events.api');
+
+    Route::prefix('events')->group(function() {
+        Route::post('/match', 'EventGroupsController@match')->name('events-match.api');
+        Route::get('/unmatched/league/{leagueId}', 'EventsController@getUnmatchedEventsByLeague')->name('unmatched-league-events.api');
+        Route::get('/unmatched/master-league/{masterLeagueId}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
+        Route::get('/matched/league/{leagueId}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
+        Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
+    });
+
 
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');

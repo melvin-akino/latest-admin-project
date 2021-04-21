@@ -47,10 +47,7 @@ class ProviderService
             $data[] = [
               'id' => $provider->id,
               'name' => $provider->name,
-              'alias' => $provider->alias,
-              'raw_leagues' => League::getByProvider($provider->id, '', 'asc', false)->count(),
-              'raw_teams'   => Team::getByProvider($provider->id, '', 'asc', false)->count(),
-              'raw_events'  => Event::getByProvider($provider->id, '', 'asc', false)->count()
+              'alias' => $provider->alias
             ];
           }
 
