@@ -32,7 +32,7 @@
       <tr class="leagueRow" :class="{ 'selected' : leagueId == item.id }" @click="expand(!isExpanded)" v-if="type=='leagues'">
         <td>
           <div class="leagueData">
-            {{item.name}} <span class="ml-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span>
+            <span class="mr-4 badge" :class="[`${item.provider.toLowerCase()}`]">{{item.provider}}</span> {{item.name}}
           </div>
         </td>
         <td>
@@ -56,16 +56,21 @@
       </tr>
     </template>
     <template v-slot:expanded-item="{ headers, item }" v-if="type=='leagues'">
-      <td :colspan="headers.length" class="expanded" v-if="item.hasOwnProperty('events') && item.events.length != 0">        
-        <div class="events" :class="{ 'mutiple' : item.events.length > 1 }">
-          <div class="px-4 py-2 event" v-for="event in item.events" :key="event.id">
-            <p>event id: {{event.event_identifier}}</p>
-            <p>home: {{event.team_home_name}}</p>
-            <p>away: {{event.team_away_name}}</p>
-            <p>ref schedule: {{event.ref_schedule}}</p>
+      <tr v-if="item.hasOwnProperty('events')">
+        <td :colspan="headers.length" class="expanded" v-if="item.events.length != 0">        
+          <div class="events" :class="{ 'mutiple' : item.events.length > 1 }">
+            <div class="px-4 py-2 event" v-for="event in item.events" :key="event.id">
+              <p>event id: {{event.event_identifier}}</p>
+              <p>home: {{event.team_home_name}}</p>
+              <p>away: {{event.team_away_name}}</p>
+              <p>ref schedule: {{event.ref_schedule}}</p>
+            </div>
           </div>
-        </div>
-      </td>
+        </td>
+        <td :colspan="headers.length" class="noEventsExpanded" v-else>
+          <div class="px-4 py-2 noEvent">No events available for this league</div>
+        </td>
+      </tr>
     </template>
   </v-data-table>
 </template>
@@ -179,6 +184,10 @@ export default {
   }
 
   .selected {
-  background-color: #cce2ff;
+    background-color: #cce2ff;
+  }
+
+  .noEventsExpanded {
+    padding: 0 !important;
   }
 </style>

@@ -73,6 +73,7 @@ class League extends Model
                 ->join('providers as p', 'p.id', 'leagues.provider_id')
                 ->where('lg.master_league_id', $masterLeagueId)
                 ->select('leagues.id', 'leagues.name', 'provider_id', 'p.alias as provider')
+                ->orderBy('p.id', 'asc')
                 ->get();
     }
 

@@ -32,8 +32,8 @@
         ></v-autocomplete>
       </div> 
     </template>
-    <template v-slot:body="{ items }" v-if="type=='leagues'">
-      <tbody :class="{ 'multiple': items.length > 4 }">
+    <template v-slot:body="{ headers, items }" v-if="type=='leagues'">
+      <tbody :class="{ 'multiple': items.length > 4 }"  v-if="items.length != 0">
         <tr v-for="item in items" :key="item.id">
           <td>
             <div class="px-4 py-2 event">
@@ -42,6 +42,13 @@
               <p>away: {{item.team_away_name}}</p>
               <p>ref schedule: {{item.ref_schedule}}</p>
             </div>
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-else>
+        <tr>
+          <td :colspan="headers.length">
+            <div class="px-4 py-2">No data available</div>
           </td>
         </tr>
       </tbody>

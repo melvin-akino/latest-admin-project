@@ -55,9 +55,10 @@ class MatchingService
             }
 
             DB::table($type . '_groups')
-                ->insert([
+                ->updateOrInsert([
+                    $type . '_id' => $request->{ 'match_' . $type . '_id' }
+                ], [
                     'master_' . $type . '_id' => $masterId,
-                    $type . '_id'             => $request->{ 'match_' . $type . '_id' }
                 ]);
 
             $providerId = DB::table($type . 's')
