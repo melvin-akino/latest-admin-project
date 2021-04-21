@@ -3,6 +3,7 @@
     :headers="headers"
     :items="unmatchedData"
     item-key="id"
+    :hide-default-header="type=='events' ? true : false"
     :server-items-length="totalUnmatchedData"
     :options.sync="options"
     show-expand

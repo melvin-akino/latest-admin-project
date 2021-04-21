@@ -1,10 +1,11 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="primaryProviderData"
-    :hide-default-header="type=='leagues' ? true : false"
+    :items="type=='leagues' ? primaryProviderData : primaryProviderGroupedHourly"
+    hide-default-header
     :hide-default-footer="type=='leagues' ? true : false"
     :disable-pagination="type=='leagues' ? true : false"
+    :group-by="type=='events' ? 'hourly_schedule' : []"
     :server-items-length="type=='events' ? totalPrimaryProviderData : -1"
     :options.sync="options"
     :loading="type=='events' ? isLoadingPrimaryProviderData : false"
@@ -31,8 +32,8 @@
         ></v-autocomplete>
       </div> 
     </template>
-    <template v-slot:body="{ items }">
-      <tbody :class="{ 'multiple': items.length > 4 && type=='leagues' }">
+    <template v-slot:body="{ items }" v-if="type=='leagues'">
+      <tbody :class="{ 'multiple': items.length > 4 }">
         <tr v-for="item in items" :key="item.id">
           <td>
             <div class="px-4 py-2 event">
@@ -44,6 +45,19 @@
           </td>
         </tr>
       </tbody>
+    </template>
+    <template v-slot:[`group.header`]="{ headers, toggle, group }" v-if="type=='events'">
+      <td :colspan="headers.length" @click="toggle" id="hourlyGroupHeader">
+        <div class="px-4 py-2">{{group}}</div>
+      </td>
+    </template>
+    <template v-slot:[`item.data`]="{ item }"  v-if="type=='events'">
+      <div class="px-4 py-2 event">
+        <p>event id: {{item.event_identifier}}</p>
+        <p>home: {{item.team_home_name}}</p>
+        <p>away: {{item.team_away_name}}</p>
+        <p>ref schedule: {{item.ref_schedule}}</p>
+      </div>
     </template>
     <template v-slot:footer v-if="type=='leagues'">
       <div class="matchBtn">
@@ -66,6 +80,7 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
+import moment from 'moment'
 
 export default {
   props: ['type'],
@@ -93,6 +108,17 @@ export default {
       if(this.primaryProviderId) {
         return this.primaryProviderLeagues.filter(data => data.id == this.primaryProviderId)[0]
       }
+    },
+    primaryProviderGroupedHourly() {
+      let data = []
+      if(this.type == 'events') {
+        this.primaryProviderData.map(event => {
+          let obj = { ...event }
+          this.$set(obj, 'hourly_schedule', moment(event.ref_schedule).startOf('hour').format('YYYY-MM-DD HH:mm:ss'))
+          data.push(obj)
+        })
+      }
+      return data
     }
   },
   watch: {
@@ -184,6 +210,12 @@ export default {
 
   .matchSummary span {
     font-weight: 600;
+  }
+
+  #hourlyGroupHeader {
+    color: #ffffff !important;
+    background-color: #e9954b;
+    cursor: pointer;
   }
 
 </style>
