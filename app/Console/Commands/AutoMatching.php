@@ -41,13 +41,13 @@ class AutoMatching extends Command
             }
             usleep(500000);
             
-            if ($automatchPrimaryEventsCount <= 0) {
-                $automatchPrimaryEventsCount = MatchingFacade::autoMatchPrimaryEvents($primaryProviderId);
-            }
-            else {
-                $automatchPrimaryEventsCount--;
-            }
-            usleep(500000);
+            // if ($automatchPrimaryEventsCount <= 0) {
+            //     $automatchPrimaryEventsCount = MatchingFacade::autoMatchPrimaryEvents($primaryProviderId);
+            // }
+            // else {
+            //     $automatchPrimaryEventsCount--;
+            // }
+            // usleep(500000);
 
             if ($unmatchedLeaguesCount <= 0) {
                 $unmatchedLeaguesCount = MatchingFacade::createUnmatchedLeagues($primaryProviderId);
@@ -65,13 +65,13 @@ class AutoMatching extends Command
             }
             usleep(500000);
 
-            if ($unmatchedEventsCount <= 0) {
-                $unmatchedEventsCount = MatchingFacade::createUnmatchedEvents($primaryProviderId);
-            }
-            else {
-                $unmatchedEventsCount--;
-            }
-            usleep(500000);
+            // if ($unmatchedEventsCount <= 0) {
+            //     $unmatchedEventsCount = MatchingFacade::createUnmatchedEvents($primaryProviderId);
+            // }
+            // else {
+            //     $unmatchedEventsCount--;
+            // }
+            // usleep(500000);
 
             //put a waiting time
             if ($automatchSecondaryLeaguesCount <= 0) {
@@ -90,13 +90,13 @@ class AutoMatching extends Command
             }
             usleep(500000);
 
-            if ($automatchSecondaryEventsCount <= 0) {
-                $automatchSecondaryEventsCount = MatchingFacade::automatchIdenticalEvents($primaryProviderId);
-            }
-            else {
-                $automatchSecondaryEventsCount--;
-            }
-            usleep(500000);
+            // if ($automatchSecondaryEventsCount <= 0) {
+            //     $automatchSecondaryEventsCount = MatchingFacade::automatchIdenticalEvents($primaryProviderId);
+            // }
+            // else {
+            //     $automatchSecondaryEventsCount--;
+            // }
+            // usleep(500000);
         }
     }
 }
