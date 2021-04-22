@@ -16,8 +16,8 @@
     </template>
     <template v-slot:[`item.data`]="{ item }">
       <div class="ma-2" v-for="league in item.leagues" :key="league.id">
-        <span class="badge matched mr-4" :class="[`${league.provider.toLowerCase()}`]">
-          {{league.provider}} <v-icon v-if="nonPrimaryProviders.includes(league.provider)" color="#ffffff" small class="unmatchBtn">mdi-close</v-icon>
+        <span class="badge unmatchBtn matched mr-4" :class="[`${league.provider.toLowerCase()}`]"  @click="confirmUnmatch(item.leagues)">
+          {{league.provider}} <v-icon v-if="nonPrimaryProviders.includes(league.provider)" color="#ffffff" small>mdi-close</v-icon>
         </span> 
         {{league.name}} 
       </div>
@@ -27,7 +27,6 @@
     </template>
     <template v-slot:expanded-item="{ headers }">
       <td :colspan="headers.length">
-        <!-- events here -->
       </td>
     </template>
   </v-data-table>
@@ -35,6 +34,7 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+import bus from '../../../../eventBus'
 
 export default {
   props: ['type'],
@@ -46,6 +46,8 @@ export default {
         { text: '', value: 'data-table-expand' }
       ],
       options: {},
+      primaryProvider: null,
+      secondaryProvider: null
     }
   },
   computed: {
@@ -70,15 +72,21 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('masterlistMatching', { setTableParams: 'SET_TABLE_PARAMS' }),
-    ...mapActions('masterlistMatching', ['getMatchedLeagues'])
+    ...mapMutations('masterlistMatching', { setTableParams: 'SET_TABLE_PARAMS', setUnmatchingData: 'SET_UNMATCHING_DATA' }),
+    ...mapActions('masterlistMatching', ['getMatchedLeagues']),
+    confirmUnmatch(leagues) {
+      this.primaryProvider = leagues.filter(league => !this.nonPrimaryProviders.includes(league.provider))[0]
+      this.secondaryProvider = leagues.filter(league => this.nonPrimaryProviders.includes(league.provider))[0]
+      this.setUnmatchingData({ data_id: this.secondaryProvider.id, provider_id: this.secondaryProvider.provider_id, sport_id: this.secondaryProvider.sport_id })
+      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.secondaryProvider, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Unmatching of ${this.type}`, matchingType: 'unmatch' })
+    }
   }
 
 }
 </script>
 
 <style>
-  .seeEvents .v-btn__content, .unmatchBtn {
+  .seeEvents .v-btn__content, .unmatchBtn > .v-icon {
     font-size: 12px !important;
   }
 

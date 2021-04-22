@@ -15,11 +15,10 @@
       </v-col>
     </v-row>
     <confirm-dialog
-      :title="`Confirm Matching of ${type}`"
       :type="type"
       :matching="true"
-      @confirm="match"
-      @close="cancelMatch"
+      @confirm="confirm"
+      @close="cancel"
     ></confirm-dialog>
   </v-container>
 </template>
@@ -39,19 +38,20 @@ export default {
     ConfirmDialog: () => import('../../component/ConfirmDialog')
   },
   computed: {
-    ...mapState('masterlistMatching', ['matchingFilters'])
+    ...mapState('masterlistMatching', ['matchingFilters', 'unmatchingData'])
   },
   methods: {
-    ...mapMutations('masterlistMatching', { setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA', setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setMatchId: 'SET_MATCH_ID', }),
-    ...mapActions('masterlistMatching', ['matchLeague', 'matchEvent']),
+    ...mapMutations('masterlistMatching', { setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA', setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setMatchId: 'SET_MATCH_ID', setUnmatchingData: 'SET_UNMATCHING_DATA'}),
+    ...mapActions('masterlistMatching', ['matchLeague', 'matchEvent', 'unmatchLeague']),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG")
     },
-    cancelMatch() {
+    cancel() {
       if(this.type=='events') {
         this.setMatchId(null)
         this.setPrimaryProviderId(null)
       }
+      this.setUnmatchingData(null)
     },
     async match() {
       bus.$emit("SHOW_SNACKBAR", {
@@ -71,6 +71,28 @@ export default {
         color: "success",
         text: 'Matched data succesfully!'
       });
+    },
+    async unmatch() {
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: 'Unmatching data...'
+      });
+      if(this.type=='leagues') {
+        await this.unmatchLeague()
+      } 
+      this.setUnmatchingData(null)
+      this.closeDialog()      
+      bus.$emit("SHOW_SNACKBAR", {
+        color: "success",
+        text: 'Unmatched data succesfully!'
+      });
+    },
+    confirm() {
+      if(this.unmatchingData) {
+        this.unmatch()
+      } else {
+        this.match()
+      }
     }
   }
 }

@@ -198,7 +198,7 @@ export default {
       }
     },
     confirmMatching() {
-      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider })
+      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Matching of ${this.type}`, matchingType: 'match' })
     }
   }
 
