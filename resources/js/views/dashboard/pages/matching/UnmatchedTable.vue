@@ -133,9 +133,12 @@ export default {
     },
     unmatchedData: {
       deep: true,
-      handler() {
+      handler(value) {
         if(this.type=='events') {
           this.eventId = null
+        }
+        if(value.length == 0) {
+          this.options.page = 1
         }
       }
     },
