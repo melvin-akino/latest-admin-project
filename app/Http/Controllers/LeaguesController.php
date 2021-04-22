@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{MasterLeague, League, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\RawListRequest;
+use App\Http\Requests\{RawListRequest, LeagueRequest};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 class LeaguesController extends Controller
@@ -111,7 +111,7 @@ class LeaguesController extends Controller
     * 
     * @return json
     */
-    public function postUnmatchLeague(Request $request)
+    public function postUnmatchLeague(LeagueRequest $request)
     {
         return MatchingFacade::unmatchSecondaryLeague($request);
     }

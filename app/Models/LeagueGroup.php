@@ -39,4 +39,9 @@ class LeagueGroup extends Model
     {
         return $this->belongsTo(MasterLeague::class, 'id', 'master_league_id');
     }
+
+    public static function checkLeagueIfmatched($leagueId)
+    {
+        return self::where('league_id', $leagueId)->count();
+    }
 }

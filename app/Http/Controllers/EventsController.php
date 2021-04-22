@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\RawListRequest;
+use App\Http\Requests\{RawListRequest, EventGroupRequest};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -149,7 +149,7 @@ class EventsController extends Controller
     * 
     * @return json
     */
-    public function postUnmatchEvent(Request $request)
+    public function postUnmatchEvent(EventGroupRequest $request)
     {
         return MatchingFacade::unmatchSecondaryEvent($request);
     }
