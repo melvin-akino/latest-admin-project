@@ -64,8 +64,8 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::post('/match', 'EventGroupsController@match')->name('events-match.api');
         Route::post('/unmatch', 'EventsController@postUnmatchEvent')->name('unmatch-events.api');
         Route::get('/unmatched/league/{leagueId}', 'EventsController@getUnmatchedEventsByLeague')->name('unmatched-league-events.api');
-        Route::get('/unmatched/master-league/{masterLeagueId}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
-        Route::get('/matched/league/{leagueId}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
+        Route::get('/unmatched/master-league/{masterLeagueId?}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
+        Route::get('/matched/league/{leagueId?}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
         Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
     });
 

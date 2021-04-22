@@ -43,7 +43,7 @@ class Event extends Model
      * 
      * @return object
      */
-    public static function getEvents($leagueIds, $providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc', $gameSchedule = null)
+    public static function getEvents($leagueIds, $providerId, bool $grouped = true, $searchKey = '', string $sortOrder = 'asc', $gameSchedule = null)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
