@@ -43,7 +43,7 @@ class Event extends Model
      * 
      * @return object
      */
-    public static function getEvents($leagueIds, $providerId, bool $grouped = true, $searchKey = '', string $sortOrder = 'asc')
+    public static function getEvents($leagueIds, $providerId, bool $grouped = true, string $searchKey = '', string $sortOrder = 'asc', $gameSchedule = null)
     {
         $where = $grouped ? "whereIn" : "whereNotIn";
 
@@ -62,6 +62,9 @@ class Event extends Model
             })
             ->when($providerId, function ($query) use ($providerId) {
                 $query->where('e.provider_id', $providerId);
+            })
+            ->when($gameSchedule, function ($query) use ($gameSchedule) {
+                $query->whereIn('e.game_schedule', $gameSchedule);
             })
             ->where('l.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')

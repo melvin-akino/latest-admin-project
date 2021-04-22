@@ -58,10 +58,11 @@ class EventsController extends Controller
         $limit = 10;
         $sortOrder = 'asc';
 
-        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
-        $page      = $request->has('page') ? $request->page : 1;
-        $limit     = $request->has('limit') ? $request->limit : 10;
-        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $searchKey    = $request->has('searchKey') ? $request->searchKey : '';
+        $page         = $request->has('page') ? $request->page : 1;
+        $limit        = $request->has('limit') ? $request->limit : 10;
+        $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
 
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
         $leagueIds = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
@@ -70,7 +71,7 @@ class EventsController extends Controller
         $total  = 0;
 
         if(!empty($leagueIds)) {
-            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder)->offset(($page - 1) * $limit)->limit($limit)->get();
+            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder, $gameSchedule)->offset(($page - 1) * $limit)->limit($limit)->get();
             $total  = $events->count();
         }
 
@@ -97,12 +98,13 @@ class EventsController extends Controller
         $sortOrder = 'asc';
         $paginated = false;
 
-        $page      = $request->has('page') ? $request->page : 1;
-        $limit     = $request->has('limit') ? $request->limit : 10;
-        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
-        $paginated = $request->has('paginated') ? $request->paginated : false;
+        $page         = $request->has('page') ? $request->page : 1;
+        $limit        = $request->has('limit') ? $request->limit : 10;
+        $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $paginated    = $request->has('paginated') ? $request->paginated : false;
+        $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
 
-        $events = Event::getEvents([$leagueId], null, true, '', $sortOrder);
+        $events = Event::getEvents([$leagueId], null, true, '', $sortOrder, $gameSchedule);
 
         return response()->json([
             'status'      => true,
