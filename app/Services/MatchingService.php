@@ -447,7 +447,6 @@ class MatchingService
                 Log::info('Matching: There are no more other teams to automatch.');
                 return 2;
             }
-            DB::commit(); 
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
@@ -507,9 +506,10 @@ class MatchingService
 
     public static function unmatchSecondaryLeague(Request $request) 
     {
-        DB::beginTransaction();
         try
         {
+            DB::beginTransaction();
+            
             $leagueInfo = League::getLeagueInfo($request->league_id, $request->provider_id, $request->sport_id);
             
             $matching = new Matching;
