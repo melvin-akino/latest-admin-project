@@ -18,11 +18,6 @@ class LeaguesController extends Controller
      */
     public function getUnmatchedLeagues(Request $request, $providerId = null)
     {
-        $searchKey = '';
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-
         $searchKey = $request->has('searchKey') ? $request->searchKey : '';
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
