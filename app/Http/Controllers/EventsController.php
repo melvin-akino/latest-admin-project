@@ -103,7 +103,7 @@ class EventsController extends Controller
         $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
         $paginated    = $request->has('paginated') ? $request->paginated : false;
         $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
-        $leagueId     = $leagueId ? [$leagueId] : null;
+        $leagueId     = $leagueId ? [$leagueId] : [];
 
         $events = Event::getEvents($leagueId, null, true, '', $sortOrder, $gameSchedule);
 
