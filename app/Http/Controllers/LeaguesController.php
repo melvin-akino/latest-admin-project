@@ -7,6 +7,8 @@ use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\{RawListRequest, LeagueRequest};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Exception;
+
 class LeaguesController extends Controller
 {
     /**
@@ -137,8 +139,6 @@ class LeaguesController extends Controller
             ], 200);
 
         } catch (Exception $e) {
-            DB::rollback();
-            
             return response()->json([
                 'status'      => false,
                 'status_code' => 500,
