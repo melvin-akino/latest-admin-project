@@ -27,7 +27,6 @@
           hide-details
           dense
           class="subtitle-1 unmatchedSearch"
-          @keyup="search"
         ></v-text-field>
       </div>
     </template>
@@ -53,6 +52,7 @@
             <p>league: {{item.league_name}}</p>
             <p>home: {{item.team_home_name}}</p>
             <p>away: {{item.team_away_name}}</p>
+            <p>game schedule: {{item.game_schedule}}</p>
             <p>ref schedule: {{item.ref_schedule}}</p>
           </div>
         </td>
@@ -66,6 +66,7 @@
               <p>event id: {{event.event_identifier}}</p>
               <p>home: {{event.team_home_name}}</p>
               <p>away: {{event.team_away_name}}</p>
+              <p>game schedule: {{event.game_schedule}}</p>
               <p>ref schedule: {{event.ref_schedule}}</p>
             </div>
           </div>
@@ -122,14 +123,18 @@ export default {
       handler(value) {
         let params = {
           page: value.page,
-          limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+          limit: value.itemsPerPage != -1 ? value.itemsPerPage : this.totalUnmatchedData,
           sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
-          searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
+          searchKey: value.searchKey
         }
         this.setTableParams({ type: 'unmatchedDataParams', data: params })
         this.getUnmatchedData()
         this.leagueId = null
       }
+    },
+    searchKey(value) {
+      this.$set(this.options, 'searchKey', value)
+      this.options.page = 1
     },
     unmatchedData: {
       deep: true,
@@ -203,14 +208,6 @@ export default {
     },
     confirmMatching() {
       bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Matching of ${this.type}`, matchingType: 'match' })
-    },
-    search() {
-      if(this.searchKey) {
-        this.$set(this.options, 'searchKey', this.searchKey)
-      } else {
-        this.$delete(this.options, 'searchKey')
-      }
-      this.options.page = 1
     }
   }
 }

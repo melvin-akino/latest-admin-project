@@ -60,4 +60,15 @@ class MasterLeague extends Model
 
         return DB::select($sql);
     }
+
+    public static function getMasterLeaguesForUnmatching($providerId, $searchKey = '', string $sortOrder = 'asc') 
+    {
+        return self::join('league_groups as lg', 'master_leagues.id', 'lg.master_league_id')
+                  ->join('leagues as l', 'l.id', 'lg.league_id')
+                  ->where('l.provider_id', $providerId)
+                  ->where(DB::raw('COALESCE(master_leagues.name, l.name)'), 'ILIKE', '%'.$searchKey.'%')
+                  ->select('master_leagues.id', DB::raw('COALESCE(master_leagues.name, l.name) as master_league_name'))
+                  ->orderBy('is_priority', 'desc')
+                  ->orderBy('master_leagues.id', $sortOrder);
+    }
 }

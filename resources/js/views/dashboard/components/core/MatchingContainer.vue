@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     ...mapMutations('masterlistMatching', { setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA', setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setMatchId: 'SET_MATCH_ID', setUnmatchingData: 'SET_UNMATCHING_DATA'}),
-    ...mapActions('masterlistMatching', ['matchLeague', 'matchEvent', 'unmatchLeague']),
+    ...mapActions('masterlistMatching', ['matchLeague', 'matchEvent', 'unmatchLeague', 'unmatchEvent']),
     closeDialog() {
       bus.$emit("CLOSE_DIALOG")
     },
@@ -54,38 +54,54 @@ export default {
       this.setUnmatchingData(null)
     },
     async match() {
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Matching data...'
-      });
-      if(this.type=='leagues') {
-        await this.matchLeague()
-        this.setPrimaryProviderData([])
-      } else {
-        await this.matchEvent()
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: 'Matching data...'
+        });
+        if(this.type=='leagues') {
+          await this.matchLeague()
+          this.setPrimaryProviderData([])
+        } else {
+          await this.matchEvent()
+        }
+        this.setPrimaryProviderId(null)
+        this.setMatchId(null)
+        this.closeDialog()      
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: 'Matched data succesfully!'
+        });
+      } catch(err) {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.message
+        });
       }
-      this.setPrimaryProviderId(null)
-      this.setMatchId(null)
-      this.closeDialog()      
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Matched data succesfully!'
-      });
     },
     async unmatch() {
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Unmatching data...'
-      });
-      if(this.type=='leagues') {
-        await this.unmatchLeague()
-      } 
-      this.setUnmatchingData(null)
-      this.closeDialog()      
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "success",
-        text: 'Unmatched data succesfully!'
-      });
+      try {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: 'Unmatching data...'
+        });
+        if(this.type=='leagues') {
+          await this.unmatchLeague()
+        } else {
+          await this.unmatchEvent()
+        }
+        this.setUnmatchingData(null)
+        this.closeDialog()      
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "success",
+          text: 'Unmatched data succesfully!'
+        });
+      } catch(err) {
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.hasOwnProperty('errors') ? err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.message
+        });
+      }
     },
     confirm() {
       if(this.unmatchingData) {

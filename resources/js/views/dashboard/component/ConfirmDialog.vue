@@ -33,6 +33,20 @@
             <p>{{primaryProvider.provider}}: <span>{{primaryProvider.name}}</span></p>
             <p>{{unmatch.provider}}: <span>{{unmatch.name}}</span></p>
           </div>
+          <div v-else>
+            <div class="mx-2">
+              <p><span>{{primaryProvider.provider}}</span></p>
+              <p>{{primaryProvider.league_name}}</p>
+              <p>{{primaryProvider.ref_schedule}}</p>
+              <p>{{primaryProvider.team_home_name}} vs {{primaryProvider.team_away_name}}</p>
+            </div>
+            <div class="mx-2">
+              <p><span>{{unmatch.provider}}</span></p>
+              <p>{{unmatch.league_name}}</p>
+              <p>{{unmatch.ref_schedule}}</p>
+              <p>{{unmatch.team_home_name}} vs {{unmatch.team_away_name}}</p>
+            </div>
+          </div>
         </div>
       </v-card-text>
       <v-card-text v-else>

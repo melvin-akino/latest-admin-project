@@ -68,6 +68,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/unmatched/master-league/{masterLeagueId?}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
         Route::get('/matched/league/{leagueId?}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
         Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
+        Route::get('/matched', 'EventsController@getMatchedEvents')->name('matched-events.api');
     });
 
     //Routes to get all currencies

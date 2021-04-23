@@ -56,7 +56,7 @@ class Event extends Model
                 $query->join('league_groups as lg', 'lg.league_id', 'l.id')
                     ->join('master_leagues as ml', 'ml.id', 'lg.master_league_id');
             })
-            ->select(['e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'e.event_identifier', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule'])
+            ->select(['e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'e.event_identifier', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule', 'e.game_schedule'])
             ->{$where}('e.id', function ($q) {
                 $q->select('event_id')
                     ->from('event_groups');
@@ -76,6 +76,21 @@ class Event extends Model
                 $query->orderBy('ml.is_priority', 'desc');
             })
             ->orderBy('e.ref_schedule', $sortOrder);
+    }
+
+    public static function getMatchedEventsByMasterLeagueId($masterLeagueId)
+    {
+        return DB::table('events as e')
+            ->join('event_groups as eg', 'e.id', 'eg.event_id')
+            ->join('providers as p', 'p.id', 'e.provider_id')
+            ->join('leagues as l', 'l.id', 'e.league_id')
+            ->join('league_groups as lg', 'l.id', 'lg.league_id')
+            ->join('teams as th', 'th.id', 'e.team_home_id')
+            ->join('teams as ta', 'ta.id', 'e.team_away_id')
+            ->where('lg.master_league_id', $masterLeagueId)
+            ->select('e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule')
+            ->orderBy('p.id', 'asc')
+            ->get();
     }
 
     public static function getGroupVerifiedUnmatchedEvent($eventId)

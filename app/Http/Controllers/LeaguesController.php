@@ -50,15 +50,13 @@ class LeaguesController extends Controller
 
     public function getMatchedLeagues(Request $request)
     {
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-        
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
         $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 
-        $masterLeagues = MasterLeague::orderBy('is_priority', 'desc')->orderBy('id', $sortOrder);
+        $masterLeagues = MasterLeague::getMasterLeaguesForUnmatching($providerId, $searchKey, $sortOrder);
         $total = $masterLeagues->count();
         $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
 
