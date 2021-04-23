@@ -18,6 +18,7 @@ class AutoMatching extends Command
 
     public function handle()
     {
+        $counter = 0;
         $automatchPrimaryLeaguesCount=$automatchPrimaryTeamsCount=$automatchPrimaryEventsCount=0;
         $unmatchedLeaguesCount=$unmatchedTeamsCount=$unmatchedEventsCount=0;
         $automatchSecondaryLeaguesCount=$automatchSecondaryTeamsCount=$automatchSecondaryEventsCount=0;
@@ -97,6 +98,12 @@ class AutoMatching extends Command
                 $automatchSecondaryEventsCount--;
             }
             usleep(500000);
+
+            $counter++;
+
+            if ($counter % 100 == 0) {
+                die("Auto matching service will terminate");
+            }
         }
     }
 }
