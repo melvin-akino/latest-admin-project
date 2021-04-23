@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC};
+use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC, MasterLeague};
 use App\Facades\{RawListingFacade, MatchingFacade};
 use App\Http\Requests\{RawListRequest, EventUnmatchRequest};
 use Illuminate\Http\Request;
@@ -123,6 +123,37 @@ class EventsController extends Controller
             'total'       => $events->count(),
             'pageNum'     => $page,
             'pageData'    => $events->offset(($page - 1) * $limit)->limit($limit)->get()
+        ]);
+    }
+
+    public function getMatchedEvents(Request $request)
+    {
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+
+        $masterLeagues = MasterLeague::getMasterLeaguesForUnmatching($providerId, $searchKey, $sortOrder);
+        $total = $masterLeagues->count();
+        $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
+
+        $result = [];
+
+        foreach($pageData as $data) {
+            $result[] = [
+                'master_league_id' => $data->id,
+                'master_league_name' => $data->master_league_name,
+                'events' => Event::getMatchedEventsByMasterLeagueId($data->id)->toArray()
+            ];
+        }
+
+        return response()->json([
+            'status'      => true,
+            'status_code' => 200,
+            'total'       => $total,
+            'pageNum'     => $page,
+            'pageData'    => $result
         ]);
     }
 

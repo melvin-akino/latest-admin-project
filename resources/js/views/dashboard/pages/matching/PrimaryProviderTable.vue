@@ -43,6 +43,7 @@
               <p>event id: {{item.event_identifier}}</p>
               <p>home: {{item.team_home_name}}</p>
               <p>away: {{item.team_away_name}}</p>
+              <p>game schedule: {{item.game_schedule}}</p>
               <p>ref schedule: {{item.ref_schedule}}</p>
             </div>
           </td>
@@ -62,13 +63,14 @@
       </td>
     </template>
     <template v-slot:item="{ headers, item, select, isSelected }"  v-if="type=='events'">
-      <tr slot="activator" :class="{ 'selected' : eventId == item.id, 'match' : eventId == item.id }" @click="select(!isSelected)">
+      <tr :class="{ 'selected' : eventId == item.id, 'match' : eventId == item.id }" @click="select(!isSelected)">
         <td :colspan="headers.length">
           <div class="px-4 py-2 event">
             <p>event id: {{item.event_identifier}}</p>
             <p>league: {{item.league_name}}</p>
             <p>home: {{item.team_home_name}}</p>
             <p>away: {{item.team_away_name}}</p>
+            <p>game schedule: {{item.game_schedule}}</p>
             <p>ref schedule: {{item.ref_schedule}}</p>
           </div>
         </td>
@@ -136,7 +138,7 @@ export default {
         if(this.type=='events') {    
           let params = {
             page: value.page,
-            limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+            limit: value.itemsPerPage != -1 ? value.itemsPerPage : this.totalPrimaryProviderData,
             sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
             paginated: true
           }      

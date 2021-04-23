@@ -111,16 +111,23 @@ export default {
 
         if(!value.league) {
           this.clearLeagueFilter()
+        } else {
+          this.filters.league = true
         }
 
         if(!value.schedule) {
           this.clearScheduleFilter()
+        }
+
+        if(this.$route.query.hasOwnProperty('masterLeagueId') && this.$route.query.hasOwnProperty('leagueId')) {
+          this.$router.replace({ query: {} })
         }
       }
     }
   },
   mounted() {
     this.loadFilters()
+    this.initialSelectedLeague()
   },
   methods: {
     ...mapMutations('masterlistMatching', { setFilter: 'SET_FILTER' }),
@@ -134,6 +141,18 @@ export default {
           this.setFilter({ type: this.type, filter: key, data })
         }
       })
+    },
+    initialSelectedLeague() {
+      if(this.$route.query.hasOwnProperty('masterLeagueId') && this.$route.query.hasOwnProperty('leagueId')) {
+        let { masterLeagueId, leagueId } = this.$route.query
+        this.filters.leagues = true
+        Cookies.set('league', true)
+        this.filters.leagueId = Number(leagueId)
+        this.filters.masterLeagueId = Number(masterLeagueId)
+        this.setFilter({ type: this.type, filter: 'league', data: true })
+        this.setFilter({ type: this.type, filter: 'leagueId', data: Number(leagueId) })
+        this.setFilter({ type: this.type, filter: 'masterLeagueId', data: Number(masterLeagueId) })
+      }
     },
     clearLeagueFilter() {
       this.filters.leagueId = null

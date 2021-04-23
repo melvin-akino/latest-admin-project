@@ -231,6 +231,25 @@ const actions = {
       })
     }
   },
+  getMatchedEvents({commit, dispatch, state}) {
+    let params = state.matchedDataParams
+    axios.get('events/matched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_MATCHED_DATA', response.data.pageData)
+      commit('SET_TOTAL_MATCHED_DATA', response.data.total)
+      commit('SET_IS_LOADING_MATCHED_DATA', false)
+    })
+    .catch(err => {
+      commit('SET_MATCHED_DATA', [])
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
+    })
+  },
   matchLeague({dispatch, state}) {
     return new Promise((resolve, reject) => {
       let payload = {
@@ -259,7 +278,7 @@ const actions = {
       .then(() => {
         dispatch('getUnmatchedEventsByMasterLeague')
         dispatch('getPrimaryProviderEventsByLeague', { leagueId: state.matchingFilters.events.leagueId, type: 'events' })
-        dispatch('getMatchedLeagues')
+        dispatch('getMatchedEvents')
         resolve()
       })
       .catch(err => {
@@ -279,6 +298,26 @@ const actions = {
       .then(() => {
         dispatch('getUnmatchedLeagues')
         dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  unmatchEvent({dispatch, state}) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        event_id: state.unmatchingData.data_id,
+        provider_id: state.unmatchingData.provider_id,
+        sport_id: state.unmatchingData.sport_id
+      }
+      axios.post('events/unmatch', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedEventsByMasterLeague')
+        dispatch('getPrimaryProviderEventsByLeague', { leagueId: state.matchingFilters.events.leagueId, type: 'events' })
+        dispatch('getMatchedEvents')
         resolve()
       })
       .catch(err => {
