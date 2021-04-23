@@ -287,6 +287,25 @@ const actions = {
       })
     })
   },
+  setMasterLeaguePriority({dispatch}, params) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        master_league_id: params.masterLeagueId,
+        is_priority: params.isPriority
+      }
+      axios.post('leagues/toggle-priority', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedLeagues')
+        dispatch('getPrimaryProviderMatchedLeagues')
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  }
 }
 
 export default {

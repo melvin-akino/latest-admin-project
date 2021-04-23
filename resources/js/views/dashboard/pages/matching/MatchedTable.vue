@@ -15,12 +15,22 @@
       </div>
     </template>
     <template v-slot:[`item.data`]="{ item }">
-      <div class="ma-2" v-for="league in item.leagues" :key="league.id">
-        <span class="badge unmatchBtn matched mr-4" :class="[`${league.provider.toLowerCase()}`]"  @click="confirmUnmatch(item.leagues)">
-          {{league.provider}} <v-icon v-if="nonPrimaryProviders.includes(league.provider)" color="#ffffff" small>mdi-close</v-icon>
-        </span> 
-        {{league.name}} 
-      </div>
+      <v-row>
+        <v-switch
+          :input-value="item.is_priority"
+          @change="setMasterLeaguePriority({ masterLeagueId: item.master_league_id, isPriority: $event })"
+          class="ml-2"
+          color="primary"
+        />
+        <div class="ma-2">
+          <div class="ma-2" v-for="league in item.leagues" :key="league.id">
+            <span class="badge unmatchBtn matched mr-4" :class="[`${league.provider.toLowerCase()}`]"  @click="confirmUnmatch(item.leagues)">
+              {{league.provider}} <v-icon v-if="nonPrimaryProviders.includes(league.provider)" color="#ffffff" small>mdi-close</v-icon>
+            </span> 
+            {{league.name}}
+          </div>
+        </div>
+      </v-row>
     </template>
     <!-- <template v-slot:[`item.data-table-expand`]="{ expand, isExpanded }">
       <v-btn @click="expand(!isExpanded)" small dark class="seeEvents success text-capitalize">See Events</v-btn>
@@ -73,7 +83,7 @@ export default {
   },
   methods: {
     ...mapMutations('masterlistMatching', { setTableParams: 'SET_TABLE_PARAMS', setUnmatchingData: 'SET_UNMATCHING_DATA' }),
-    ...mapActions('masterlistMatching', ['getMatchedLeagues']),
+    ...mapActions('masterlistMatching', ['getMatchedLeagues', 'setMasterLeaguePriority']),
     confirmUnmatch(leagues) {
       this.primaryProvider = leagues.filter(league => !this.nonPrimaryProviders.includes(league.provider))[0]
       this.secondaryProvider = leagues.filter(league => this.nonPrimaryProviders.includes(league.provider))[0]
