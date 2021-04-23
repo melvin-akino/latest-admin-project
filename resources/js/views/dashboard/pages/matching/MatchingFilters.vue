@@ -36,6 +36,7 @@
             label="Select League"
             outlined
             dense
+            clearable
             background-color="#fff"
             class="filterInput leagueDropdown"
             :disabled="!filters.league"
@@ -102,23 +103,20 @@ export default {
     ...mapState('masterlistMatching', ['primaryProviderLeagues', 'matchingFilters'])
   },
   watch: {
-    primaryProviderLeagues: {
+    'matchingFilters.events': {
       deep: true,
       handler(value) {
-        if(this.filters.league && value.length != 0) {
-          let initialSelected = value[0]
-          this.filters.leagueId = initialSelected.id
-          this.filters.masterLeagueId = initialSelected.master_league_id
-          this.setFilter({ type: this.type, filter: 'leagueId', data: this.filters.leagueId })
-          this.setFilter({ type: this.type, filter: 'masterLeagueId', data: this.filters.masterLeagueId })
+        this.getUnmatchedEventsByMasterLeague()
+        this.getPrimaryProviderEventsByLeague({ leagueId: this.matchingFilters.events.leagueId, type: this.type })
+
+        if(!value.league) {
+          this.clearLeagueFilter()
+        }
+
+        if(!value.schedule) {
+          this.clearScheduleFilter()
         }
       }
-    },
-    'matchingFilters.events.masterLeagueId'() {
-      this.getUnmatchedEventsByMasterLeague()
-    },
-    'matchingFilters.events.leagueId'(value) {
-      this.getPrimaryProviderEventsByLeague({ paginated: true })
     }
   },
   mounted() {
@@ -126,7 +124,7 @@ export default {
   },
   methods: {
     ...mapMutations('masterlistMatching', { setFilter: 'SET_FILTER' }),
-    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues', 'getUnmatchedEventsByMasterLeague', 'getPrimaryProviderEventsByLeague']),
+    ...mapActions('masterlistMatching', ['getUnmatchedEventsByMasterLeague', 'getPrimaryProviderEventsByLeague']),
     loadFilters() {
       Object.keys(this.matchingFilters[this.type]).map(key => {
         let exemptedKeys = ['leagueId', 'masterLeagueId']
@@ -136,23 +134,32 @@ export default {
           this.setFilter({ type: this.type, filter: key, data })
         }
       })
-
-      if(this.type == 'events') {
-        this.getPrimaryProviderMatchedLeagues()
-      }
+    },
+    clearLeagueFilter() {
+      this.filters.leagueId = null
+      this.filters.masterLeagueId = null
+      this.setFilter({ type: this.type, filter: 'leagueId', data: null })
+      this.setFilter({ type: this.type, filter: 'masterLeagueId', data: null })
+    },
+    clearScheduleFilter() {
+      this.filters.inplay = false
+      this.filters.today = false
+      this.filters.early = false
+      this.setFilter({ type: this.type, filter: 'inplay', data: false })
+      this.setFilter({ type: this.type, filter: 'today', data: false })
+      this.setFilter({ type: this.type, filter: 'early', data: false })
     },
     updateFilter(filter, data) {
       this.setFilter({ type: this.type, filter, data })
       Cookies.set(filter, data, { expires: 3650 })
     },
     getEvents() {
-      if(this.filters.league) {
+      if(this.filters.league && this.filters.leagueId) {
         this.filters.masterLeagueId = this.primaryProviderLeagues.filter(league => league.id == this.filters.leagueId)[0].master_league_id
         this.setFilter({ type: this.type, filter: 'leagueId', data: this.filters.leagueId })
         this.setFilter({ type: this.type, filter: 'masterLeagueId', data: this.filters.masterLeagueId })
       } else {
-        this.filters.leagueId = null
-        this.filters.masterLeagueId = null
+        this.clearLeagueFilter()
       }
     }
   }

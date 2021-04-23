@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\RawListRequest;
+use App\Http\Requests\{RawListRequest, EventUnmatchRequest};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -47,10 +47,11 @@ class EventsController extends Controller
      */
     public function getUnmatchedEventsByMasterLeague(Request $request, $masterLeagueId = null)
     {
-        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
-        $page      = $request->has('page') ? $request->page : 1;
-        $limit     = $request->has('limit') ? $request->limit : 10;
-        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $searchKey    = $request->has('searchKey') ? $request->searchKey : '';
+        $page         = $request->has('page') ? $request->page : 1;
+        $limit        = $request->has('limit') ? $request->limit : 10;
+        $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
 
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
         $leagueIds = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
@@ -59,7 +60,7 @@ class EventsController extends Controller
         $total  = 0;
 
         if(!empty($leagueIds)) {
-            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder)->offset(($page - 1) * $limit)->limit($limit)->get();
+            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder, $gameSchedule)->offset(($page - 1) * $limit)->limit($limit)->get();
             $total  = $events->count();
         }
 
@@ -80,14 +81,17 @@ class EventsController extends Controller
      * 
      * @return json
      */
+
     public function getMatchedEventsByLeague(Request $request, $leagueId = null) 
     {
-        $page      = $request->has('page') ? $request->page : 1;
-        $limit     = $request->has('limit') ? $request->limit : 10;
-        $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
-        $paginated = $request->has('paginated') ? $request->paginated : false;
+        $page         = $request->has('page') ? $request->page : 1;
+        $limit        = $request->has('limit') ? $request->limit : 10;
+        $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
+        $paginated    = $request->has('paginated') ? $request->paginated : false;
+        $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
+        $leagueId     = $leagueId ? [$leagueId] : [];
 
-        $events = Event::getEvents([$leagueId], null, true, '', $sortOrder);
+        $events = Event::getEvents($leagueId, null, true, '', $sortOrder, $gameSchedule);
 
         return response()->json([
             'status'      => true,
@@ -132,7 +136,7 @@ class EventsController extends Controller
     * 
     * @return json
     */
-    public function postUnmatchEvent(Request $request)
+    public function postUnmatchEvent(EventUnmatchRequest $request)
     {
         return MatchingFacade::unmatchSecondaryEvent($request);
     }

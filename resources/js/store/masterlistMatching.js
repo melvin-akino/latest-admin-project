@@ -29,8 +29,23 @@ const state = {
   isLoadingMatchedData: false,
   totalMatchedData: 0,
   primaryProviderId: null,
-  matchId: null
+  matchId: null,
+  unmatchingData: null,
+  unmatchedDataParams: {},
+  primaryProviderDataParams: {},
+  matchedDataParams: {}
 } 
+
+const getters = {
+  gameScheduleParams(state) {
+    let gameSchedule = []
+    let { inplay, today, early } = state.matchingFilters.events
+    if(inplay) gameSchedule.push('inplay')
+    if(today) gameSchedule.push('today')
+    if(early) gameSchedule.push('early')
+    return gameSchedule
+  }
+}
 
 const mutations = {
   SET_UNMATCHED_DATA: (state, data) => {
@@ -85,11 +100,18 @@ const mutations = {
   },
   SET_MATCH_ID: (state, id) => {
     state.matchId = id
+  },
+  SET_TABLE_PARAMS: (state, data) => {
+    state[data.type] = data.data
+  },
+  SET_UNMATCHING_DATA: (state, data) => {
+    state.unmatchingData = data
   }
 }
 
 const actions = {
-  getUnmatchedLeagues({commit, dispatch}, params) {
+  getUnmatchedLeagues({commit, dispatch, state}) {
+    let params = state.unmatchedDataParams
     axios.get('leagues/unmatched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_UNMATCHED_DATA', response.data.pageData)
@@ -107,7 +129,8 @@ const actions = {
       }
     })
   },
-  getMatchedLeagues({commit, dispatch}, params) {
+  getMatchedLeagues({commit, dispatch, state}) {
+    let params = state.matchedDataParams
     axios.get('leagues/matched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
     .then(response => {
       commit('SET_MATCHED_DATA', response.data.pageData)
@@ -159,31 +182,38 @@ const actions = {
       })
     }
   },
-  getUnmatchedEventsByMasterLeague({commit, dispatch, state}, params) {
+  getUnmatchedEventsByMasterLeague({commit, dispatch, state, getters}) {
     let masterLeagueId = state.matchingFilters.events.masterLeagueId
-    if(masterLeagueId) {
-      axios.get(`events/unmatched/master-league/${masterLeagueId}`, { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        commit('SET_UNMATCHED_DATA', response.data.pageData)
-        commit('SET_TOTAL_UNMATCHED_DATA', response.data.total)
-        commit('SET_IS_LOADING_UNMATCHED_DATA', false)
-      })
-      .catch(err => {
-        commit('SET_UNMATCHED_DATA', [])
-        if(!axios.isCancel(err)) {
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-          bus.$emit("SHOW_SNACKBAR", {
-            color: "error",
-            text: err.response.data.message
-          });
-        }
-      })
-    }
+    let params = state.unmatchedDataParams
+    Vue.set(params, 'gameSchedule', getters.gameScheduleParams)
+    let apiUrl = masterLeagueId ? `events/unmatched/master-league/${masterLeagueId}` : `events/unmatched/master-league`
+    axios.get(apiUrl, { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_UNMATCHED_DATA', response.data.pageData)
+      commit('SET_TOTAL_UNMATCHED_DATA', response.data.total)
+      commit('SET_IS_LOADING_UNMATCHED_DATA', false)
+    })
+    .catch(err => {
+      commit('SET_UNMATCHED_DATA', [])
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
+    })
   },
-  getPrimaryProviderEventsByLeague({commit, dispatch, state}, params) {
-    let leagueId = state.matchingFilters.events.leagueId || params.leagueId
-    if(leagueId) {
-      axios.get(`events/matched/league/${leagueId}`, { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
+  getPrimaryProviderEventsByLeague({commit, dispatch, state, getters}, data) {
+    let { leagueId, type } = data
+    let params = state.primaryProviderDataParams
+    let apiUrl = leagueId ? `events/matched/league/${leagueId}` : `events/matched/league`
+    let fetchData = type == 'leagues' && !leagueId ? false : true
+    let paginated = type == 'leagues' ? false : true
+    Vue.set(params, 'gameSchedule', getters.gameScheduleParams)  
+    Vue.set(params, 'paginated', paginated)  
+    if(fetchData) {
+      axios.get(apiUrl, { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         commit('SET_PRIMARY_PROVIDER_DATA', response.data.pageData)
         commit('SET_TOTAL_PRIMARY_PROVIDER_DATA', response.data.total)
@@ -228,7 +258,7 @@ const actions = {
       axios.post('events/match', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(() => {
         dispatch('getUnmatchedEventsByMasterLeague')
-        dispatch('getPrimaryProviderEventsByLeague')
+        dispatch('getPrimaryProviderEventsByLeague', { leagueId: state.matchingFilters.events.leagueId, type: 'events' })
         dispatch('getMatchedLeagues')
         resolve()
       })
@@ -237,9 +267,28 @@ const actions = {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
-  }
+  },
+  unmatchLeague({dispatch, state}) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        league_id: state.unmatchingData.data_id,
+        provider_id: state.unmatchingData.provider_id,
+        sport_id: state.unmatchingData.sport_id
+      }
+      axios.post('leagues/unmatch', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedLeagues')
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
 }
 
 export default {
-  state, mutations, actions, namespaced: true
+  state, getters, mutations, actions, namespaced: true
 }

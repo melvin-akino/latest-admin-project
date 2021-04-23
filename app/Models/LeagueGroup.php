@@ -23,9 +23,11 @@ class LeagueGroup extends Model
         return self::where('league_id', $leagueId)->get();
     }
 
-    public static function getNonPrimaryLeagueIds(int $masterLeagueId, int $primaryProviderId) {
+    public static function getNonPrimaryLeagueIds($masterLeagueId, int $primaryProviderId) {
         return self::join('leagues as l', 'l.id', 'league_groups.league_id')
-            ->where('league_groups.master_league_id', $masterLeagueId)
+            ->when($masterLeagueId, function ($query) use ($masterLeagueId) {
+              $query->where('league_groups.master_league_id', $masterLeagueId);
+            })
             ->where('l.provider_id', '!=', $primaryProviderId)
             ->pluck('l.id');
     }
@@ -38,5 +40,10 @@ class LeagueGroup extends Model
     public function masterLeagues()
     {
         return $this->belongsTo(MasterLeague::class, 'id', 'master_league_id');
+    }
+
+    public static function checkLeagueIfmatched($leagueId)
+    {
+        return self::where('league_id', $leagueId)->count();
     }
 }

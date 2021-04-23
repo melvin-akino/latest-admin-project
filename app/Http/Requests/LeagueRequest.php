@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
-class EventGroupRequest extends FormRequest
+class LeagueRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,17 +25,20 @@ class EventGroupRequest extends FormRequest
      */
     public function rules()
     {
-
-        return [
-            'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
-            'match_event_id'            => 'required|int|check_if_league_and_team_is_matched'
-        ];        
+        $path = $this->path();
+        if ($path == 'api/leagues/unmatch') {
+            return [
+                'league_id'      => 'required|int|check_if_league_is_matched',
+                'provider_id'   => 'required',
+                'sport_id'      => 'required'
+            ];
+        }        
     }
 
     public function messages()
     {
         return [
-            'match_event_id.check_if_league_and_team_is_matched' => 'The supplied :attribute has no valid matched leagues and teams.'
+            'league_id.check_if_league_is_matched' => 'The supplied :attribute has no valid matched leagues.'
         ];
     }
 
