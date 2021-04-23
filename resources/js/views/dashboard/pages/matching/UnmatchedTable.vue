@@ -10,6 +10,9 @@
     single-expand
     :expanded.sync="expanded"
     @item-expanded="getEvents"
+    single-select
+    @item-selected="selectEvent"
+    v-model="selected"
     @pagination="clearSelected"
     :loading="isLoadingUnmatchedData"
     :loading-text="`Loading ${type}`"
@@ -28,7 +31,7 @@
         ></v-text-field>
       </div>
     </template>
-    <template v-slot:item="{ headers, item, expand, isExpanded }">
+    <template v-slot:item="{ headers, item, expand, isExpanded, select, isSelected }">
       <tr class="leagueRow" :class="{ 'selected' : leagueId == item.id }" @click="expand(!isExpanded)" v-if="type=='leagues'">
         <td>
           <div class="leagueData">
@@ -42,7 +45,7 @@
           </v-btn>
         </td>
       </tr>
-      <tr class="eventRow" v-else>
+      <tr class="eventRow" :class="{ 'selected' : eventId == item.id }" v-else @click="select(!isSelected)">
         <td :colspan="headers.length">
           <div class="px-4 py-2 event">
             <p>provider: {{item.provider}}</p>
@@ -68,7 +71,7 @@
           </div>
         </td>
         <td :colspan="headers.length" class="noEventsExpanded" v-else>
-          <div class="px-4 py-2 noEvent">No events available for this league</div>
+          <div class="px-4 py-2">No events available for this league</div>
         </td>
       </tr>
     </template>
@@ -77,6 +80,7 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+import bus from '../../../../eventBus'
 
 export default {
   props: ['type'],
@@ -90,11 +94,27 @@ export default {
       options: {},
       searchKey: '',
       leagueId: null,
-      expanded: []
+      eventId: null,
+      expanded: [],
+      selected: []
     }
   },
   computed: {
-    ...mapState('masterlistMatching', ['unmatchedData', 'isLoadingUnmatchedData', 'totalUnmatchedData'])
+    ...mapState('masterlistMatching', ['unmatchedData', 'isLoadingUnmatchedData', 'totalUnmatchedData', 'primaryProviderLeagues', 'primaryProviderData', 'primaryProviderId', 'matchId']),
+    unmatch() {
+      if(this.matchId) {
+        return this.unmatchedData.filter(data => data.id == this.matchId)[0]
+      }
+    },
+    primaryProvider() {
+      if(this.primaryProviderId) {
+        if(this.type=='leagues') {
+          return this.primaryProviderLeagues.filter(data => data.id == this.primaryProviderId)[0]
+        } else {
+          return this.primaryProviderData.filter(data => data.id == this.primaryProviderId)[0]
+        }
+      }
+    },
   },
   watch: {
     options: {
@@ -106,23 +126,52 @@ export default {
           sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
           searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
         }
-        this.getUnmatchedData(params)
+        this.setTableParams({ type: 'unmatchedDataParams', data: params })
+        this.getUnmatchedData()
         this.leagueId = null
+      }
+    },
+    unmatchedData: {
+      deep: true,
+      handler(value) {
+        if(this.type=='events') {
+          this.eventId = null
+        }
+        if(value.length == 0) {
+          this.options.page = 1
+        }
       }
     },
     leagueId(value) {
       this.setMatchId(value)
+    },
+    eventId(value) {
+      this.setMatchId(value)
+      if(!value) {
+        this.selected = []
+      }
+    },
+    matchId(value) {
+      if(value && this.primaryProviderId && this.type=='events') {
+        this.confirmMatching()
+      } else {
+        if(this.type=='leagues') {
+          this.leagueId = value
+        } else {
+          this.eventId = value
+        }
+      }
     }
   },
   methods: {
-    ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID' }),
+    ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID', setTableParams: 'SET_TABLE_PARAMS' }),
     ...mapActions('masterlistMatching', ['getUnmatchedLeagues', 'getPrimaryProviderMatchedLeagues', 'getUnmatchedEventsByLeague', 'getUnmatchedEventsByMasterLeague']),
-    getUnmatchedData(params) {
+    async getUnmatchedData() {
+      await this.getPrimaryProviderMatchedLeagues()
       if(this.type == 'leagues') {
-        this.getUnmatchedLeagues(params)
-        this.getPrimaryProviderMatchedLeagues()
+        this.getUnmatchedLeagues()
       } else {
-        this.getUnmatchedEventsByMasterLeague(params)
+        this.getUnmatchedEventsByMasterLeague()
       }
     },
     getEvents(data) {
@@ -143,6 +192,17 @@ export default {
           this.removeUnmatchedEventsForLeague(data.id)
         }
       })
+    },
+    selectEvent(data) {
+      let { item, value } = data
+      if(value) {
+        this.eventId = item.id
+      } else {
+        this.eventId = null
+      }
+    },
+    confirmMatching() {
+      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider })
     },
     search() {
       if(this.searchKey) {
@@ -181,10 +241,6 @@ export default {
 
   .leagueRow, .eventRow {
     cursor: pointer;
-  }
-
-  .selected {
-    background-color: #cce2ff;
   }
 
   .noEventsExpanded {

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" width="500" :activator="activator">
+  <v-dialog v-model="dialog" width="500" :activator="activator" @click:outside="cancel">
     <v-card>
       <v-toolbar color="primary" dark height="40px">
         <v-toolbar-title class="text-uppercase subtitle-1"
@@ -12,6 +12,21 @@
       </v-toolbar>
       <v-card-text v-if="message">
         {{message}}
+      </v-card-text>
+      <v-card-text v-else-if="matching">
+        <div class="matchSummary" v-if="unmatch && primaryProvider">
+          <div v-if="type=='leagues'">
+            <p>league id: <span>{{unmatch.id}}</span> >> <span>{{primaryProvider.id}}</span></p>
+            <p>name: <span>{{unmatch.name}}</span> >> <span>{{primaryProvider.name}}</span></p>
+          </div>
+          <div v-else>
+            <p>event_id: <span>{{unmatch.event_identifier}}</span> >> <span>{{primaryProvider.event_identifier}}</span></p>
+            <p>league: <span>{{unmatch.league_name}}</span> >> <span>{{primaryProvider.league_name}}</span></p>
+            <p>home team: <span>{{unmatch.team_home_name}}</span> >> <span>{{primaryProvider.team_home_name}}</span></p>
+            <p>away team: <span>{{unmatch.team_away_name}}</span> >> <span>{{primaryProvider.team_away_name}}</span></p>
+            <p>ref_schedule: <span>{{unmatch.ref_schedule}}</span> >> <span>{{primaryProvider.ref_schedule}}</span></p>
+          </div>
+        </div>
       </v-card-text>
       <v-card-text v-else>
         <slot></slot>
@@ -32,11 +47,19 @@ import bus from '../../../eventBus'
 
 export default {
   name: 'ConfirmDialog',
-  props: ['title', 'message', 'activator'],
+  props: ['title', 'message', 'activator', 'matching', 'type'],
   data: () => ({
-    dialog: false
+    dialog: false,
+    unmatch: null,
+    primaryProvider: null
   }),
   mounted() {
+    bus.$on('OPEN_MATCHING_DIALOG', ({ unmatch, primaryProvider }) => {
+      this.dialog = true
+      this.unmatch = unmatch
+      this.primaryProvider = primaryProvider
+    })
+
     bus.$on('CLOSE_DIALOG', () => {
       this.dialog = false
     })
@@ -44,6 +67,7 @@ export default {
   methods: {
     cancel() {
       this.dialog = false
+      this.$emit('close')
     },
     confirm() {
       this.$emit('confirm')

@@ -177,26 +177,33 @@ class MatchingService
 
             //check if event doesnt exist in event groups
             $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
+            Log::info('Getting all unmatched HG events:');
+            Log::info((array) $unmatchedEvents);
             if ($unmatchedEvents->count() > 0) {
                 foreach ($unmatchedEvents as $unmatchedEvent) {
                     DB::beginTransaction();
                     $leagueGroupData = LeagueGroup::getByLeagueId($unmatchedEvent['league_id']);
                     if ($leagueGroupData->count() == 0) {
+                        Log::info('No Master league for this primary league_id: '. $unmatchedEvent['league_id']);
                         continue;
                     }
 
                     $teamGroupHomeData = TeamGroup::getByTeamId($unmatchedEvent['team_home_id']);
                     if ($teamGroupHomeData->count() == 0) {
+                        Log::info('No Master Home Team for this team_id: ' . $unmatchedEvent['team_home_id']);
                         continue;
                     }
 
                     $teamGroupAwayData = TeamGroup::getByTeamId($unmatchedEvent['team_away_id']);
                     if ($teamGroupAwayData->count() == 0) {
+                        Log::info('No Master Away Team for this team_id: ' . $unmatchedEvent['team_away_id']);
                         continue;
                     }                                       
                     
                     //if not, check if event has similar league, home team, away team and ref sched filtered by hour and currently soft deleted and hasEventGroups
                     $event = Event::getSoftDeletedEvent($unmatchedEvent);
+                    Log::info('Getting softdeleted event with the same info as this event:');
+                    Log::info((array) $event);
                     //if yes, reuse master event 
                     if ($event) {
                         $masterEventId = $event->master_event_id;
@@ -364,6 +371,7 @@ class MatchingService
                             self::removeFromUnmatchedData('league', $league['provider_id'], $league['data_id']);
                             Log::info('Removed from Unmatched: league_id:'.$league['data_id'].' - provider_id:'.$league['provider_id'].' - leaguename:'.$league['name']);
                             DB::commit();
+                            continue 2;
                         }
                         else {
                             //update the is_failed to true here
@@ -417,6 +425,7 @@ class MatchingService
                             self::removeFromUnmatchedData('team', $team['provider_id'], $team['data_id']);
                             Log::info('Removed from Unmatched: team_id:'.$team['data_id'].' - provider_id:'.$team['provider_id'].' - teamname:'.$team['name']);
                             DB::commit();
+                            continue 2;
                         }
                         else {
                             //update the is_failed to true here
@@ -438,7 +447,6 @@ class MatchingService
                 Log::info('Matching: There are no more other teams to automatch.');
                 return 2;
             }
-            DB::commit(); 
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
@@ -498,9 +506,10 @@ class MatchingService
 
     public static function unmatchSecondaryLeague(Request $request) 
     {
-        DB::beginTransaction();
         try
         {
+            DB::beginTransaction();
+            
             $leagueInfo = League::getLeagueInfo($request->league_id, $request->provider_id, $request->sport_id);
             
             $matching = new Matching;

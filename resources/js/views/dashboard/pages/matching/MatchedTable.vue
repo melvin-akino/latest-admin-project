@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   props: ['type'],
@@ -64,11 +64,13 @@ export default {
           limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
           sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
         }
-        this.getMatchedLeagues(params)
+        this.setTableParams({ type: 'matchedDataParams', data: params })
+        this.getMatchedLeagues()
       }
     }
   },
   methods: {
+    ...mapMutations('masterlistMatching', { setTableParams: 'SET_TABLE_PARAMS' }),
     ...mapActions('masterlistMatching', ['getMatchedLeagues'])
   }
 

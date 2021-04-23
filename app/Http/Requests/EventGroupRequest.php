@@ -25,7 +25,6 @@ class EventGroupRequest extends FormRequest
      */
     public function rules()
     {
-
         return [
             'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
             'match_event_id'            => 'required|int|check_if_league_and_team_is_matched'
