@@ -25,21 +25,11 @@ class EventGroupRequest extends FormRequest
      */
     public function rules()
     {
-        $path = $this->path();
-        if ($path == 'api/events/unmatch') {
-            return [
-                'event_id'      => 'required|int|check_if_league_and_team_is_matched',
-                'provider_id'   => 'required',
-                'sport_id'      => 'required'
-            ];
-        }
-        else{
-            return [
-                'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
-                'match_event_id'            => 'required|int|check_if_league_and_team_is_matched'
-            ];
-        }
-        
+
+        return [
+            'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
+            'match_event_id'            => 'required|int|check_if_league_and_team_is_matched'
+        ];        
     }
 
     public function messages()
