@@ -20,12 +20,6 @@ class EventsController extends Controller
      */
     public function getUnmatchedEventsByLeague(Request $request, $leagueId = null)
     {
-        $searchKey = '';
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-        $paginated = false;
-
         $searchKey = $request->has('searchKey') ? $request->searchKey : '';
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
@@ -53,11 +47,6 @@ class EventsController extends Controller
      */
     public function getUnmatchedEventsByMasterLeague(Request $request, $masterLeagueId = null)
     {
-        $searchKey = '';
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-
         $searchKey    = $request->has('searchKey') ? $request->searchKey : '';
         $page         = $request->has('page') ? $request->page : 1;
         $limit        = $request->has('limit') ? $request->limit : 10;
@@ -92,12 +81,9 @@ class EventsController extends Controller
      * 
      * @return json
      */
-    public function getMatchedEventsByLeague(Request $request, $leagueId = null) {
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-        $paginated = false;
 
+    public function getMatchedEventsByLeague(Request $request, $leagueId = null) 
+    {
         $page         = $request->has('page') ? $request->page : 1;
         $limit        = $request->has('limit') ? $request->limit : 10;
         $sortOrder    = $request->has('sortOrder') ? $request->sortOrder : 'asc';
@@ -124,10 +110,8 @@ class EventsController extends Controller
      * 
      * @return json
      */
-    public function getMatchedEventsByProvider(Request $request, $providerId = null) {
-        $page = 1;
-        $limit = 10;
-
+    public function getMatchedEventsByProvider(Request $request, $providerId = null) 
+    {
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
 
