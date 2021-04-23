@@ -44,7 +44,8 @@ class League extends Model
 
         return self::join('providers as p', 'p.id', 'leagues.provider_id')
             ->when($grouped, function ($query) {
-                $query->join('league_groups as lg', 'lg.league_id', 'leagues.id');
+                $query->join('league_groups as lg', 'lg.league_id', 'leagues.id')
+                    ->join('master_leagues as ml', 'ml.id', 'lg.master_league_id');
             })
             ->when(!$grouped, function ($query) use ($providerId) {
                 $query->whereNotIn('leagues.id', function ($q) {
@@ -64,6 +65,9 @@ class League extends Model
             })
             ->where('leagues.name', 'ILIKE', '%'.$searchKey.'%')
             ->select($select)
+            ->when($grouped, function ($query) {
+                $query->orderBy('ml.is_priority', 'desc');
+            })
             ->orderBy('leagues.name', $sortOrder);
     }
 
