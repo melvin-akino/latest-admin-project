@@ -126,15 +126,19 @@ export default {
           sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
           searchKey: value.hasOwnProperty('searchKey') ? value.searchKey : ''
         }
-        this.getUnmatchedData(params)
+        this.setTableParams({ type: 'unmatchedDataParams', data: params })
+        this.getUnmatchedData()
         this.leagueId = null
       }
     },
     unmatchedData: {
       deep: true,
-      handler() {
+      handler(value) {
         if(this.type=='events') {
           this.eventId = null
+        }
+        if(value.length == 0) {
+          this.options.page = 1
         }
       }
     },
@@ -160,14 +164,14 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID' }),
+    ...mapMutations('masterlistMatching', { removeUnmatchedEventsForLeague: 'REMOVE_UNMATCHED_EVENTS_FOR_LEAGUE', setMatchId: 'SET_MATCH_ID', setTableParams: 'SET_TABLE_PARAMS' }),
     ...mapActions('masterlistMatching', ['getUnmatchedLeagues', 'getPrimaryProviderMatchedLeagues', 'getUnmatchedEventsByLeague', 'getUnmatchedEventsByMasterLeague']),
-    getUnmatchedData(params) {
+    async getUnmatchedData() {
+      await this.getPrimaryProviderMatchedLeagues()
       if(this.type == 'leagues') {
-        this.getUnmatchedLeagues(params)
-        this.getPrimaryProviderMatchedLeagues()
+        this.getUnmatchedLeagues()
       } else {
-        this.getUnmatchedEventsByMasterLeague(params)
+        this.getUnmatchedEventsByMasterLeague()
       }
     },
     getEvents(data) {

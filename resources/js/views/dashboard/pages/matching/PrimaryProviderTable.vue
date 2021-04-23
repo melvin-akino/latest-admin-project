@@ -31,7 +31,7 @@
           dense
           clearable
           class="primaryProviderDropdown"
-          @change="getPrimaryProviderEventsByLeague({ leagueId, paginated: false })"
+          @change="getPrimaryProviderEventsByLeague({ leagueId, type })"
         ></v-autocomplete>
       </div> 
     </template>
@@ -102,7 +102,7 @@ export default {
     }
   },  
   computed: {
-    ...mapState('masterlistMatching', ['primaryProviderLeagues', 'primaryProviderData', 'totalPrimaryProviderData', 'isLoadingPrimaryProviderData',  'unmatchedData', 'primaryProviderId', 'matchId']),
+    ...mapState('masterlistMatching', ['primaryProviderLeagues', 'primaryProviderData', 'totalPrimaryProviderData', 'isLoadingPrimaryProviderData',  'unmatchedData', 'primaryProviderId', 'matchId', 'matchingFilters']),
     unmatch() {
       if(this.matchId) {
         return this.unmatchedData.filter(data => data.id == this.matchId)[0]
@@ -133,20 +133,26 @@ export default {
     options: {
       deep: true,
       handler(value) {
-        let params = {
-          page: value.page,
-          limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
-          sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
-          paginated: true
+        if(this.type=='events') {    
+          let params = {
+            page: value.page,
+            limit: value.itemsPerPage != -1 ? value.itemsPerPage : null,
+            sortOrder: value.sortDesc[0] ? 'desc' : 'asc',
+            paginated: true
+          }      
+          this.setTableParams({ type: 'primaryProviderDataParams', data: params })
+          this.getPrimaryProviderData()
         }
-        this.getPrimaryProviderEventsByLeague(params)
       }
     },
     primaryProviderData: {
       deep: true,
-      handler() {
+      handler(value) {
         if(this.type=='events') {
           this.eventId = null
+        }
+        if(value.length == 0) {
+          this.options.page = 1
         }
       }
     },
@@ -175,8 +181,14 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('masterlistMatching', { setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA' }),
-    ...mapActions('masterlistMatching', ['getPrimaryProviderEventsByLeague', 'matchLeague']),
+    ...mapMutations('masterlistMatching', { setPrimaryProviderId: 'SET_PRIMARY_PROVIDER_ID', setPrimaryProviderData: 'SET_PRIMARY_PROVIDER_DATA', setTableParams: 'SET_TABLE_PARAMS' }),
+    ...mapActions('masterlistMatching', ['getPrimaryProviderMatchedLeagues', 'getPrimaryProviderEventsByLeague']),
+    async getPrimaryProviderData() {
+      await this.getPrimaryProviderMatchedLeagues()
+      if(this.type=='events') {
+        this.getPrimaryProviderEventsByLeague({ leagueId: this.matchingFilters.events.leagueId, type: this.type })
+      }
+    },
     selectEvent(data) {
       let { item, value } = data
       if(value) {
