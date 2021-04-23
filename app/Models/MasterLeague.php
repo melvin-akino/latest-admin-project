@@ -15,6 +15,7 @@ class MasterLeague extends Model
     protected $fillable = [
         'sport_id',
         'name',
+        'is_priority'
     ];
 
     protected $hidden = [

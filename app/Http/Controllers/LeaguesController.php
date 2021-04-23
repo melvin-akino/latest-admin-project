@@ -18,11 +18,6 @@ class LeaguesController extends Controller
      */
     public function getUnmatchedLeagues(Request $request, $providerId = null)
     {
-        $searchKey = '';
-        $page = 1;
-        $limit = 10;
-        $sortOrder = 'asc';
-
         $searchKey = $request->has('searchKey') ? $request->searchKey : '';
         $page      = $request->has('page') ? $request->page : 1;
         $limit     = $request->has('limit') ? $request->limit : 10;
@@ -61,7 +56,7 @@ class LeaguesController extends Controller
         $limit     = $request->has('limit') ? $request->limit : 10;
         $sortOrder = $request->has('sortOrder') ? $request->sortOrder : 'asc';
 
-        $masterLeagues = MasterLeague::orderBy('id', $sortOrder);
+        $masterLeagues = MasterLeague::orderBy('is_priority', 'desc')->orderBy('id', $sortOrder);
         $total = $masterLeagues->count();
         $pageData = $masterLeagues->offset(($page - 1) * $limit)->limit($limit)->get();
 
@@ -70,6 +65,7 @@ class LeaguesController extends Controller
         foreach($pageData as $data) {
             $result[] = [
                 'master_league_id' => $data->id,
+                'is_priority' => $data->is_priority,
                 'leagues' => League::getMatchedLeaguesByMasterLeagueId($data->id)->toArray()
             ];
         }
@@ -114,5 +110,40 @@ class LeaguesController extends Controller
     public function postUnmatchLeague(LeagueRequest $request)
     {
         return MatchingFacade::unmatchSecondaryLeague($request);
+    }
+
+    public function togglePriority(Request $request) {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'master_league_id' => 'required|int|exists:master_leagues,id',
+                'is_priority'      => 'boolean'
+            ]);
+
+            if ($validator->fails()) {
+                return response([
+                    'errors' => $validator->errors()->all()
+                ], 422);
+            }
+
+            $masterLeague = MasterLeague::find($request->master_league_id);
+            $masterLeague->is_priority = $request->is_priority;
+            $masterLeague->save();
+
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'message'     => 'success'
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
+        }
     }
 }

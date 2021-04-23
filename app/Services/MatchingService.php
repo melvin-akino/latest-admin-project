@@ -535,10 +535,10 @@ class MatchingService
                 foreach($events as $event) {
                     //Delete this home team from the team groups table
                     $matching->delete('TeamGroup', [
-                        'master_team_id' => $event['team_master_home_id'],
-                        'team_id'        => $event['team_home_id']
+                        'master_team_id' => $event->team_master_home_id,
+                        'team_id'        => $event->team_home_id
                     ]);
-                    Log::info('Matching: Removing this home_team_id:'.$event['team_home_id'].' from team_groups table with master_team_id:'.$event['team_master_home_id']);
+                    Log::info('Matching: Removing this home_team_id:'.$event->team_home_id.' from team_groups table with master_team_id:'.$event->team_master_home_id);
 
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
@@ -552,10 +552,10 @@ class MatchingService
 
                     //Delete this away team from the team groups table
                     $matching->delete('TeamGroup', [
-                        'master_team_id' => $event['team_master_away_id'],
-                        'team_id'        => $event['team_away_id']
+                        'master_team_id' => $event->team_master_away_id,
+                        'team_id'        => $event->team_away_id
                     ]);
-                    Log::info('Matching: Removing this home_team_id:'.$event['team_away_id'].' from team_groups table with master_team_id:'.$event['team_master_away_id']);
+                    Log::info('Matching: Removing this home_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
 
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
@@ -566,12 +566,13 @@ class MatchingService
                     ['is_failed'     => false]);
                     Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
 
+
                     //Delete this event from the event groups table
                     $matching->delete('EventGroup', [
-                        'master_event_id' => $event['master_event_id'],
-                        'event_id'        => $event['id']
+                        'master_event_id' => $event->master_event_id,
+                        'event_id'        => $event->id
                     ]);
-                    Log::info('Matching: Removing this event_id:'.$event['id'].' from team_groups table with master_team_id:'.$event['master_event_id']);
+                    Log::info('Matching: Removing this event_id:'.$event->id.' from team_groups table with master_team_id:'.$event->master_event_id);
 
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [

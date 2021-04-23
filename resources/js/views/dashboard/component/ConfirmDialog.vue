@@ -3,7 +3,7 @@
     <v-card>
       <v-toolbar color="primary" dark height="40px">
         <v-toolbar-title class="text-uppercase subtitle-1"
-          >{{title}}</v-toolbar-title
+          >{{title ? title : confirmMessage}}</v-toolbar-title
         >
         <v-spacer></v-spacer>
         <v-btn @click="cancel" icon>
@@ -13,8 +13,8 @@
       <v-card-text v-if="message">
         {{message}}
       </v-card-text>
-      <v-card-text v-else-if="matching">
-        <div class="matchSummary" v-if="unmatch && primaryProvider">
+      <v-card-text v-else-if="matching && unmatch && primaryProvider">
+        <div class="matchSummary" v-if="matchingType=='match'">
           <div v-if="type=='leagues'">
             <p>league id: <span>{{unmatch.id}}</span> >> <span>{{primaryProvider.id}}</span></p>
             <p>name: <span>{{unmatch.name}}</span> >> <span>{{primaryProvider.name}}</span></p>
@@ -25,6 +25,13 @@
             <p>home team: <span>{{unmatch.team_home_name}}</span> >> <span>{{primaryProvider.team_home_name}}</span></p>
             <p>away team: <span>{{unmatch.team_away_name}}</span> >> <span>{{primaryProvider.team_away_name}}</span></p>
             <p>ref_schedule: <span>{{unmatch.ref_schedule}}</span> >> <span>{{primaryProvider.ref_schedule}}</span></p>
+          </div>
+        </div>
+        <div class="matchSummary" v-else>
+          <p>Are you sure you want to unmatch these {{type}}?</p>
+          <div v-if="type=='leagues'">
+            <p>{{primaryProvider.provider}}: <span>{{primaryProvider.name}}</span></p>
+            <p>{{unmatch.provider}}: <span>{{unmatch.name}}</span></p>
           </div>
         </div>
       </v-card-text>
@@ -51,13 +58,17 @@ export default {
   data: () => ({
     dialog: false,
     unmatch: null,
-    primaryProvider: null
+    primaryProvider: null,
+    confirmMessage: '',
+    matchingType: ''
   }),
   mounted() {
-    bus.$on('OPEN_MATCHING_DIALOG', ({ unmatch, primaryProvider }) => {
+    bus.$on('OPEN_MATCHING_DIALOG', ({ unmatch, primaryProvider, confirmMessage, matchingType }) => {
       this.dialog = true
       this.unmatch = unmatch
       this.primaryProvider = primaryProvider
+      this.confirmMessage = confirmMessage
+      this.matchingType = matchingType
     })
 
     bus.$on('CLOSE_DIALOG', () => {

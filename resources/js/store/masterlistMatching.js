@@ -30,6 +30,7 @@ const state = {
   totalMatchedData: 0,
   primaryProviderId: null,
   matchId: null,
+  unmatchingData: null,
   unmatchedDataParams: {},
   primaryProviderDataParams: {},
   matchedDataParams: {}
@@ -102,6 +103,9 @@ const mutations = {
   },
   SET_TABLE_PARAMS: (state, data) => {
     state[data.type] = data.data
+  },
+  SET_UNMATCHING_DATA: (state, data) => {
+    state.unmatchingData = data
   }
 }
 
@@ -255,6 +259,44 @@ const actions = {
       .then(() => {
         dispatch('getUnmatchedEventsByMasterLeague')
         dispatch('getPrimaryProviderEventsByLeague', { leagueId: state.matchingFilters.events.leagueId, type: 'events' })
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  unmatchLeague({dispatch, state}) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        league_id: state.unmatchingData.data_id,
+        provider_id: state.unmatchingData.provider_id,
+        sport_id: state.unmatchingData.sport_id
+      }
+      axios.post('leagues/unmatch', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedLeagues')
+        dispatch('getMatchedLeagues')
+        resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  setMasterLeaguePriority({dispatch}, params) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        master_league_id: params.masterLeagueId,
+        is_priority: params.isPriority
+      }
+      axios.post('leagues/toggle-priority', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(() => {
+        dispatch('getUnmatchedLeagues')
+        dispatch('getPrimaryProviderMatchedLeagues')
         dispatch('getMatchedLeagues')
         resolve()
       })

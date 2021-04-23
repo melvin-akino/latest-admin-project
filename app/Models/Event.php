@@ -52,6 +52,10 @@ class Event extends Model
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
             ->join('providers as p', 'p.id', 'e.provider_id')
+            ->when($grouped, function ($query) {
+                $query->join('league_groups as lg', 'lg.league_id', 'l.id')
+                    ->join('master_leagues as ml', 'ml.id', 'lg.master_league_id');
+            })
             ->select(['e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'e.event_identifier', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule'])
             ->{$where}('e.id', function ($q) {
                 $q->select('event_id')
@@ -68,6 +72,9 @@ class Event extends Model
             })
             ->where('l.name', 'ILIKE', '%'.$searchKey.'%')
             ->whereNull('e.deleted_at')
+            ->when($grouped, function ($query) {
+                $query->orderBy('ml.is_priority', 'desc');
+            })
             ->orderBy('e.ref_schedule', $sortOrder);
     }
 
