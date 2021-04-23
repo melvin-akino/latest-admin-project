@@ -22,13 +22,13 @@
         {{league.name}} 
       </div>
     </template>
-    <template v-slot:[`item.data-table-expand`]="{ expand, isExpanded }">
+    <!-- <template v-slot:[`item.data-table-expand`]="{ expand, isExpanded }">
       <v-btn @click="expand(!isExpanded)" small dark class="seeEvents success text-capitalize">See Events</v-btn>
     </template>
     <template v-slot:expanded-item="{ headers }">
       <td :colspan="headers.length">
       </td>
-    </template>
+    </template> -->
   </v-data-table>
 </template>
 
