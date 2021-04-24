@@ -26,7 +26,7 @@ class MasterEvent extends Model
         'updated_at',
     ];
 
-    public static function saklapNaman(int $masterId, int $rawId)
+    public static function getEventInfo(int $masterId, int $rawId)
     {
         $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 

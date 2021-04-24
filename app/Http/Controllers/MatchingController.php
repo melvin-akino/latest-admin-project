@@ -59,7 +59,7 @@ class MatchingController extends Controller
                         'provider_id' => $getRaw->provider_id,
                     ];
                 } else {
-                    $getEventInfo = MasterEvent::saklapNaman($props->attributes->master_event_id, $props->attributes->event_id);
+                    $getEventInfo = MasterEvent::getEventInfo($props->attributes->master_event_id, $props->attributes->event_id);
                     $description  = [
                         [ 'primary_alias' => $getEventInfo->primary_alias, 'secondary_alias' => $getEventInfo->secondary_alias ], # Provider
                         [ 'primary_event_id' => $getEventInfo->primary_event_id, 'secondary_event_id' => $getEventInfo->secondary_event_id ], # Event ID
