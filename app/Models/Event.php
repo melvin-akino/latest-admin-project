@@ -88,8 +88,10 @@ class Event extends Model
             ->join('teams as th', 'th.id', 'e.team_home_id')
             ->join('teams as ta', 'ta.id', 'e.team_away_id')
             ->where('lg.master_league_id', $masterLeagueId)
-            ->select('e.id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule')
-            ->orderBy('p.id', 'asc')
+            ->whereNull('e.deleted_at')
+            ->select('e.id', 'e.event_identifier', 'eg.master_event_id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule')
+            ->orderBy('eg.master_event_id', 'asc')
+            ->orderBy('e.provider_id', 'asc')
             ->get();
     }
 
