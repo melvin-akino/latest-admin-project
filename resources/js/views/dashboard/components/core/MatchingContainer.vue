@@ -17,6 +17,7 @@
     <confirm-dialog
       :type="type"
       :matching="true"
+      :width="700"
       @confirm="confirm"
       @close="cancel"
     ></confirm-dialog>
