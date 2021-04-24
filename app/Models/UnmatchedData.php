@@ -57,7 +57,8 @@ class UnmatchedData extends Model
                 'e.team_home_id',
                 'e.team_away_id',
                 'e.league_id',
-                'e.ref_schedule'
+                'e.ref_schedule',
+                'e.event_identifier'
             )
             ->get()
             ->toArray();
