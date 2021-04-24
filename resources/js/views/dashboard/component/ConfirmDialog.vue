@@ -13,38 +13,47 @@
       <v-card-text v-if="message">
         {{message}}
       </v-card-text>
-      <v-card-text v-else-if="matching && unmatch && primaryProvider">
-        <div class="matchSummary" v-if="matchingType=='match'">
-          <div v-if="type=='leagues'">
-            <p>league id: <span>{{unmatch.id}}</span> >> <span>{{primaryProvider.id}}</span></p>
-            <p>name: <span>{{unmatch.name}}</span> >> <span>{{primaryProvider.name}}</span></p>
-          </div>
-          <div v-else>
-            <p>event_id: <span>{{unmatch.event_identifier}}</span> >> <span>{{primaryProvider.event_identifier}}</span></p>
-            <p>league: <span>{{unmatch.league_name}}</span> >> <span>{{primaryProvider.league_name}}</span></p>
-            <p>home team: <span>{{unmatch.team_home_name}}</span> >> <span>{{primaryProvider.team_home_name}}</span></p>
-            <p>away team: <span>{{unmatch.team_away_name}}</span> >> <span>{{primaryProvider.team_away_name}}</span></p>
-            <p>ref_schedule: <span>{{unmatch.ref_schedule}}</span> >> <span>{{primaryProvider.ref_schedule}}</span></p>
-          </div>
-        </div>
-        <div class="matchSummary" v-else>
-          <p>Are you sure you want to unmatch these {{type}}?</p>
-          <div v-if="type=='leagues'">
-            <p>{{primaryProvider.provider}}: <span>{{primaryProvider.name}}</span></p>
-            <p>{{unmatch.provider}}: <span>{{unmatch.name}}</span></p>
-          </div>
-          <div v-else>
-            <div class="mx-2">
+      <v-card-text v-else-if="matching && secondaryProvider && primaryProvider">
+        <div class="matchSummary">
+          <p class="mb-2">Are you sure you want to <span>{{ matchingType == 'match' ? 'match' : 'unmatch' }}</span> these {{type}}?</p>
+          <div v-if="type=='leagues'" class="matchConfirmDetails">
+            <div class="primaryData mx-2">
               <p><span>{{primaryProvider.provider}}</span></p>
-              <p>{{primaryProvider.league_name}}</p>
-              <p>{{primaryProvider.ref_schedule}}</p>
-              <p>{{primaryProvider.team_home_name}} vs {{primaryProvider.team_away_name}}</p>
+              <p><span>{{primaryProvider.name}}</span></p>
             </div>
-            <div class="mx-2">
-              <p><span>{{unmatch.provider}}</span></p>
-              <p>{{unmatch.league_name}}</p>
-              <p>{{unmatch.ref_schedule}}</p>
-              <p>{{unmatch.team_home_name}} vs {{unmatch.team_away_name}}</p>
+            <div class="label mx-2">
+              <p>provider</p>
+              <p>name</p>
+            </div>
+            <div class="secondaryData mx-2">
+              <p><span>{{secondaryProvider.provider}}</span></p>
+              <p><span>{{secondaryProvider.name}}</span></p>
+            </div>
+          </div>
+          <div v-else class="matchConfirmDetails">
+            <div class="primaryData mx-2">
+              <p><span>{{primaryProvider.provider}}</span></p>
+              <p><span>{{primaryProvider.event_identifier}}</span></p>
+              <p><span>{{primaryProvider.league_name}}</span></p>
+              <p><span>{{primaryProvider.team_home_name}}</span></p>
+              <p><span>{{primaryProvider.team_away_name}}</span></p>
+              <p> <span>{{primaryProvider.ref_schedule}}</span></p>
+            </div>
+            <div class="label mx-2">
+              <p>provider</p>
+              <p>event id</p>
+              <p>league </p>
+              <p>home team</p>
+              <p>away team</p>
+              <p>ref schedule </p>
+            </div>
+            <div class="secondaryData mx-2">
+              <p><span>{{secondaryProvider.provider}}</span></p>
+              <p><span>{{secondaryProvider.event_identifier}}</span></p>
+              <p><span>{{secondaryProvider.league_name}}</span> </p>
+              <p><span>{{secondaryProvider.team_home_name}}</span></p>
+              <p><span>{{secondaryProvider.team_away_name}}</span> </p>
+              <p><span>{{secondaryProvider.ref_schedule}}</span> </p>
             </div>
           </div>
         </div>
@@ -71,15 +80,15 @@ export default {
   props: ['title', 'message', 'activator', 'matching', 'type'],
   data: () => ({
     dialog: false,
-    unmatch: null,
+    secondaryProvider: null,
     primaryProvider: null,
     confirmMessage: '',
     matchingType: ''
   }),
   mounted() {
-    bus.$on('OPEN_MATCHING_DIALOG', ({ unmatch, primaryProvider, confirmMessage, matchingType }) => {
+    bus.$on('OPEN_MATCHING_DIALOG', ({ secondaryProvider, primaryProvider, confirmMessage, matchingType }) => {
       this.dialog = true
-      this.unmatch = unmatch
+      this.secondaryProvider = secondaryProvider
       this.primaryProvider = primaryProvider
       this.confirmMessage = confirmMessage
       this.matchingType = matchingType
@@ -105,5 +114,27 @@ export default {
 .v-dialog > .v-card > .v-card__text {
   font-weight: 400;
   font-size: 15px;
+}
+
+.matchConfirmDetails {
+  display: flex;
+  justify-content: center;
+}
+
+.primaryData {
+  text-align: right;
+}
+
+.label {
+  text-align: center;
+}
+
+.label p {
+  text-transform: uppercase;
+  color:  #C6C6C6;
+}
+
+.secondaryData {
+  text-align: left;
 }
 </style>

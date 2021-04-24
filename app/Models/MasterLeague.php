@@ -67,7 +67,7 @@ class MasterLeague extends Model
                   ->join('leagues as l', 'l.id', 'lg.league_id')
                   ->where('l.provider_id', $providerId)
                   ->where(DB::raw('COALESCE(master_leagues.name, l.name)'), 'ILIKE', '%'.$searchKey.'%')
-                  ->select('master_leagues.id', DB::raw('COALESCE(master_leagues.name, l.name) as master_league_name'))
+                  ->select('master_leagues.id', DB::raw('COALESCE(master_leagues.name, l.name) as master_league_name'), 'is_priority')
                   ->orderBy('is_priority', 'desc')
                   ->orderBy('master_leagues.id', $sortOrder);
     }

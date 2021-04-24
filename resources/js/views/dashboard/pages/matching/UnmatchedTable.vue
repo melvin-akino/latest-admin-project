@@ -102,7 +102,7 @@ export default {
   },
   computed: {
     ...mapState('masterlistMatching', ['unmatchedData', 'isLoadingUnmatchedData', 'totalUnmatchedData', 'primaryProviderLeagues', 'primaryProviderData', 'primaryProviderId', 'matchId']),
-    unmatch() {
+    secondaryProvider() {
       if(this.matchId) {
         return this.unmatchedData.filter(data => data.id == this.matchId)[0]
       }
@@ -207,7 +207,7 @@ export default {
       }
     },
     confirmMatching() {
-      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.unmatch, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Matching of ${this.type}`, matchingType: 'match' })
+      bus.$emit("OPEN_MATCHING_DIALOG", { secondaryProvider: this.secondaryProvider, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Matching of ${this.type}`, matchingType: 'match' })
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="matchedData"
+    :items="displayMatchedData"
     item-key="master_league_id"
     :server-items-length="totalMatchedData"
     :options.sync="options"
@@ -51,26 +51,19 @@
     </template>
     <template v-slot:expanded-item="{ headers, item }" v-if="type=='events'">
       <td :colspan="headers.length">
-        <div class="matchedEvent ma-2" v-for="event in item.events" :key="event.id">
-          <div class="matchedEventDetails provider">
-            <span class="badge matched" :class="[`${event.provider.toLowerCase()}`]">{{event.provider}}</span>
-          </div>
-          <div class="matchedEventDetails details">
-            <p>{{event.league_name}}</p>
-            <p>{{event.ref_schedule}}</p>
-            <p>{{event.team_home_name}} vs {{event.team_away_name}}</p>
-          </div>
-          <div class="matchedEventDetails button">
-            <v-btn 
-              v-if="nonPrimaryProviders.includes(event.provider)" 
-              outlined 
-              color="error" 
-              class="unmatchBtn text-capitalize" 
-              small 
-              @click="confirmUnmatch(item.events, event.id)"
-              >
-                Unmatch
-              </v-btn>
+        <div class="matchedEvents" v-for="(events, index) in item.groupedEvents" :key="index">
+          <div class="matchedEvent ma-4" v-for="event in events" :key="event.id">
+            <div class="matchedEventDetails provider mr-4">
+              <span class="badge matched" :class="[`${event.provider.toLowerCase()}`]">{{event.provider}}</span>
+            </div>
+            <div class="matchedEventDetails details mr-4">
+              <p>{{event.league_name}}</p>
+              <p>{{event.ref_schedule}}</p>
+              <p>{{event.team_home_name}} vs {{event.team_away_name}}</p>
+            </div>
+            <div class="matchedEventDetails button">
+              <v-btn v-if="nonPrimaryProviders.includes(event.provider) && events.length > 1" outlined color="error" class="unmatchBtn text-capitalize" small @click="confirmUnmatch(events, event.id)">Unmatch</v-btn>
+            </div>
           </div>
         </div>
       </td>
@@ -81,6 +74,7 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
 import bus from '../../../../eventBus'
+import _ from 'lodash'
 
 export default {
   props: ['type'],
@@ -102,7 +96,13 @@ export default {
     ...mapState('providers', ['providers']),
     nonPrimaryProviders() {
       return this.providers.map(provider => provider.alias)
-    }
+    },
+    displayMatchedData() {
+      return this.matchedData.map(data => {
+        this.$set(data, 'groupedEvents', _.groupBy(data.events, 'master_event_id'))
+        return { ...data }
+      })
+    },
   },
   watch: {
     options: {
@@ -130,7 +130,7 @@ export default {
       this.primaryProvider = data.filter(item => !this.nonPrimaryProviders.includes(item.provider))[0]
       this.secondaryProvider = data.filter(item => item.id == id)[0]
       this.setUnmatchingData({ data_id: this.secondaryProvider.id, provider_id: this.secondaryProvider.provider_id, sport_id: this.secondaryProvider.sport_id })
-      bus.$emit("OPEN_MATCHING_DIALOG", { unmatch: this.secondaryProvider, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Unmatching of ${this.type}`, matchingType: 'unmatch' })
+      bus.$emit("OPEN_MATCHING_DIALOG", { secondaryProvider: this.secondaryProvider, primaryProvider: this.primaryProvider, confirmMessage: `Confirm Unmatching of ${this.type}`, matchingType: 'unmatch' })
     },
     getMatchedData() {
       if(this.type=='leagues') {
@@ -158,25 +158,20 @@ export default {
     cursor: pointer;
   }
 
-  .matchedEvent, .matchedEventDetails {
+  .matchedEvents, .matchedEvent {
     display: flex;
   }
 
-  .matchedEventDetails {
-    flex-direction: column;
-    justify-content: center;
+  .matchedEvent {
+    align-items: center;
   }
 
   .matchedEventDetails p {
     margin: 0;
   }
 
-  .matchedEventDetails.provider, .matchedEventDetails.button {
-    flex: 1;
-  }
-
   .matchedEventDetails.details {
-    flex: 10;
+    width: 200px;
   }
 
   .matchedEventDetails > .unmatchBtn {
