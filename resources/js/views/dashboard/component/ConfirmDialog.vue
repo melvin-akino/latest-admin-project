@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" width="500" :activator="activator" @click:outside="cancel">
+  <v-dialog v-model="dialog" :width="width ? width: 500" :activator="activator" @click:outside="cancel">
     <v-card>
       <v-toolbar color="primary" dark height="40px">
         <v-toolbar-title class="text-uppercase subtitle-1"
@@ -16,45 +16,53 @@
       <v-card-text v-else-if="matching && secondaryProvider && primaryProvider">
         <div class="matchSummary">
           <p class="mb-2">Are you sure you want to <span>{{ matchingType == 'match' ? 'match' : 'unmatch' }}</span> these {{type}}?</p>
-          <div v-if="type=='leagues'" class="matchConfirmDetails">
-            <div class="primaryData mx-2">
-              <p><span>{{primaryProvider.provider}}</span></p>
-              <p><span>{{primaryProvider.name}}</span></p>
-            </div>
-            <div class="label mx-2">
-              <p>provider</p>
-              <p>name</p>
-            </div>
-            <div class="secondaryData mx-2">
-              <p><span>{{secondaryProvider.provider}}</span></p>
-              <p><span>{{secondaryProvider.name}}</span></p>
-            </div>
+          <div v-if="type=='leagues'">
+            <table class="matchConfirmDetails">
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.provider}}</span></p></td>
+                <td width="20%" class="label"><p>provider</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.provider}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.name}}</span></p></td>
+                <td width="20%" class="label"><p>name</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.name}}</span></p></td>
+              </tr>
+            </table>
           </div>
-          <div v-else class="matchConfirmDetails">
-            <div class="primaryData mx-2">
-              <p><span>{{primaryProvider.provider}}</span></p>
-              <p><span>{{primaryProvider.event_identifier}}</span></p>
-              <p><span>{{primaryProvider.league_name}}</span></p>
-              <p><span>{{primaryProvider.team_home_name}}</span></p>
-              <p><span>{{primaryProvider.team_away_name}}</span></p>
-              <p> <span>{{primaryProvider.ref_schedule}}</span></p>
-            </div>
-            <div class="label mx-2">
-              <p>provider</p>
-              <p>event id</p>
-              <p>league </p>
-              <p>home team</p>
-              <p>away team</p>
-              <p>ref schedule </p>
-            </div>
-            <div class="secondaryData mx-2">
-              <p><span>{{secondaryProvider.provider}}</span></p>
-              <p><span>{{secondaryProvider.event_identifier}}</span></p>
-              <p><span>{{secondaryProvider.league_name}}</span> </p>
-              <p><span>{{secondaryProvider.team_home_name}}</span></p>
-              <p><span>{{secondaryProvider.team_away_name}}</span> </p>
-              <p><span>{{secondaryProvider.ref_schedule}}</span> </p>
-            </div>
+          <div v-else>
+            <table class="matchConfirmDetails">
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.provider}}</span></p></td>
+                <td width="20%" class="label"><p>provider</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.provider}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.event_identifier}}</span></p></td>
+                <td width="20%" class="label"><p>event id</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.event_identifier}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.league_name}}</span></p></td>
+                <td width="20%" class="label"><p>league</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.league_name}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.team_home_name}}</span></p></td>
+                <td width="20%" class="label"><p>home team</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.team_home_name}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.team_away_name}}</span></p></td>
+                <td width="20%" class="label"><p>away team</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.team_away_name}}</span></p></td>
+              </tr>
+              <tr>
+                <td width="40%" class="primaryData"><p><span>{{primaryProvider.ref_schedule}}</span></p></td>
+                <td width="20%" class="label"><p>ref schedule</p></td>
+                <td width="40%" class="secondaryData"><p><span>{{secondaryProvider.ref_schedule}}</span></p></td>
+              </tr>
+            </table>
           </div>
         </div>
       </v-card-text>
@@ -77,7 +85,7 @@ import bus from '../../../eventBus'
 
 export default {
   name: 'ConfirmDialog',
-  props: ['title', 'message', 'activator', 'matching', 'type'],
+  props: ['title', 'message', 'activator', 'matching', 'type', 'width'],
   data: () => ({
     dialog: false,
     secondaryProvider: null,
@@ -117,8 +125,12 @@ export default {
 }
 
 .matchConfirmDetails {
-  display: flex;
-  justify-content: center;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.matchConfirmDetails td {
+  word-wrap: break-word;
 }
 
 .primaryData {
