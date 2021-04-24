@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{MasterLeague, League, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\{RawListRequest, LeagueRequest};
+use App\Http\Requests\{RawListRequest, LeagueRequest, LeaguesMatchingRequest};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Exception;
@@ -92,9 +92,9 @@ class LeaguesController extends Controller
      * 
      * @return json
      */
-    public function postMatchLeagues(Request $request)
+    public function postMatchLeagues(LeaguesMatchingRequest $request)
     {
-        return MatchingFacade::postMatch($request, 'league');
+        return MatchingFacade::postMatchLeagues($request);
     }
 
     /**

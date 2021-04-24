@@ -135,6 +135,11 @@ const router = new Router({
                 type: 'events'
               }
             },
+            {
+              name: 'Matching History',
+              path: 'history',
+              component: () => import('./views/dashboard/pages/matching/MatchingHistory'),
+            },
           ]
         },
         {

@@ -71,6 +71,10 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/matched', 'EventsController@getMatchedEvents')->name('matched-events.api');
     });
 
+    Route::prefix('matching')->group(function () {
+        Route::get('/history', 'MatchingController@getHistory')->name('matching-history.api');
+    });
+
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 
