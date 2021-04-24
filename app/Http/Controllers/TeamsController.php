@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Team, Provider, SystemConfiguration AS SC};
 use App\Facades\{RawListingFacade, MatchingFacade};
-use App\Http\Requests\RawListRequest;
+use App\Http\Requests\{RawListRequest, TeamsMatchingRequest};
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 class TeamsController extends Controller
@@ -42,8 +42,8 @@ class TeamsController extends Controller
      * 
      * @return json
      */
-    public function postMatchTeams(Request $request)
+    public function postMatchTeams(TeamsMatchingRequest $request)
     {
-        return MatchingFacade::postMatch($request, 'team');
+        return MatchingFacade::postMatchTeams($request);
     }
 }

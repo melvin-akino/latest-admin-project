@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
-use App\Models\{League, Team, Matching};
+use App\Models\{League, Team, Matching, SystemConfiguration AS SC, Provider};
 use Illuminate\Support\Facades\{DB, Log};
 use Carbon\Carbon;
 
@@ -31,6 +31,14 @@ class Event extends Model
         'created_at',
         'updated_at',
     ];
+
+    public static function checkRawEventProvider(int $rawId)
+    {
+        $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $query             = self::find($rawId)->provider_id;
+
+        return $primaryProviderId == $query ? true : false;
+    }
 
     /**
      * Get `events` data by League, also allowing to choose from `raw` or `existing match`
@@ -257,7 +265,6 @@ class Event extends Model
                 'eg.master_event_id', 
                 'e.id'
             )
-            ->first()
-            ->toArray();
+            ->first();
     }
 }

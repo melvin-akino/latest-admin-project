@@ -16,21 +16,19 @@ class EventGroupService
 
         try {
             $primaryProviderEventId = $request->primary_provider_event_id;
-            $matchEventId = $request->match_event_id;
-
-            $primaryProviderEvent = Event::find($primaryProviderEventId);
-            $matchEvent = Event::find($matchEventId);
+            $matchEventId           = $request->match_event_id;
+            $primaryProviderEvent   = Event::find($primaryProviderEventId);
+            $matchEvent             = Event::find($matchEventId);
 
             // check if league is already matched
-            $matchLeagueId = $matchEvent->league_id;
+            $matchLeagueId       = $matchEvent->league_id;
             $matchMasterLeagueId = self::getMasterLeagueId($matchLeagueId);
+
             if (!$matchMasterLeagueId) {
-                $leagueGroup = new LeagueGroup([
+                if (LeagueGroup::create([
                     'master_league_id' => self::getMasterLeagueId($primaryProviderEvent->league_id)->master_league_id,
                     'league_id'        => $matchLeagueId
-                ]);
-
-                if ($leagueGroup->save()) {
+                ])) {
                     $providerId = $matchEvent->provider_id;
     
                     MatchingService::removeFromUnmatchedData('league', $providerId, $matchLeagueId);
@@ -40,15 +38,14 @@ class EventGroupService
             }
 
             // check if team home is already matched
-            $matchTeamHomeId = $matchEvent->team_home_id;
+            $matchTeamHomeId       = $matchEvent->team_home_id;
             $matchMasterTeamHomeId = self::getMasterTeamId($matchTeamHomeId);
+
             if (!$matchMasterTeamHomeId) {
-                $teamGroup = new TeamGroup([
+                if (TeamGroup::create([
                     'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_home_id)->master_team_id,
                     'team_id'        => $matchTeamHomeId
-                ]);
-
-                if ($teamGroup->save()) {
+                ])) {
                     $providerId = $matchEvent->provider_id;
     
                     MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamHomeId);
@@ -58,15 +55,14 @@ class EventGroupService
             }
 
             // check if team away is already matched
-            $matchTeamAwayId = $matchEvent->team_away_id;
+            $matchTeamAwayId       = $matchEvent->team_away_id;
             $matchMasterTeamAwayId = self::getMasterTeamId($matchTeamAwayId);
+
             if (!$matchMasterTeamAwayId) {
-                $teamGroup = new TeamGroup([
+                if (TeamGroup::create([
                     'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_away_id)->master_team_id,
                     'team_id'        => $matchTeamAwayId
-                ]);
-
-                if ($teamGroup->save()) {
+                ])) {
                     $providerId = $matchEvent->provider_id;
     
                     MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamAwayId);
@@ -75,12 +71,10 @@ class EventGroupService
                 }
             }
 
-            $eventGroup = new EventGroup([
+            if (EventGroup::create([
                 'master_event_id' => self::getMasterEventId($primaryProviderEventId)->master_event_id,
                 'event_id'        => $matchEventId
-            ]);
-
-            if ($eventGroup->save()) {
+            ])) {
                 $providerId = $matchEvent->provider_id;
 
                 MatchingService::removeFromUnmatchedData('event', $providerId, $matchEventId);

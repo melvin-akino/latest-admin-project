@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use Illuminate\Support\Facades\DB;
-use App\Models\LeagueGroup;
+use App\Models\{LeagueGroup, SystemConfiguration AS SC, Provider};
 
 class League extends Model
 {
@@ -23,6 +23,14 @@ class League extends Model
         'created_at',
         'updated_at',
     ];
+
+    public static function checkRawLeagueProvider(int $rawId)
+    {
+        $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $query             = self::find($rawId)->provider_id;
+
+        return $primaryProviderId == $query ? true : false;
+    }
 
     /**
      * Get `leagues` data by Provider, also allowing to choose from `raw` or `existing match`
