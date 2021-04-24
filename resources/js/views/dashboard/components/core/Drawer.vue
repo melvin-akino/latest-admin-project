@@ -126,6 +126,7 @@ export default {
           {
             icon: "mdi-history",
             title: "History",
+            to: "history"
           }
         ]
       }

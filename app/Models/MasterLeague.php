@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 use Illuminate\Support\Facades\DB;
-use App\Models\LeagueGroup;
+use App\Models\{LeagueGroup, SystemConfiguration AS SC, Provider};
 
 class MasterLeague extends Model
 {
@@ -27,6 +27,22 @@ class MasterLeague extends Model
     public function leagueGroups()
     {
         return $this->hasMany(LeagueGroup::class, 'master_league_id', 'id');
+    }
+
+    public static function getLeagueBaseName(int $masterId)
+    {
+        $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+
+        $query = self::find($masterId)
+            ->join('league_groups AS lg', 'lg.master_league_id', 'master_leagues.id')
+            ->join('leagues AS l', function ($join) use ($primaryProviderId) {
+                $join->on('l.id', 'lg.league_id');
+                $join->where('l.provider_id', $primaryProviderId);
+            })
+            ->select(DB::raw("COALESCE(master_leagues.name, l.name) AS name"))
+            ->first();
+
+        return $query;
     }
 
     public static function getSideBarLeaguesBySportAndGameSchedule(int $sportId, int $primaryProviderId, int $maxMissingCount, string $gameSchedule)
