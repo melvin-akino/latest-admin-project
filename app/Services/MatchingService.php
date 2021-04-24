@@ -179,7 +179,6 @@ class MatchingService
             $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
             if ($unmatchedEvents->count() > 0) {
                 foreach ($unmatchedEvents as $unmatchedEvent) {
-                    DB::beginTransaction();
                     $leagueGroupData = LeagueGroup::getByLeagueId($unmatchedEvent['league_id']);
                     if ($leagueGroupData->count() == 0) {
                         continue;
@@ -233,7 +232,6 @@ class MatchingService
                     ]);
 
                     Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
-                    DB::commit();
                 }
                 return 0;
             } else {
@@ -243,7 +241,14 @@ class MatchingService
         } catch (Exception $e) {
             Log::error('Something went wrong', (array) $e);
 
-            DB::rollBack();
+            if ($unmatchedEvents->count() > 0) {
+                foreach ($unmatchedEvents as $unmatchedEvent) {
+                    Log::info('Matching: Attempting to unmatch event ' . $unmatchedEvent['event_identifier'] . ' because of some error exception');
+                    $matching->delete('EventGroup', [
+                        'event_id' => $unmatchedEvent['id']
+                    ]);
+                }
+            }
         }
     }
 
@@ -460,7 +465,6 @@ class MatchingService
                     $masterEvent = Event::getMasterEventId($event, $primaryProviderId);
                     if (!empty($masterEvent))
                     {
-                        DB::beginTransaction();
                         Log::info('Found a team for automatching with master_team_id: ' . $masterEvent);    
                         $matching->create('EventGroup', [
                             'master_event_id' => $masterEvent,
@@ -469,11 +473,9 @@ class MatchingService
 
                         self::removeFromUnmatchedData('event', $event['provider_id'], $event['data_id']);
                         Log::info('Removed from Unmatched: event_id:'.$event['data_id'].' - provider_id:'.$event['provider_id']);
-                        DB::commit(); 
                     }
                     else {
                         //update the is_failed to true here
-                        DB::beginTransaction();
                         Log::info('No primary event found for automatching for event_id: ' . $event['data_id'] . ' setting is_failed TRUE');    
                         $matching->updateOrCreate('UnmatchedData', [
                             'data_type'     => 'event',
@@ -481,7 +483,6 @@ class MatchingService
                             'provider_id'   => $event['provider_id']
                         ],
                         ['is_failed'     => true]);
-                        DB::commit();
                     }
                 }
                 return 0;
@@ -491,8 +492,16 @@ class MatchingService
                 return 3;
             }
         } catch (Exception $e) {
-            DB::rollback();
             Log::error('Something went wrong', (array) $e);
+
+            if ($unmatchedEvents->count() > 0) {
+                foreach ($unmatchedEvents as $event) {
+                    Log::info('Matching: Attempting to unmatch event ' . $event['event_identifier'] . ' because of some error exception');
+                    $matching->delete('EventGroup', [
+                        'event_id' => $event['data_id']
+                    ]);
+                }
+            }
         }
     }
 
