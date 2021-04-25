@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\EventGroupRequest;
 use Illuminate\Support\Facades\{DB, Log};
-use App\Models\{Event, EventGroup};
+use App\Models\{Event, EventGroup, LeagueGroup, TeamGroup};
 use App\Services\MatchingService;
 use Exception;
 
@@ -15,15 +15,69 @@ class EventGroupService
         DB::beginTransaction();
 
         try {
-            $eventGroup = new EventGroup([
-                'master_event_id' => self::getMasterEventId($request->primary_provider_event_id),
-                'event_id'        => $request->match_event_id
-            ]);
+            $primaryProviderEventId = $request->primary_provider_event_id;
+            $matchEventId           = $request->match_event_id;
+            $primaryProviderEvent   = Event::find($primaryProviderEventId);
+            $matchEvent             = Event::find($matchEventId);
 
-            if ($eventGroup->save()) {
-                $providerId = Event::find($request->match_event_id)->provider_id;
+            // check if league is already matched
+            $matchLeagueId       = $matchEvent->league_id;
+            $matchMasterLeagueId = self::getMasterLeagueId($matchLeagueId);
 
-                MatchingService::removeFromUnmatchedData('event', $providerId, $request->match_event_id);
+            if (!$matchMasterLeagueId) {
+                if (LeagueGroup::create([
+                    'master_league_id' => self::getMasterLeagueId($primaryProviderEvent->league_id)->master_league_id,
+                    'league_id'        => $matchLeagueId
+                ])) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('league', $providerId, $matchLeagueId);
+    
+                    DB::commit();
+                }
+            }
+
+            // check if team home is already matched
+            $matchTeamHomeId       = $matchEvent->team_home_id;
+            $matchMasterTeamHomeId = self::getMasterTeamId($matchTeamHomeId);
+
+            if (!$matchMasterTeamHomeId) {
+                if (TeamGroup::create([
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_home_id)->master_team_id,
+                    'team_id'        => $matchTeamHomeId
+                ])) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamHomeId);
+    
+                    DB::commit();
+                }
+            }
+
+            // check if team away is already matched
+            $matchTeamAwayId       = $matchEvent->team_away_id;
+            $matchMasterTeamAwayId = self::getMasterTeamId($matchTeamAwayId);
+
+            if (!$matchMasterTeamAwayId) {
+                if (TeamGroup::create([
+                    'master_team_id' => self::getMasterTeamId($primaryProviderEvent->team_away_id)->master_team_id,
+                    'team_id'        => $matchTeamAwayId
+                ])) {
+                    $providerId = $matchEvent->provider_id;
+    
+                    MatchingService::removeFromUnmatchedData('team', $providerId, $matchTeamAwayId);
+    
+                    DB::commit();
+                }
+            }
+
+            if (EventGroup::create([
+                'master_event_id' => self::getMasterEventId($primaryProviderEventId)->master_event_id,
+                'event_id'        => $matchEventId
+            ])) {
+                $providerId = $matchEvent->provider_id;
+
+                MatchingService::removeFromUnmatchedData('event', $providerId, $matchEventId);
 
                 DB::commit();
 
@@ -47,7 +101,15 @@ class EventGroupService
         }
     }
 
+    private static function getMasterLeagueId($leagueId) {
+        return LeagueGroup::where('league_id', $leagueId)->first();
+    }
+
+    private static function getMasterTeamId($teamId) {
+        return TeamGroup::where('team_id', $teamId)->first();
+    }
+
     private static function getMasterEventId($primaryProviderEventId) {
-        return EventGroup::where('event_id', $primaryProviderEventId)->first()->master_event_id;
+        return EventGroup::where('event_id', $primaryProviderEventId)->first();
     }
 }

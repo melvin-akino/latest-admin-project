@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
-class EventGroupRequest extends FormRequest
+class TeamsMatchingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,11 +25,12 @@ class EventGroupRequest extends FormRequest
      */
     public function rules()
     {
-
         return [
-            'primary_provider_event_id' => 'required|int|exists:event_groups,event_id',
-            'match_event_id'            => 'required|int|exists:events,id'
-        ];        
+            'primary_provider_team_id' => 'required|numeric|exists:team_groups,team_id',
+            'match_team_id'            => 'required|numeric|exists:teams,id',
+            'master_team_alias'        => 'min:1|max:100',
+            'add_master_team'          => 'boolean',
+        ];
     }
 
     protected function failedValidation(Validator $validator)

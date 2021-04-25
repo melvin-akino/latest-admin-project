@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-use App\Models\Event;
+use App\Models\{Event, LeagueGroup};
 use Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,7 +26,16 @@ class AppServiceProvider extends ServiceProvider
     {
         Validator::extend('check_if_league_and_team_is_matched', function($attribute, $value, $parameters, $validator) {
             $event = Event::getGroupVerifiedUnmatchedEvent($value);
-            if (!empty($event))
+            // if (empty($event)) {
+            //     return true;
+            // }
+
+            return empty($event) ? true : false;
+        });
+
+        Validator::extend('check_if_league_is_matched', function($attribute, $value, $parameters, $validator) {
+            $league = LeagueGroup::checkLeagueIfmatched($value);
+            if ($league > 0)
             {
                 return true;
             }
