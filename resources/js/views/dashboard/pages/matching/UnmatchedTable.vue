@@ -72,7 +72,7 @@
           </div>
         </td>
         <td :colspan="headers.length" class="noEventsExpanded" v-else>
-          <div class="px-4 py-2">No events available for this league</div>
+          <div class="px-4 py-2">No active events available for this league</div>
         </td>
       </tr>
     </template>
@@ -238,9 +238,5 @@ export default {
 
   .leagueRow, .eventRow {
     cursor: pointer;
-  }
-
-  .noEventsExpanded {
-    padding: 0 !important;
   }
 </style>
