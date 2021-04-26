@@ -68,7 +68,7 @@
         data:() => ({
             headers: [
                 { text: 'LOG TYPE', value: 'log_name' },
-                { text: 'ACTION', value: 'action' },
+                { text: 'ACTION', value: 'action', sortable: false },
                 { text: 'DESCRIPTION', value: 'description', sortable: false, align: 'center' },
                 { text: 'IP ADDRESS', value: 'ip_address', sortable: false, align: 'center' },
                 { text: 'CREATED DATE', value: 'created_at' },
