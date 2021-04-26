@@ -23,7 +23,7 @@ class MatchingController extends Controller
 
             if (strpos($row->log_name, 'Leagues') !== false) {
                 $getMaster             = MasterLeague::getLeagueBaseName($props->attributes->master_league_id);
-                $getRaw                = League::find($props->attributes->league_id);
+                $getRaw                = League::withTrashed()->find($props->attributes->league_id);
                 $checkRawEventProvider = League::checkRawLeagueProvider($props->attributes->league_id);
 
                 if ($checkRawEventProvider) {
@@ -47,7 +47,7 @@ class MatchingController extends Controller
                 }
             } else if (strpos($row->log_name, 'Events') !== false) {
                 $checkRawEventProvider = Event::checkRawEventProvider($props->attributes->event_id);
-                $getRaw                = Event::find($props->attributes->event_id);
+                $getRaw                = Event::withTrashed()->find($props->attributes->event_id);
 
                 if ($checkRawEventProvider) {
                     $description = "From Auto-Matching";
