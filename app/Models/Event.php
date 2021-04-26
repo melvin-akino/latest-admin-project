@@ -35,7 +35,7 @@ class Event extends Model
     public static function checkRawEventProvider(int $rawId)
     {
         $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $query             = self::find($rawId)->provider_id;
+        $query             = self::withTrashed()->find($rawId)->provider_id;
 
         return $primaryProviderId == $query ? true : false;
     }
