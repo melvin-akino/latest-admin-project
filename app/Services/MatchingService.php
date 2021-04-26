@@ -837,6 +837,17 @@ class MatchingService
                         'provider_id'   => $data['provider_id']
                     ],
                     ['is_failed'     => false]);
+
+                    self::logActivity(
+                        'Matching Reprocess',
+                        'UnmatchedData', // indicate sub-folder if necessary
+                        [
+                            'data_type'     => $data['data_type'],
+                            'data_id'       => $data['data_id'],
+                            'provider_id'   => $data['provider_id']
+                        ],
+                        "For automatch reprocessing data_type: " . $data['data_type'] . ", data_id:  " . $data['data_id'] . ", provider_id: " . $data['provider_id'] . ", is_failed: FALSE",
+                    );
                     DB::commit();
                 }
             }
