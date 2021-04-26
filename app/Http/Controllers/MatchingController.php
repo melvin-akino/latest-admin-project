@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ActivityLog, MasterLeague, League, LeagueGroup, MasterEvent, Event, EventGroup};
+use App\Models\{ActivityLog, MasterLeague, League, MasterEvent, Event, EventGroup};
+use App\Facades\MatchingFacade
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -147,5 +148,10 @@ class MatchingController extends Controller
             'pageNum'     => $page,
             'pageData'    => $data
         ]);
+    }
+
+    public function reprocess()
+    {
+        return MatchingFacade::setAllFailedMatchingToFalse();
     }
 }
