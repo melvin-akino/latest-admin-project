@@ -118,6 +118,7 @@ class Event extends Model
             ->select('e.id', 'e.event_identifier', 'eg.master_event_id', 'e.provider_id', 'p.alias as provider', 'e.sport_id', 'l.name as league_name', 'th.name as team_home_name', 'ta.name as team_away_name', 'e.ref_schedule')
             ->orderBy('eg.master_event_id', 'asc')
             ->orderBy('e.provider_id', 'asc')
+            ->distinct()
             ->get();
     }
 
