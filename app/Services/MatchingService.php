@@ -843,12 +843,16 @@ class MatchingService
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
-                    'message'     => 'success'
+                    'message'     => "Reprocessed ".count($failedData)." data"
                 ], 200);
-
             }
             else {
                 Log::info('Matching: There are no more data in unmatched.');
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'No data to reprocess'
+                ], 200);
             }
         } catch (Exception $e) {
             DB::rollback();
