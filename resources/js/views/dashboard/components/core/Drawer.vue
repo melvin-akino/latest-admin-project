@@ -102,6 +102,33 @@ export default {
         icon: "mdi-cash-usd",
         title: "Currencies",
         to: "/currencies"
+      },
+      {
+        icon: "mdi-cash-multiple",
+        title: "Providers",
+        to: "/providers"
+      },
+      {
+        icon: "mdi-arrow-decision",
+        title: "Matching",
+        group: "/matching",
+        children: [
+          {
+            icon: "mdi-trophy",
+            title: "Leagues",
+            to: "leagues"
+          },
+          {
+            icon: "mdi-calendar-blank",
+            title: "Events",
+            to: "events"
+          },
+          {
+            icon: "mdi-history",
+            title: "History",
+            to: "history"
+          }
+        ]
       }
       // {
       //   title: "icons",
@@ -145,6 +172,14 @@ export default {
 <style lang="scss">
 @import '~vuetify/src/styles/tools/_rtl.sass';
 
+.item.v-list-item--active {
+  color: #ffffff !important; 
+}
+
+.item-group .v-list-group__header.v-list-item--active {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
 #core-navigation-drawer {
   .v-list-group__header.v-list-item--active:before {
     opacity: 0.24;
@@ -172,10 +207,6 @@ export default {
         margin-left: 24px;
         margin-right: 12px !important;
       }
-    }
-
-    &--active {
-      color: #ffffff !important;
     }
   }
 

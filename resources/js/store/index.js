@@ -6,12 +6,14 @@ Vue.use(Vuex)
 import auth from './auth'
 import users from './users'
 import admin from './admin'
+import providerAccounts from './providerAccounts'
 import providers from './providers'
-import resources from './resources'
+import currencies from './currencies'
 import systemConfigurations from './systemConfigurations'
 import generalErrors from './generalErrors'
 import providerErrors from './providerErrors'
 import wallet from './wallet'
+import masterlistMatching from './masterlistMatching'
 
 export default new Vuex.Store({
   state: {
@@ -43,11 +45,13 @@ export default new Vuex.Store({
     auth,
     users,
     admin,
+    providerAccounts,
     providers,
-    resources,
+    currencies,
     systemConfigurations,
     generalErrors,
     providerErrors,
-    wallet
+    wallet,
+    masterlistMatching
   }
 })

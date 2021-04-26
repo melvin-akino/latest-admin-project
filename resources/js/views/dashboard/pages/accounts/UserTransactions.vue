@@ -6,7 +6,7 @@
         <span v-if="search.date_from && search.date_to">({{search.date_from}} to {{search.date_to}})</span>
       </p>
       <div class="my-6">
-        <v-form @submit.prevent="getUserTransactions">
+        <v-form @submit.prevent="getUserTransactions(search)">
           <v-row>
             <v-col cols="12" md="4" class="formColumn">
               <v-text-field
@@ -119,6 +119,11 @@
         <template v-slot:[`item.profit_loss`]="{ item }">
           <span>{{ item.profit_loss | moneyFormat}}</span>
         </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Adjust Transaction" v-if="!item.settled_date">
+            <admin-settlement-form :order="item" type="user"></admin-settlement-form>
+          </table-action-dialog>
+        </template>
       </v-data-table>
     </v-container>
   </div>
@@ -138,6 +143,10 @@ function toDateValidation(value) {
 
 export default {
   name: 'UserTransactions',
+  components: {
+    TableActionDialog: () => import("../../component/TableActionDialog"),
+    AdminSettlementForm: () => import("../../components/forms/AdminSettlementForm"),
+  },
   data() {
     return {
       headers: [
@@ -152,6 +161,7 @@ export default {
         { text: 'VALID STAKE', value: 'valid_stake' },
         { text: 'P/L', value: 'profit_loss' },
         { text: 'REMARKS', value: 'reason' },
+        { text: '', value: 'actions' },
       ],
       search: {
         user_id: this.$route.params.id,
@@ -162,8 +172,6 @@ export default {
         currency_id: null
       },
       user: '',
-      userTransactions: [],
-      isLoadingUserTransactions: false,
       periods: [
         { text: 'All', value: 'all' },
         { text: 'Today', value: 'today' },
@@ -191,7 +199,9 @@ export default {
     }
   },
   computed: {
-    ...mapState('resources', ['providers', 'currencies']),
+    ...mapState('providers', ['providers']),
+    ...mapState('currencies', ['currencies']),
+    ...mapState('users', ['userTransactions', 'isLoadingUserTransactions']),
     fromDateErrors() {
       let errors = []
       !this.$v.search.date_from.required && errors.push('From date is required.')
@@ -208,31 +218,17 @@ export default {
     this.getProviders()
     this.getCurrencies()
     this.getUser()
-    this.getUserTransactions()
+    this.getUserTransactions(this.search)
   },
   methods: {
-    ...mapActions('resources', ['getProviders', 'getCurrencies']),
+    ...mapActions('currencies', ['getCurrencies']),
+    ...mapActions('providers', ['getProviders']),
     ...mapActions('auth', ['logoutOnError']),
+    ...mapActions('users', ['getUserTransactions']),
     getUser() {
       axios.get(`user/${this.$route.params.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
         this.user = `${response.data.firstname} ${response.data.lastname}`
-      })
-      .catch(err => {
-        this.logoutOnError(err.response.status)
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "error",
-          text: err.response.data.message
-        });
-      })
-    },
-    getUserTransactions() {
-      this.userTransactions = []
-      this.isLoadingUserTransactions = true
-      axios.get('orders/user', { params: this.search, headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        this.userTransactions = response.data
-        this.isLoadingUserTransactions = false
       })
       .catch(err => {
         this.logoutOnError(err.response.status)

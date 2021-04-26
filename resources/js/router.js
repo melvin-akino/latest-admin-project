@@ -42,7 +42,7 @@ const router = new Router({
               component: () => import('./views/dashboard/pages/accounts/UserTransactions'),
             },
             {
-              name: 'Providers',
+              name: 'Provider Accounts',
               path: 'providers',
               component: () => import('./views/dashboard/pages/accounts/Providers'),
             },
@@ -104,6 +104,43 @@ const router = new Router({
           name: 'Currencies',
           path: 'currencies',
           component: () => import('./views/dashboard/pages/Currencies')
+        },
+        {
+          name: 'Providers',
+          path: 'providers',
+          component: () => import('./views/dashboard/pages/Providers')
+        },
+        {
+          path: 'matching',
+          component: () => import('./views/dashboard/pages/MasterlistMatching'),
+          children: [
+            {
+              name: 'Leagues Matching',
+              path: 'leagues',
+              component: () => import('./views/dashboard/pages/matching/LeaguesMatching'),
+              meta: {
+                type: 'leagues'
+              }
+            },
+            // {
+            //   name: 'Team Matching',
+            //   path: 'teams',
+            //   component: () => import('./views/dashboard/pages/matching/MatchingTable')
+            // },
+            {
+              name: 'Events Matching',
+              path: 'events',
+              component: () => import('./views/dashboard/pages/matching/EventsMatching'),
+              meta: {
+                type: 'events'
+              }
+            },
+            {
+              name: 'Matching History',
+              path: 'history',
+              component: () => import('./views/dashboard/pages/matching/MatchingHistory'),
+            },
+          ]
         },
         {
           name: 'User Profile',

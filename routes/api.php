@@ -20,6 +20,7 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
     // public routes
     Route::post('/login', 'Auth\ApiAuthController@login')->name('login.api');
 });
+
 Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     // our routes to be protected will go in here
     Route::post('/logout', 'Auth\ApiAuthController@logout')->name('logout.api');
@@ -28,6 +29,11 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/admin-users/logs','AdminUsersController@getAdminActivityLogs')->name('admin-logs.api');
     Route::get('/admin-user/{id}','AdminUsersController@getAdminUser')->name('admin-user.api');
 
+    //Poviders routes
+    Route::get('/providers', 'ProvidersController@index')->name('providers.api');
+    Route::post('/providers/create', 'ProvidersController@create')->name('providers-create.api');
+    Route::post('/providers/update', 'ProvidersController@update')->name('providers-update.api');
+
     //Provider accounts routes
     Route::get('/provider-accounts', 'ProviderAccountsController@index')->name('provider-accounts.api');
     Route::post('/provider-accounts/manage', 'ProviderAccountsController@manage')->name('provider-accounts-manage.api');
@@ -35,16 +41,47 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
 
-
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
+    Route::get('/providers/non-primary', 'ProvidersController@getNonPrimaryProviders')->name('non-primary-providers.api');
+    
+    // Leagues routes
+    Route::prefix('leagues')->group(function() {
+        Route::post('/match', 'LeaguesController@postMatchLeagues')->name('match-leagues.api');
+        Route::post('/unmatch', 'LeaguesController@postUnmatchLeague')->name('unmatch-leagues.api');
+        Route::post('/toggle-priority', 'LeaguesController@togglePriority')->name('toggle-priority.api');
+        Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
+        Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
+        Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
+    });
+        
+    // Teams routes
+    Route::get('/raw-teams', 'TeamsController@getRawTeams')->name('teams.api');
+    Route::get('/matched-teams', 'TeamsController@getTeams')->name('matched-teams.api');
+    Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
+
+    // Events routes
+    Route::prefix('events')->group(function() {
+        Route::post('/match', 'EventGroupsController@match')->name('events-match.api');
+        Route::post('/unmatch', 'EventsController@postUnmatchEvent')->name('unmatch-events.api');
+        Route::get('/unmatched/league/{leagueId}', 'EventsController@getUnmatchedEventsByLeague')->name('unmatched-league-events.api');
+        Route::get('/unmatched/master-league/{masterLeagueId?}', 'EventsController@getUnmatchedEventsByMasterLeague')->name('unmatched-master-league-events.api');
+        Route::get('/matched/league/{leagueId?}', 'EventsController@getMatchedEventsByLeague')->name('matched-league-events.api');
+        Route::get('/matched/provider/{providerId}', 'EventsController@getMatchedEventsByProvider')->name('matched-provider-events.api');
+        Route::get('/matched', 'EventsController@getMatchedEvents')->name('matched-events.api');
+    });
+
+    Route::prefix('matching')->group(function () {
+        Route::get('/history', 'MatchingController@getHistory')->name('matching-history.api');
+    });
+
     //Routes to get all currencies
     Route::get('/currencies', 'CurrenciesController@index')->name('currencies.api');
 
     //Orders related routes
     Route::get('/orders', 'OrdersController@index')->name('orders.api');
-    Route::get('/orders/open', 'OrdersController@getUserOpenOrders')->name('open-orders.api');
     Route::get('/orders/user', 'OrdersController@getUserTransactions')->name('orders-user.api');
+    Route::post('/orders/update', 'OrdersController@update')->name('orders-update.api');
 
     //System configurations related routes
     Route::get('/system-configurations', 'SystemConfigurationsController@index')->name('system-configurations.api');
@@ -60,12 +97,12 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');
+    Route::get('/users/wallet', 'UsersController@getUsersWallet')->name('get-users-wallet.api');
     Route::post('/users/manage', 'UsersController@manage')->name('users-manage.api');
     Route::get('/user/{id}', 'UsersController@getUser')->name('get-user-by-id.api');
     Route::get('/user/uuid/{uuid}', 'UsersController@getUserByUuid')->name('get-user-by-uuid.api');
 
     //Wallet replated routes
-    Route::get('/users/wallet', 'WalletsController@getUserBalance')->name('users-wallet.api');
     Route::post('/wallet/token', 'WalletsController@getAccessToken')->name('wallet-token.api');
     Route::get('/wallet/clients', 'WalletsController@getClients')->name('wallet-clients.api');
     Route::post('/wallet/create', 'WalletsController@createClient')->name('wallet-create.api');

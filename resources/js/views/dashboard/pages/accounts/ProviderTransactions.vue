@@ -65,7 +65,7 @@
         </template>
         <template v-slot:[`item.actions`]="{ item }">
           <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Generate Settlement">
-            <admin-settlement-form :order="item"></admin-settlement-form>
+            <admin-settlement-form :order="item" type="providerAccount"></admin-settlement-form>
           </table-action-dialog>
         </template>
       </v-data-table>

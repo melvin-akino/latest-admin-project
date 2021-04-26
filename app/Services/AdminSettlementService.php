@@ -15,21 +15,38 @@ class AdminSettlementService
         DB::beginTransaction();
         try {
                 preg_match_all('!\d+!', $request->bet_id, $id);
+
+                $requestId = (string) Str::uuid();
                 //Generate kafka json payload here
-                $payload = 
-                [
-                    'provider'      => $request->provider,
-                    'sport'         => $request->sport,
-                    'id'            => $id[0][0],
-                    'username'      => $request->username,
-                    'status'        => $request->status,
-                    'odds'          => $request->odds,
-                    'score'         => $request->score,
-                    'stake'         => $request->stake,
-                    'profit_loss'   => $request->pl,
-                    'bet_id'        => $request->bet_id,
-                    'reason'        => $request->reason
+
+                $payload = [
+
+                    'request_id'    => $requestId,
+                    'request_ts'    => getMilliseconds(),
+                    'command'       => 'settlement',
+                    'sub_command'   => 'transform',
+                    'data' => [
+                        'provider'      => $request->provider,
+                        'sport'         => $request->sport,
+                        'id'            => $id[0][0],
+                        'username'      => $request->username,
+                        'status'        => $request->status,
+                        'odds'          => $request->odds,
+                        'score'         => $request->score,
+                        'stake'         => $request->stake,
+                        'profit_loss'   => $request->pl,
+                        'bet_id'        => $request->bet_id,
+                        'reason'        => $request->reason
+                    ]
+
                 ];
+
+                $topic = env('KAFKA_SCRAPE_SETTLEMENTS', 'SCRAPING-SETTLEMENTS');
+
+                if (!in_array(env('APP_ENV'), ['testing'])) {
+                    kafkaPush($topic, $payload, $requestId);
+                 }
+
                 $settlement = new AdminSettlement([
                     'reason'    => $request->reason,
                     'payload'   => serialize(json_encode($payload)),

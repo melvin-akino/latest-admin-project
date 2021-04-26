@@ -1,11 +1,10 @@
-import Vue from 'vue'
-import { getToken, getWalletToken } from '../helpers/token'
+import Vue from "vue"
+import { getToken } from '../helpers/token'
 import bus from '../eventBus'
 
 const state = {
-  providerAccounts: [],
-  filteredProviderAccounts: [],
-  isLoadingProviderAccounts: false,
+  providers: [],
+  isLoadingProviders: false,
   providerStatus: [
     {
       text: 'Active',
@@ -16,147 +15,78 @@ const state = {
       value: false
     }
   ],
-  providerAccountTypes: ['BET_NORMAL', 'BET_VIP', 'SCRAPER', 'SCRAPER_MIN_MAX'],
-  providerIdleOptions: [
-    {
-      text: 'Yes',
-      value: true
-    },
-    {
-      text: 'No',
-      value: false
-    }
-  ]
+}
+
+const getters = {
+  providerFilters(state) {
+    let allOption = { text: 'All', value: 'all' }
+    let filters = [allOption]
+    state.providers.map(provider => {
+      let option = { text: provider.alias, value: provider.id }
+      filters.push(option)
+    })
+    return filters
+  },
+  sortedProviders(state) {
+    return state.providers.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+  }
 }
 
 const mutations = {
-  SET_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
-    state.providerAccounts = providerAccounts
+  SET_PROVIDERS: (state, providers) => {
+    state.providers = providers
   },
-  SET_FILTERED_PROVIDER_ACCOUNTS: (state, providerAccounts) => {
-    state.filteredProviderAccounts = providerAccounts
+  SET_IS_LOADING_PROVIDERS: (state, loadingState) => {
+    state.isLoadingProviders = loadingState
   },
-  SET_IS_LOADING_PROVIDER_ACCOUNTS: (state, loadingState) => {
-    state.isLoadingProviderAccounts = loadingState
+  ADD_PROVIDER: (state, newProvider) => {
+    state.providers.push(newProvider)
   },
-  ADD_PROVIDER_ACCOUNT: (state, providerAccount) => {
-    let newProviderAccount = {
-      id: providerAccount.id,
-      username: providerAccount.username,
-      password: providerAccount.password,
-      type: providerAccount.type,
-      punter_percentage: providerAccount.punter_percentage,
-      credits: 0,
-      is_enabled: providerAccount.is_enabled,
-      is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id,
-      currency_id: providerAccount.currency_id,
-      uuid: providerAccount.uuid,
-      pl: '-',
-      open_orders: '-',
-      last_bet: '-',
-      last_scrape: '-',
-      last_sync: '-'
+  UPDATE_PROVIDER: (state, updatedProvider) => {
+    let providerToUpdate = {
+      alias: updatedProvider.alias,
+      punter_percentage: updatedProvider.punter_percentage,
+      is_enabled: updatedProvider.is_enabled,
+      currency_id: updatedProvider.currency_id,
+      updated_at: updatedProvider.updated_at
     }
-    state.providerAccounts.unshift(newProviderAccount)
-  },
-  UPDATE_PROVIDER_ACCOUNT: (state, providerAccount) => {
-    let updatedProviderAccount = {
-      username: providerAccount.username,
-      password: providerAccount.password,
-      type: providerAccount.type,
-      punter_percentage: providerAccount.punter_percentage,
-      is_enabled: providerAccount.is_enabled,
-      is_idle: providerAccount.is_idle,
-      provider_id: providerAccount.provider_id,
-      currency_id: providerAccount.currency_id
-    }
-    state.providerAccounts.map(account => {
-      if (account.id == providerAccount.id) {
-        Object.keys(updatedProviderAccount).map(key => {
-          Vue.set(account, key, updatedProviderAccount[key])
-        })
+
+    state.providers.map(provider => {
+      if(provider.name == updatedProvider.name) {
+        Object.keys(providerToUpdate).map(key => {
+          Vue.set(provider, key, providerToUpdate[key])
+        }) 
       }
-    });
+    })
   }
 }
 
 const actions = {
-  getProviderAccounts({dispatch}) { 
-    return new Promise((resolve, reject) => {
-      axios.get('provider-accounts', { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        resolve(response.data.data)
-      })
-      .catch(err => {
-        if(!axios.isCancel(err)) {
-          reject(err)
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-        }
-      })
+  getProviders({commit, dispatch}, non_primary = false) {
+    commit('SET_IS_LOADING_PROVIDERS', true)
+    let path = non_primary ? 'providers/non-primary' : 'providers'
+    axios.get(path, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_PROVIDERS', response.data.data)
+      commit('SET_IS_LOADING_PROVIDERS', false)
+    })
+    .catch(err => {
+      commit('SET_PROVIDERS', [])
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
     })
   },
-  getProviderAccountOrders({dispatch}, id) {
+  addProvider({commit, dispatch}, provider) {
     return new Promise((resolve, reject) => {
-      axios.get('orders', { params: { id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.post('providers/create', provider, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        resolve(response.data)
-      })
-      .catch(err => {
-        if(!axios.isCancel(err)) {
-          reject(err)
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-        }
-      })
-    })
-  },
-  async getProviderAccountsList({state, commit, dispatch}) {
-    try {
-      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
-      let providerAccounts = await dispatch('getProviderAccounts')
-      commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
-      commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
-      commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
-      let providerAccountOtherData = ['pl', 'open_orders', 'last_bet', 'last_scrape', 'last_sync']
-      state.providerAccounts.map(async account => {
-        let providerAccountOrder = await dispatch('getProviderAccountOrders', account.id)
-        let wallet = await dispatch('wallet/getWalletBalance', { uuid: account.uuid, currency: account.currency, wallet_token: getWalletToken() }, { root: true })
-        if(providerAccountOrder.length != 0) {
-          providerAccountOtherData.map(key => {
-            Vue.set(account, key, providerAccountOrder[key])
-          })
-        } else {
-          providerAccountOtherData.map(key => {
-            Vue.set(account, key, '-')
-          })
-        }
-        if(wallet) {
-          Vue.set(account, 'credits', wallet.balance)
-        } else {
-          Vue.set(account, 'credits', '-')
-        }
-      })
-    } catch(err) {
-      commit('SET_PROVIDER_ACCOUNTS', [])
-      commit('SET_FILTERED_PROVIDER_ACCOUNTS', [])
-      bus.$emit("SHOW_SNACKBAR", {
-        color: "error",
-        text: err.response.data.message
-      });
-    }
-  },
-  manageProviderAccount({commit, dispatch, rootState}, payload) {
-    return new Promise((resolve, reject) => {
-      axios.post('provider-accounts/manage', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        let currency = rootState.resources.providers.filter(provider => provider.id == response.data.data.provider_id).map(provider => provider.currency_id)
-        Vue.set(response.data.data, 'currency_id', currency[0])
-        if(payload.id) {
-          commit('UPDATE_PROVIDER_ACCOUNT', response.data.data)
-        } else {
-          commit('ADD_PROVIDER_ACCOUNT', response.data.data)
-        }
-        resolve()
+        commit('ADD_PROVIDER', response.data.data)
+        resolve(response.data.message)
       })
       .catch(err => {
         reject(err)
@@ -164,10 +94,11 @@ const actions = {
       })
     })
   },
-  createSettlement({dispatch}, payload) {
+  updateProvider({commit, dispatch}, provider) {
     return new Promise((resolve, reject) => {
-      axios.post('settlements/create', payload, { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      axios.post('providers/update', provider, { headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
+        commit('UPDATE_PROVIDER', response.data.data)
         resolve(response.data.message)
       })
       .catch(err => {
@@ -179,5 +110,5 @@ const actions = {
 }
 
 export default {
-  state, mutations, actions, namespaced: true
+  state, getters, mutations, actions, namespaced: true
 }
