@@ -817,4 +817,35 @@ class MatchingService
             ], 500);
         }
     }
+
+    public static function setAllFailedMatchingToFalse() 
+    {
+        try {
+            $matching = new Matching;
+
+            $failedData = UnmatchedData::getAllFailedData();
+
+            if (count($failedData) > 0) 
+            {
+                foreach($failedData as $data) 
+                {
+                    DB::beginTransaction();
+                    Log::info('Matching: Setting data_type: ' . $data['data_type'] . ', data_id: '.$data['data_id'] . ', provider_id: ' . $data['provider_id'] . ' to FALSE.');    
+                    $matching->updateOrCreate('UnmatchedData', [
+                        'data_type'     => $data['data_type'],
+                        'data_id'       => $data['data_id'],
+                        'provider_id'   => $data['provider_id']
+                    ],
+                    ['is_failed'     => false]);
+                    DB::commit();
+                }
+            }
+            else {
+                Log::info('Matching: There are no more data in unmatched.');
+            }
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+        }
+    }
 }

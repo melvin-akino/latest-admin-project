@@ -73,6 +73,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
 
     Route::prefix('matching')->group(function () {
         Route::get('/history', 'MatchingController@getHistory')->name('matching-history.api');
+        Route::get('/reprocess', 'MatchingController@reprocess')->name('matching-reprocess.api');
     });
 
     //Routes to get all currencies

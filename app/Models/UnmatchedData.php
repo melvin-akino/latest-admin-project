@@ -63,4 +63,9 @@ class UnmatchedData extends Model
             ->get()
             ->toArray();
     }
+
+    public static function getAllFailedData()
+    {
+        return self::where('is_failed', true)->get()->toArray();
+    }
 }
