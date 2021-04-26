@@ -678,8 +678,8 @@ class MatchingService
                         'Events Matching',
                         'EventGroup', // indicate sub-folder if necessary
                         [
-                            'master_team_id' => $event->master_event_id,
-                            'team_id'        => $event->id
+                            'master_event_id' => $event->master_event_id,
+                            'event_id'        => $event->id
                         ],
                         "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
                     );
