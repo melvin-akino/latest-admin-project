@@ -47,6 +47,13 @@ class EventGroup extends Model
         return "Matched Raw Event ID " . $this->event_id . " to " . $this->master_event_id;
     }
 
+    public static function checkMatchExist(int $masterId, int $rawId): bool
+    {
+        return self::where('master_event_id', $masterId)    
+            ->where('event_id', $rawId)
+            ->count();
+    }
+
     public static function getByEventId($eventId)
     {
         return self::where('event_id', $eventId)->get();

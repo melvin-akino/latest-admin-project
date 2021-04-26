@@ -26,12 +26,11 @@ class MasterEvent extends Model
         'updated_at',
     ];
 
-    public static function getEventInfo(int $masterId, int $rawId)
+    public static function getEventInfo(int $masterId)
     {
         $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 
-        $query = self::find($masterId)
-            ->join('event_groups AS egp', 'egp.master_event_id', 'master_events.id')
+        return self::join('event_groups AS egp', 'egp.master_event_id', 'master_events.id')
             ->join('events AS ep', function ($join) use ($primaryProviderId) {
                 $join->on('ep.id', 'egp.event_id');
                 $join->where('ep.provider_id', $primaryProviderId);
@@ -40,32 +39,16 @@ class MasterEvent extends Model
             ->join('teams AS thp', 'thp.id', 'ep.team_home_id')
             ->join('teams AS tap', 'tap.id', 'ep.team_away_id')
             ->join('providers AS pp', 'ep.provider_id', 'pp.id')
-            ->join('event_groups AS egs', 'egs.master_event_id', 'master_events.id')
-            ->join('events AS es', function ($join) use ($rawId) {
-                $join->on('es.id', 'egs.event_id');
-                $join->where('es.id', $rawId);
-            })
-            ->join('leagues AS ls', 'ls.id', 'es.league_id')
-            ->join('teams AS ths', 'ths.id', 'es.team_home_id')
-            ->join('teams AS tas', 'tas.id', 'es.team_away_id')
-            ->join('providers AS ps', 'es.provider_id', 'ps.id')
+            ->where('master_events.id', $masterId)
             ->select([
                 'pp.alias AS primary_alias',
-                'ps.alias AS secondary_alias',
                 'ep.event_identifier AS primary_event_id',
-                'es.event_identifier AS secondary_event_id',
                 DB::raw("COALESCE(lp.name, lp.name) AS primary_league_name"),
-                DB::raw("ls.name AS secondary_league_name"),
                 DB::raw("COALESCE(thp.name, thp.name) AS primary_team_home_name"),
-                DB::raw("ths.name AS secondary_team_home_name"),
                 DB::raw("COALESCE(tap.name, tap.name) AS primary_team_away_name"),
-                DB::raw("tas.name AS secondary_team_away_name"),
                 'ep.ref_schedule AS primary_ref_schedule',
-                'es.ref_schedule AS secondary_ref_schedule',
             ])
             ->first();
-
-        return $query;
     }
 
     public function eventGroups()
