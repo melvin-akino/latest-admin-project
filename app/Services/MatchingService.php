@@ -824,32 +824,28 @@ class MatchingService
             $matching = new Matching;
 
             $failedData = UnmatchedData::getAllFailedData();
-
+            
             if (count($failedData) > 0) 
             {
-                foreach($failedData as $data) 
-                {
-                    DB::beginTransaction();
-                    Log::info('Matching: Setting data_type: ' . $data['data_type'] . ', data_id: '.$data['data_id'] . ', provider_id: ' . $data['provider_id'] . ' to FALSE.');    
-                    $matching->updateOrCreate('UnmatchedData', [
-                        'data_type'     => $data['data_type'],
-                        'data_id'       => $data['data_id'],
-                        'provider_id'   => $data['provider_id']
-                    ],
+
+                DB::beginTransaction();    
+                $matching->updateOrCreate('UnmatchedData', 
+                    ['is_failed'     => true],
                     ['is_failed'     => false]);
 
-                    self::logActivity(
-                        'Matching Reprocess',
-                        'UnmatchedData', // indicate sub-folder if necessary
-                        [
-                            'data_type'     => $data['data_type'],
-                            'data_id'       => $data['data_id'],
-                            'provider_id'   => $data['provider_id']
-                        ],
-                        "For automatch reprocessing data_type: " . $data['data_type'] . ", data_id:  " . $data['data_id'] . ", provider_id: " . $data['provider_id'] . ", is_failed: FALSE",
-                    );
-                    DB::commit();
-                }
+                self::logActivity(
+                    'Matching Reprocess',
+                    'UnmatchedData', // indicate sub-folder if necessary
+                    $failedData,
+                    "For automatch reprocessing all failed in automatching set is_failed=FALSE",
+                );
+                DB::commit();
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'success'
+                ], 200);
+
             }
             else {
                 Log::info('Matching: There are no more data in unmatched.');
@@ -857,6 +853,11 @@ class MatchingService
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
         }
     }
 }

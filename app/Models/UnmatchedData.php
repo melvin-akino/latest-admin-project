@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 class UnmatchedData extends Model
 {
     protected $table = "unmatched_data";
@@ -66,6 +66,10 @@ class UnmatchedData extends Model
 
     public static function getAllFailedData()
     {
-        return self::where('is_failed', true)->get()->toArray();
+        return self::where('is_failed', true)
+            ->select('data_type', DB::raw('count(data_type) as type_count'))
+            ->groupBy('data_type')
+            ->get()
+            ->toArray();
     }
 }
