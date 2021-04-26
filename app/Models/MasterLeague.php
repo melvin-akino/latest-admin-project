@@ -29,7 +29,6 @@ class MasterLeague extends Model
         return $this->hasMany(LeagueGroup::class, 'master_league_id', 'id');
     }
 
-    # App\Models\MasterLeague::getLeagueBaseName(9)
     public static function getLeagueBaseName(int $masterId)
     {
         $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
@@ -40,7 +39,10 @@ class MasterLeague extends Model
                 $join->where('l.provider_id', $primaryProviderId);
             })
             ->where('master_leagues.id', $masterId)
-            ->select(DB::raw("COALESCE(master_leagues.name, l.name) AS leaguename"))
+            ->select([
+                DB::raw("COALESCE(master_leagues.name, l.name) AS leaguename"),
+                DB::raw("'" . SC::getValueByType('PRIMARY_PROVIDER') . "' AS provider")
+            ])
             ->first();
 
         return $query;

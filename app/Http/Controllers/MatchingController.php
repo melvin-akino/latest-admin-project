@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ActivityLog, MasterLeague, League, MasterEvent, Event, EventGroup};
+use App\Models\{ActivityLog, MasterLeague, League, MasterEvent, Event, EventGroup, Provider};
 use App\Facades\MatchingFacade;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,7 +31,16 @@ class MatchingController extends Controller
                 $getRaw                = League::withTrashed()->find($props->attributes->league_id);
 
                 if ($props->ip_address == $autoMatchIP) {
-                    $description = [ 'master' => $getMaster->leaguename, 'raw' => $getRaw->name ];
+                    $description = [
+                        'master' => [
+                            'name'     => $getMaster->leaguename,
+                            'provider' => strtoupper($getMaster->provider),
+                        ],
+                        'raw' => [
+                            'name'     => $getRaw->name,
+                            'provider' => strtoupper(Provider::find($getRaw->provider_id)->alias),
+                        ]
+                    ];
                     $action      = "Auto-Matched";
                     $options     = [
                         'type'        => 'leagues',
@@ -44,7 +53,16 @@ class MatchingController extends Controller
                     $checkRawEventProvider = League::checkRawLeagueProvider($props->attributes->league_id);
 
                     if ($checkRawEventProvider) {
-                        $description = "From Auto-Matching";
+                        $description = [
+                            'master' => [
+                                'name'     => $getMaster->leaguename,
+                                'provider' => strtoupper($getMaster->provider),
+                            ],
+                            'raw' => [
+                                'name'     => $getRaw->name,
+                                'provider' => strtoupper(Provider::find($getRaw->provider_id)->alias),
+                            ]
+                        ];
                         $action      = "Auto-Matched";
                         $options     = [
                             'type'        => 'league',
@@ -54,7 +72,16 @@ class MatchingController extends Controller
                             'provider_id' => $getRaw->provider_id,
                         ];
                     } else {
-                        $description = [ 'master' => $getMaster->leaguename, 'raw' => $getRaw->name ];
+                        $description = [
+                            'master' => [
+                                'name'     => $getMaster->leaguename,
+                                'provider' => strtoupper($getMaster->provider),
+                            ],
+                            'raw' => [
+                                'name'     => $getRaw->name,
+                                'provider' => strtoupper(Provider::find($getRaw->provider_id)->alias),
+                            ]
+                        ];
                         $action      = strtolower($props->action) == "deleted" ? "Unmatched" : "Matched";
                         $options     = [
                             'type'        => 'leagues',

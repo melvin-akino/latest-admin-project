@@ -15,7 +15,10 @@
                     <div v-if="item.options.type == 'leagues'" class="events-desc">
                         <table>
                             <tr>
-                                <td>{{ item.description.master }}</td> <td>LEAGUE NAME</td> <td>{{ item.description.raw }}</td>
+                                <td>{{ item.description.master.provider }}</td> <td>PROVIDER</td> <td>{{ item.description.raw.provider }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ item.description.master.name }}</td> <td>LEAGUE NAME</td> <td>{{ item.description.raw.name }}</td>
                             </tr>
                         </table>
                     </div>
