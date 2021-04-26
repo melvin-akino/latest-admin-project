@@ -6,6 +6,7 @@
     :to="item.to"
     :active-class="`primary ${!isDark ? 'black' : 'white'}--text`"
     class="item"
+    :class="{ 'listClicked' : hasClickEvent }"
   >
     <v-list-item-icon>
       <v-icon v-text="item.icon" />
@@ -39,6 +40,10 @@
         }),
       },
       text: {
+        type: Boolean,
+        default: false,
+      },
+      hasClickEvent: {
         type: Boolean,
         default: false,
       },
