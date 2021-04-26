@@ -2,14 +2,23 @@
     <div class="history pa-6">
         <v-container>
             <v-toolbar flat color="transparent">
-                <v-autocomplete :items="matchingFilters" label="-- Select Filter --" clearable class=""></v-autocomplete>
+                <v-autocomplete :items="matchingFilters" v-model="searchKey" label="-- Select Filter --" clearable></v-autocomplete>
             </v-toolbar>
-            <v-data-table :headers="headers" :items="activityLog" :items-per-page="10" :loading="isLoadingActivityLog" loading-text="Loading Matching History log">
+            <v-data-table :headers="headers" :items="activityLog" :items-per-page="10" :loading="isLoadingActivityLog" loading-text="Loading Matching History log" :server-items-length="totalRows" :options.sync="options">
+                <template v-slot:[`item.log_name`]="{ item }">
+                    <div :class="{'match': item.action == 'Matched', 'unmatch': item.action == 'Unmatched' }">
+                        {{ item.log_name }}
+                    </div>
+                </template>
+
                 <template v-slot:[`item.description`]="{ item }">
                     <div v-if="item.options.type == 'leagues'" class="events-desc">
                         <table>
                             <tr>
-                                <td>{{ item.description.master }}</td> <td>LEAGUE NAME</td> <td>{{ item.description.raw }}</td>
+                                <td>{{ item.description.master.provider }}</td> <td>PROVIDER</td> <td>{{ item.description.raw.provider }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ item.description.master.name }}</td> <td>LEAGUE NAME</td> <td>{{ item.description.raw.name }}</td>
                             </tr>
                         </table>
                     </div>
@@ -62,13 +71,12 @@
         data:() => ({
             headers: [
                 { text: 'LOG TYPE', value: 'log_name' },
-                { text: 'ACTION', value: 'action' },
+                { text: 'ACTION', value: 'action', sortable: false },
                 { text: 'DESCRIPTION', value: 'description', sortable: false, align: 'center' },
                 { text: 'IP ADDRESS', value: 'ip_address', sortable: false, align: 'center' },
                 { text: 'CREATED DATE', value: 'created_at' },
                 // { text: '', value: 'unmatch' },
             ],
-            search: '',
             activityLog: [],
             isLoadingActivityLog: false,
             matchingFilters: [
@@ -76,17 +84,17 @@
                 'Events',
             ],
             fromAutoMatching: ['league', 'event'],
+            totalRows: 0,
+            searchKey: '',
+            options: {},
         }),
-        mounted() {
-            this.getMatchingHistoryLog()
-        },
         methods: {
             ...mapActions('auth', ['logoutOnError']),
-            getMatchingHistoryLog() {
+            getMatchingHistoryLog(params) {
                 this.isLoadingActivityLog = true
-                axios.get('matching/history', { params: {}, headers: { 'Authorization': `Bearer ${getToken()}` } })
+                axios.get('matching/history', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
                     .then(response => {
-                        console.log(response.data.pageData)
+                        this.totalRows = response.data.total
                         this.activityLog = response.data.pageData
                         this.isLoadingActivityLog = false
                     })
@@ -111,11 +119,34 @@
                 //         });
                 //     })
             }
-        }
+        },
+        watch: {
+            options: {
+                deep: true,
+                handler(value) {
+                    let params = {
+                        page: value.page,
+                        limit: value.itemsPerPage != -1 ? value.itemsPerPage : this.totalRows,
+                        sortOrder: value.sortDesc[0] ? 'asc' : 'desc',
+                        searchKey: value.searchKey
+                    }
+
+                    this.getMatchingHistoryLog(params)
+                }
+            },
+            searchKey(value) {
+                this.$set(this.options, 'searchKey', value)
+                this.options.page = 1
+            },
+        },
     }
 </script>
 
 <style lang="scss">
+    .history .v-toolbar__content {
+        width: 10vw;
+    }
+
     .history p {
         margin-bottom: 0;
     }
