@@ -39,9 +39,39 @@
         v-else
         :key="`item-${i}`"
         :item="child"
+        :hasClickEvent="child.hasClickEvent"
         text
       />
     </template>
+    <button-dialog activator=".listClicked" :width="500">
+      <v-card>
+        <v-toolbar color="primary" dark height="40px">
+          <v-toolbar-title class="text-uppercase subtitle-1"
+            >Confirm Reprocess Data</v-toolbar-title
+          >
+          <v-spacer></v-spacer>
+          <v-btn @click="closeDialog" icon>
+            <v-icon dark>mdi-close-circle</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="text-center">
+          <v-progress-circular
+            indeterminate
+            color="success"
+            :size="50"
+            v-if="isSubmitting"
+          ></v-progress-circular>
+          <p class="font-weight-regular text-center mt-4">{{ isSubmitting ? 'Reprocessing data...' : 'Click "Confirm" to proceed data re-processing...' }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn dark right class="red darken-2" @click="closeDialog"
+            >Cancel</v-btn
+          >
+          <v-btn dark right class="success" @click="reProcess">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </button-dialog>
   </v-list-group>
 </template>
 
@@ -49,10 +79,16 @@
   // Utilities
   import kebabCase from 'lodash/kebabCase'
   import { mapState } from 'vuex'
+  import bus from '../../eventBus'
+  import { getToken } from '../../helpers/token'
+  import { mapActions } from 'vuex'
 
   export default {
     name: 'ItemGroup',
 
+    components: {
+      ButtonDialog: () => import('../../views/dashboard/component/ButtonDialog')
+    },
     inheritAttrs: false,
 
     props: {
@@ -73,6 +109,12 @@
         type: Boolean,
         default: false,
       },
+    },
+
+    data() {
+      return {
+        isSubmitting: false
+      }
     },
 
     computed: {
@@ -100,6 +142,31 @@
     },
 
     methods: {
+      ...mapActions('auth', ['logoutOnError']),
+      closeDialog() {
+        bus.$emit('CLOSE_DIALOG')
+      },
+      reProcess() {
+        this.isSubmitting = true
+        axios.get('matching/reprocess', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+        .then(response => {
+          this.closeDialog()
+          this.isSubmitting = false
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: response.data.message
+          });
+        })
+        .catch(err => {
+          if(!axios.isCancel(err)) {
+            this.logoutOnError(err.response.status)
+            bus.$emit("SHOW_SNACKBAR", {
+              color: "error",
+              text: err.response.data.message
+            });
+          }
+        })
+      },
       genGroup (children) {
         return children
           .filter(item => item.to)
