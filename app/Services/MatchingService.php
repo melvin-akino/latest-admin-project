@@ -633,12 +633,12 @@ class MatchingService
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
                         'data_type'     => 'team',
-                        'data_id'       => $event['team_home_id'],
+                        'data_id'       => $event->team_home_id,
                         'provider_id'   => $request->provider_id
                     ],
                     ['is_failed'     => false]);
 
-                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$request->provider_id);
 
                     //Delete this away team from the team groups table
                     $matching->delete('TeamGroup', [
@@ -660,11 +660,11 @@ class MatchingService
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
                         'data_type'     => 'team',
-                        'data_id'       => $event['team_away_id'],
+                        'data_id'       => $event->team_away_id,
                         'provider_id'   => $request->provider_id
                     ],
                     ['is_failed'     => false]);
-                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event['team_home_id'].' - provider_id:'.$request->provider_id);
+                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$request->provider_id);
 
 
                     //Delete this event from the event groups table
@@ -687,10 +687,10 @@ class MatchingService
                     //Add this home team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
                         'data_type'     => 'event',
-                        'data_id'       => $event['id'],
+                        'data_id'       => $event->id,
                         'provider_id'   => $request->provider_id
                     ],['is_failed'     => false]);
-                    Log::info('Matching: Recreating unmatched data for event_id:'.$event['id'].' - provider_id:'.$request->provider_id);
+                    Log::info('Matching: Recreating unmatched data for event_id:'.$event->id.' - provider_id:'.$request->provider_id);
                 }
             }
 
