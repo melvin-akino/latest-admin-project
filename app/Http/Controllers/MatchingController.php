@@ -29,7 +29,6 @@ class MatchingController extends Controller
             if (strpos($row->log_name, 'Leagues') !== false) {
                 $getMaster             = MasterLeague::getLeagueBaseName($props->attributes->master_league_id);
                 $getRaw                = League::withTrashed()->find($props->attributes->league_id);
-                $checkRawEventProvider = League::checkRawLeagueProvider($props->attributes->league_id);
 
                 if ($props->ip_address == $autoMatchIP) {
                     $description = [
@@ -51,9 +50,9 @@ class MatchingController extends Controller
                         'provider_id' => $getRaw->provider_id,
                     ];
                 } else {
-                    $checkRawEventProvider = League::checkRawLeagueProvider($props->attributes->league_id);
+                    $checkRawLeagueProvider = League::checkRawLeagueProvider($props->attributes->league_id);
 
-                    if ($checkRawEventProvider) {
+                    if ($checkRawLeagueProvider) {
                         $description = [
                             'master' => [
                                 'name'     => $getMaster->leaguename,
