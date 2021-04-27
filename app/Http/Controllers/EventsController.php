@@ -90,8 +90,9 @@ class EventsController extends Controller
         $paginated    = $request->has('paginated') ? $request->paginated : false;
         $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
         $leagueId     = $leagueId ? [$leagueId] : [];
+        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 
-        $events = Event::getEvents($leagueId, null, true, '', $sortOrder, $gameSchedule);
+        $events = Event::getEvents($leagueId, $providerId, true, '', $sortOrder, $gameSchedule);
 
         return response()->json([
             'status'      => true,

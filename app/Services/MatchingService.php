@@ -678,8 +678,8 @@ class MatchingService
                         'Events Matching',
                         'EventGroup', // indicate sub-folder if necessary
                         [
-                            'master_team_id' => $event->master_event_id,
-                            'team_id'        => $event->id
+                            'master_event_id' => $event->master_event_id,
+                            'event_id'        => $event->id
                         ],
                         "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
                     );
@@ -786,8 +786,8 @@ class MatchingService
                     'Events Matching',
                     'EventGroup', // indicate sub-folder if necessary
                     [
-                        'master_team_id' => $event->master_event_id,
-                        'team_id'        => $event->id
+                        'master_event_id' => $event->master_event_id,
+                        'event_id'        => $event->id
                     ],
                     "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
                 );
@@ -805,6 +805,53 @@ class MatchingService
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => 'success'
+                ], 200);
+            }
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public static function setAllFailedMatchingToFalse() 
+    {
+        try {
+            $matching = new Matching;
+
+            $failedData = UnmatchedData::getAllFailedData();
+            
+            if (count($failedData) > 0) 
+            {
+
+                DB::beginTransaction();    
+                $matching->updateOrCreate('UnmatchedData', 
+                    ['is_failed'     => true],
+                    ['is_failed'     => false]);
+
+                self::logActivity(
+                    'Matching Reprocess',
+                    'UnmatchedData', // indicate sub-folder if necessary
+                    $failedData,
+                    "For automatch reprocessing all failed in automatching set is_failed=FALSE",
+                );
+                DB::commit();
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => "Reprocessed ".count($failedData)." data"
+                ], 200);
+            }
+            else {
+                Log::info('Matching: There are no more data in unmatched.');
+                return response()->json([
+                    'status'      => true,
+                    'status_code' => 200,
+                    'message'     => 'No data to reprocess'
                 ], 200);
             }
         } catch (Exception $e) {

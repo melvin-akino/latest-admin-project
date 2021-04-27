@@ -135,7 +135,8 @@ export default {
       }
     ],
     search: null,
-    page: 1
+    page: 1,
+    currentItems: []
   }),
   computed: {
     ...mapState('users', ['users', 'userStatus', 'isLoadingUsers']),
@@ -173,11 +174,10 @@ export default {
     },
     getPage(pagination) {
       this.page = pagination.page
-    },
-    getWalletDataForCurrentItems(users) {
-      if(users.length != 0) {
+
+      if(this.currentItems.length != 0) {
         let noWalletData = []
-        users.map(user => {
+        this.currentItems.map(user => {
           if(!user.hasOwnProperty('credits') && !user.hasOwnProperty('currency')) {
             noWalletData.push({ uuid: user.uuid, currency: user.currency_code })
           }
@@ -187,6 +187,9 @@ export default {
           this.getUserWalletForCurrentItems(noWalletData)
         }
       }
+    },
+    getWalletDataForCurrentItems(users) {
+      this.currentItems = users
     }
   },
   filters: {

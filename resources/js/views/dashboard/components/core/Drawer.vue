@@ -116,17 +116,25 @@ export default {
           {
             icon: "mdi-trophy",
             title: "Leagues",
-            to: "leagues"
+            to: "leagues",
+            hasClickEvent: false
           },
           {
             icon: "mdi-calendar-blank",
             title: "Events",
-            to: "events"
+            to: "events",
+            hasClickEvent: false
           },
           {
             icon: "mdi-history",
             title: "History",
-            to: "history"
+            to: "history",
+            hasClickEvent: false
+          },
+          {
+            icon: "mdi-refresh-circle",
+            title: "Reprocess Data",
+            hasClickEvent: true
           }
         ]
       }

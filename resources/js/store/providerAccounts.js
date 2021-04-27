@@ -100,7 +100,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.get('orders', { params: { id }, headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
-        resolve(response.data)
+        resolve(response.data.data)
       })
       .catch(err => {
         if(!axios.isCancel(err)) {
