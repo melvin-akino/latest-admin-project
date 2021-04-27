@@ -40,6 +40,24 @@ class Event extends Model
         return $primaryProviderId == $query ? true : false;
     }
 
+    public static function getEventData(int $rawId)
+    {
+        return self::withTrashed()->join('leagues AS l', 'l.id', 'events.league_id')
+            ->join('teams AS th', 'th.id', 'events.team_home_id')
+            ->join('teams AS ta', 'ta.id', 'events.team_away_id')
+            ->join('providers AS p', 'p.id', 'events.provider_id')
+            ->where('events.id', $rawId)
+            ->select([
+                'p.alias AS alias',
+                'events.event_identifier AS event_id',
+                'l.name AS league_name',
+                'th.name AS team_home_name',
+                'ta.name AS team_away_name',
+                'events.ref_schedule AS ref_schedule'
+            ])
+            ->first();
+    }
+
     /**
      * Get `events` data by League, also allowing to choose from `raw` or `existing match`
      * 
