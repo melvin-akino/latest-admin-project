@@ -240,7 +240,7 @@ class MatchingService
                     
                     //if not, check if event has similar league, home team, away team and ref sched filtered by hour and currently soft deleted and hasEventGroups
                     $event = Event::getSoftDeletedEvent($unmatchedEvent);
-                    Log::info('Getting softdeleted event with the same info as this event:');
+                    Log::info('Getting soft deleted event with the same info as this event:');
                     Log::info((array) $event);
                     //if yes, reuse master event 
                     if ($event) {
@@ -460,7 +460,7 @@ class MatchingService
                         if ($pt['name'] === $team['name'])
                         {
                             DB::beginTransaction();
-                            Log::info('Found a league for automatching with master_team_id: ' . $pt['master_team_id']);    
+                            Log::info('Found a team for automatching with master_team_id: ' . $pt['master_team_id']);    
                             $matching->create('TeamGroup', [
                                 'master_team_id' => $pt['master_team_id'],
                                 'team_id'        => $team['data_id']
@@ -474,7 +474,7 @@ class MatchingService
                         else {
                             //update the is_failed to true here
                             DB::beginTransaction();
-                            Log::info('No primay team found for automatching team_id: ' . $team['data_id'] . ' setting is_failed TRUE');    
+                            Log::info('No primary team found for automatching team_id: ' . $team['data_id'] . ' setting is_failed TRUE');    
                             $matching->updateOrCreate('UnmatchedData', [
                                 'data_type'     => 'team',
                                 'data_id'       => $team['data_id'],
@@ -512,7 +512,7 @@ class MatchingService
                     $masterEvent = Event::getMasterEventId($event, $primaryProviderId);
                     if (!empty($masterEvent))
                     {
-                        Log::info('Found a team for automatching with master_team_id: ' . $masterEvent);    
+                        Log::info('Found an event for automatching with master_event_id: ' . $masterEvent);    
                         $matching->create('EventGroup', [
                             'master_event_id' => $masterEvent,
                             'event_id'        => $event['data_id']
@@ -645,7 +645,7 @@ class MatchingService
                         'master_team_id' => $event->team_master_away_id,
                         'team_id'        => $event->team_away_id
                     ]);
-                    Log::info('Matching: Removing this home_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
+                    Log::info('Matching: Removing this away_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
 
                     self::logActivity(
                         'Teams Matching',
@@ -657,14 +657,14 @@ class MatchingService
                         "Unmatched Raw Team ID " . $event->team_away_id . " to Master Team ID " . $event->team_master_away_id,
                     );
 
-                    //Add this home team into the unmatched_table
+                    //Add this away team into the unmatched_table
                     $matching->updateOrCreate('UnmatchedData', [
                         'data_type'     => 'team',
                         'data_id'       => $event->team_away_id,
                         'provider_id'   => $request->provider_id
                     ],
                     ['is_failed'     => false]);
-                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$request->provider_id);
+                    Log::info('Matching: Recreating unmatched data for away_team_id:'.$event->team_away_id.' - provider_id:'.$request->provider_id);
 
 
                     //Delete this event from the event groups table
@@ -754,7 +754,7 @@ class MatchingService
                     'master_team_id' => $event->team_master_away_id,
                     'team_id'        => $event->team_away_id
                 ]);
-                Log::info('Matching: Removing this home_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
+                Log::info('Matching: Removing this away_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
 
                 self::logActivity(
                     'Teams Matching',
@@ -766,7 +766,7 @@ class MatchingService
                     "Unmatched Raw Team ID " . $event->team_away_id . " to Master Team ID " . $event->team_master_away_id,
                 );
 
-                //Add this home team into the unmatched_table
+                //Add this away team into the unmatched_table
                 $matching->updateOrCreate('UnmatchedData', [
                     'data_type'     => 'team',
                     'data_id'       => $event->team_away_id,
