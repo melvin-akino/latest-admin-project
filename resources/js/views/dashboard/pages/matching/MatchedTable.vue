@@ -50,7 +50,7 @@
       </div>
     </template>
     <template v-slot:expanded-item="{ headers, item }" v-if="type=='events'">
-      <td :colspan="headers.length">
+      <td :colspan="headers.length" v-if="item.events.length != 0">
         <div class="matchedEvents" v-for="(events, index) in item.groupedEvents" :key="index">
           <div class="matchedEvent ma-4" v-for="event in events" :key="event.id">
             <div class="matchedEventDetails provider mr-4">
@@ -66,6 +66,9 @@
             </div>
           </div>
         </div>
+      </td>
+      <td :colspan="headers.length" class="noEventsExpanded" v-else>
+        <div class="px-4 py-2">No active events available for this league</div>
       </td>
     </template>
   </v-data-table>

@@ -87,4 +87,8 @@ export default {
   .matchSummary span {
     font-weight: 600;
   }
+
+  .noEventsExpanded {
+    padding: 0 !important;
+  }
 </style>

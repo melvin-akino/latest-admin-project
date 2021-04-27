@@ -152,6 +152,10 @@ class UserService {
       ->select(['email', 'firstname', 'lastname', 'c.code as currency', 'uuid'])
       ->first();
 
-    return response()->json($user);
+    return response()->json([
+      'status'      => true,
+      'status_code' => 200,
+      'data'        => $user
+    ], 200);
   }
 }

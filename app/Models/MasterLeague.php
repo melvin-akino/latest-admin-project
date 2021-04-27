@@ -33,13 +33,16 @@ class MasterLeague extends Model
     {
         $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 
-        $query = self::find($masterId)
-            ->join('league_groups AS lg', 'lg.master_league_id', 'master_leagues.id')
+        $query = self::join('league_groups AS lg', 'lg.master_league_id', 'master_leagues.id')
             ->join('leagues AS l', function ($join) use ($primaryProviderId) {
                 $join->on('l.id', 'lg.league_id');
                 $join->where('l.provider_id', $primaryProviderId);
             })
-            ->select(DB::raw("COALESCE(master_leagues.name, l.name) AS name"))
+            ->where('master_leagues.id', $masterId)
+            ->select([
+                DB::raw("COALESCE(master_leagues.name, l.name) AS leaguename"),
+                DB::raw("'" . SC::getValueByType('PRIMARY_PROVIDER') . "' AS provider")
+            ])
             ->first();
 
         return $query;
@@ -85,6 +88,6 @@ class MasterLeague extends Model
                   ->where(DB::raw('COALESCE(master_leagues.name, l.name)'), 'ILIKE', '%'.$searchKey.'%')
                   ->select('master_leagues.id', DB::raw('COALESCE(master_leagues.name, l.name) as master_league_name'), 'is_priority')
                   ->orderBy('is_priority', 'desc')
-                  ->orderBy('master_leagues.id', $sortOrder);
+                  ->orderBy('l.name', $sortOrder);
     }
 }

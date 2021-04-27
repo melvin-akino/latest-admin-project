@@ -18,16 +18,25 @@ class ActivityLog extends Model
         'properties',
     ];
 
-    public static function getMatchingLogs($searchKey, $page, $limit)
+    public static function getMatchingLogs($searchKey = null)
     {
-        $query = self::where('log_name', 'ILIKE', '%Matching')
-            ->whereIn('log_name', ['Leagues Matching', 'Events Matching']);
+        $query = self::whereIn('log_name', ['Leagues Matching', 'Events Matching']);
 
         if ($searchKey) {
             $query = $query->where('log_name', 'ILIKE', ucfirst($searchKey) . " Matching");
         }
 
-        $query = $query->orderBy('id', 'DESC');
+        foreach ($query->get() AS $row) {
+            $props = json_decode($row->properties);
+
+            if (stripos($row->log_name, 'leagues') !== false) {
+                //
+            } else if (stripos($row->log_name, 'events') !== false) {
+                if (($row->action != "Deleted") && !EventGroup::where('master_event_id', $props->attributes->master_event_id)->where('event_id', $props->attributes->event_id)->count()) {
+                    unset($row);
+                }
+            }
+        }
 
         return $query;
     }
