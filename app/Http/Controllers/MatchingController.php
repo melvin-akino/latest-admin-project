@@ -50,9 +50,9 @@ class MatchingController extends Controller
                         'provider_id' => $getRaw->provider_id,
                     ];
                 } else {
-                    $checkRawEventProvider = League::checkRawLeagueProvider($props->attributes->league_id);
+                    $checkRawLeagueProvider = League::checkRawLeagueProvider($props->attributes->league_id);
 
-                    if ($checkRawEventProvider) {
+                    if ($checkRawLeagueProvider) {
                         $description = [
                             'master' => [
                                 'name'     => $getMaster->leaguename,
