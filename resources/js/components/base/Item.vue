@@ -6,7 +6,10 @@
     :to="item.to"
     :active-class="`primary ${!isDark ? 'black' : 'white'}--text`"
     class="item"
-    :class="{ 'listClicked' : hasClickEvent }"
+    :class="{
+      'listClickedReprocess' : title === 'Reprocess Data',
+      'listClickedClearDuplicates' : title === 'Clear Duplicates'
+    }"
   >
     <v-list-item-icon>
       <v-icon v-text="item.icon" />
@@ -42,6 +45,10 @@
       text: {
         type: Boolean,
         default: false,
+      },
+      title: {
+        type: String,
+        default: '',
       },
       hasClickEvent: {
         type: Boolean,

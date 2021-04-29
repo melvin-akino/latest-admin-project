@@ -6,7 +6,7 @@ use App\Models\{
     MasterLeague,
     MasterTeam,
     Provider,
-    SystemConfiguration,
+    SystemConfiguration AS SC,
     League,
     LeagueGroup,
     Team,
@@ -581,118 +581,8 @@ class MatchingService
             DB::beginTransaction();
             
             $leagueInfo = League::getLeagueInfo($request->league_id, $request->provider_id, $request->sport_id);
-            
-            $matching = new Matching;
 
-            //Delete this league from the groups table
-            $matching->delete('LeagueGroup', [
-                'master_league_id' => $leagueInfo->master_league_id,
-                'league_id'        => $request->league_id
-            ]);
-            Log::info('Matching: Removing this league_id:'.$request->league_id.' from league_groups table');
-
-            self::logActivity(
-                'Leagues Matching',
-                'LeagueGroup', // indicate sub-folder if necessary
-                [
-                    'master_league_id' => $leagueInfo->master_league_id,
-                    'league_id'        => $request->league_id,
-                ],
-                "Unmatched Raw League ID " . $request->league_id . " to Master League ID " . $leagueInfo->master_league_id,
-            );
-
-            //Add this league into the unmatched_table
-            $matching->create('UnmatchedData', [
-                'data_type'     => 'league',
-                'data_id'       => $request->league_id,
-                'provider_id'   => $request->provider_id
-            ]);
-            Log::info('Matching: Recreating unmatched data for league_id:'.$request->league_id.' - provider_id:'.$request->provider_id);
-
-            //Now let's get all associated events and teams for this league and unmatch them too
-            $events = Event::getLeagueEvents($request->league_id, $request->provider_id, $request->sport_id);
-            if ($events) {
-                foreach($events as $event) {
-                    //Delete this home team from the team groups table
-                    $matching->delete('TeamGroup', [
-                        'master_team_id' => $event->team_master_home_id,
-                        'team_id'        => $event->team_home_id
-                    ]);
-                    Log::info('Matching: Removing this home_team_id:'.$event->team_home_id.' from team_groups table with master_team_id:'.$event->team_master_home_id);
-
-                    self::logActivity(
-                        'Teams Matching',
-                        'TeamGroup', // indicate sub-folder if necessary
-                        [
-                            'master_team_id' => $event->team_master_home_id,
-                            'team_id'        => $event->team_home_id
-                        ],
-                        "Unmatched Raw Team ID " . $event->team_home_id . " to Master Team ID " . $event->team_master_home_id,
-                    );
-
-                    //Add this home team into the unmatched_table
-                    $matching->updateOrCreate('UnmatchedData', [
-                        'data_type'     => 'team',
-                        'data_id'       => $event->team_home_id,
-                        'provider_id'   => $request->provider_id
-                    ],
-                    ['is_failed'     => false]);
-
-                    Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$request->provider_id);
-
-                    //Delete this away team from the team groups table
-                    $matching->delete('TeamGroup', [
-                        'master_team_id' => $event->team_master_away_id,
-                        'team_id'        => $event->team_away_id
-                    ]);
-                    Log::info('Matching: Removing this away_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
-
-                    self::logActivity(
-                        'Teams Matching',
-                        'TeamGroup', // indicate sub-folder if necessary
-                        [
-                            'master_team_id' => $event->team_master_away_id,
-                            'team_id'        => $event->team_away_id
-                        ],
-                        "Unmatched Raw Team ID " . $event->team_away_id . " to Master Team ID " . $event->team_master_away_id,
-                    );
-
-                    //Add this away team into the unmatched_table
-                    $matching->updateOrCreate('UnmatchedData', [
-                        'data_type'     => 'team',
-                        'data_id'       => $event->team_away_id,
-                        'provider_id'   => $request->provider_id
-                    ],
-                    ['is_failed'     => false]);
-                    Log::info('Matching: Recreating unmatched data for away_team_id:'.$event->team_away_id.' - provider_id:'.$request->provider_id);
-
-
-                    //Delete this event from the event groups table
-                    $matching->delete('EventGroup', [
-                        'master_event_id' => $event->master_event_id,
-                        'event_id'        => $event->id
-                    ]);
-                    Log::info('Matching: Removing this event_id:'.$event->id.' from team_groups table with master_team_id:'.$event->master_event_id);
-
-                    self::logActivity(
-                        'Events Matching',
-                        'EventGroup', // indicate sub-folder if necessary
-                        [
-                            'master_event_id' => $event->master_event_id,
-                            'event_id'        => $event->id
-                        ],
-                        "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
-                    );
-
-                    //Add this home team into the unmatched_table
-                    $matching->updateOrCreate('UnmatchedData', [
-                        'data_type'     => 'event',
-                        'data_id'       => $event->id,
-                        'provider_id'   => $request->provider_id
-                    ],['is_failed'     => false]);
-                    Log::info('Matching: Recreating unmatched data for event_id:'.$event->id.' - provider_id:'.$request->provider_id);
-                }
-            }
+            self::unmatchLeague($leagueInfo->master_league_id, $request->league_id, $request->provider_id, $request->sport_id, false);
 
             DB::commit();
             return response()->json([
@@ -711,6 +601,223 @@ class MatchingService
         }
     }
 
+    public static function unmatchLeague($masterLeagueId, $leagueId, $providerId, $sportId, $isPrimary) {
+        $matching = new Matching;
+
+        //Delete this league from the groups table
+        $matching->delete('LeagueGroup', [
+            'master_league_id' => $masterLeagueId,
+            'league_id'        => $leagueId
+        ]);
+        Log::info('Matching: Removing this league_id:'.$leagueId.' from league_groups table');
+
+        self::logActivity(
+            'Leagues Matching',
+            'LeagueGroup', // indicate sub-folder if necessary
+            [
+                'master_league_id' => $masterLeagueId,
+                'league_id'        => $leagueId,
+            ],
+            "Unmatched Raw League ID " . $leagueId . " to Master League ID " . $masterLeagueId,
+        );
+
+        if (!$isPrimary) {
+            //Add this league into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'league',
+                'data_id'       => $leagueId,
+                'provider_id'   => $providerId
+            ],
+            ['is_failed'     => false]);
+            Log::info('Matching: Recreating unmatched data for league_id:'.$leagueId.' - provider_id:'.$providerId);
+        }
+
+        //Now let's get all associated events and teams for this league and unmatch them too
+        $events = Event::getLeagueEvents($leagueId, $providerId, $sportId);
+
+        self::unmatchAssociatedEvents($matching, $events, $providerId, $isPrimary);
+    }
+
+    public static function unmatchAssociatedEvents($matching, $events, $providerId, $isPrimary) {
+        if ($events) {
+            foreach($events as $event) {
+                self::unmatchEvent($matching, $event, $providerId, $isPrimary);
+            }
+        }
+    }
+
+    public static function unmatchEvent($matching, $event, $providerId, $isPrimary) {
+        //Delete this home team from the team groups table
+        $matching->delete('TeamGroup', [
+            'master_team_id' => $event->team_master_home_id,
+            'team_id'        => $event->team_home_id
+        ],
+        ['is_failed'     => false]);
+        Log::info('Matching: Removing this home_team_id:'.$event->team_home_id.' from team_groups table with master_team_id:'.$event->team_master_home_id);
+
+        self::logActivity(
+            'Teams Matching',
+            'TeamGroup', // indicate sub-folder if necessary
+            [
+                'master_team_id' => $event->team_master_home_id,
+                'team_id'        => $event->team_home_id
+            ],
+            "Unmatched Raw Team ID " . $event->team_home_id . " to Master Team ID " . $event->team_master_home_id,
+        );
+
+        if (!$isPrimary) {
+            //Add this home team into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'team',
+                'data_id'       => $event->team_home_id,
+                'provider_id'   => $providerId
+            ],
+            ['is_failed'     => false]);
+
+            Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$providerId);
+        }
+
+        //Delete this away team from the team groups table
+        $matching->delete('TeamGroup', [
+            'master_team_id' => $event->team_master_away_id,
+            'team_id'        => $event->team_away_id
+        ]);
+        Log::info('Matching: Removing this away_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
+
+        self::logActivity(
+            'Teams Matching',
+            'TeamGroup', // indicate sub-folder if necessary
+            [
+                'master_team_id' => $event->team_master_away_id,
+                'team_id'        => $event->team_away_id
+            ],
+            "Unmatched Raw Team ID " . $event->team_away_id . " to Master Team ID " . $event->team_master_away_id,
+        );
+
+        if (!$isPrimary) {
+            //Add this away team into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'team',
+                'data_id'       => $event->team_away_id,
+                'provider_id'   => $providerId
+            ],
+            ['is_failed'     => false]);
+            Log::info('Matching: Recreating unmatched data for away_team_id:'.$event->team_away_id.' - provider_id:'.$providerId);
+        }
+
+        //Delete this event from the event groups table
+        $matching->delete('EventGroup', [
+            'master_event_id' => $event->master_event_id,
+            'event_id'        => $event->id
+        ]);
+        Log::info('Matching: Removing this event_id:'.$event->id.' from team_groups table with master_team_id:'.$event->master_event_id);
+
+        self::logActivity(
+            'Events Matching',
+            'EventGroup', // indicate sub-folder if necessary
+            [
+                'master_event_id' => $event->master_event_id,
+                'event_id'        => $event->id
+            ],
+            "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
+        );
+
+        if (!$isPrimary) {
+            //Add this event into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'event',
+                'data_id'       => $event->id,
+                'provider_id'   => $providerId
+            ],['is_failed'     => false]);
+            Log::info('Matching: Recreating unmatched data for event_id:'.$event->id.' - provider_id:'.$providerId);
+        }
+    }
+
+    public static function unmatchTeamWithAssocEvents($teamId, $providerId, $sportId, $isPrimary) {
+        $matching = new Matching;
+
+        // Now let's get all associated events for this team and unmatch them too
+        $events = Event::getTeamEvents($teamId, $providerId, $sportId);
+
+        self::unmatchAssociatedEvents($matching, $events, $providerId, $isPrimary);
+    }
+
+    public static function unmatchTeamByMasterTeamId($masterTeamId, $teamId, $providerId, $isPrimary) {
+        $matching = new Matching;
+
+        // cleanup other team matched records
+        $matching->delete('TeamGroup', [
+            'master_team_id' => $masterTeamId,
+            'team_id'        => $teamId
+        ],
+        ['is_failed'     => false]);
+        Log::info('Matching: Removing this team_id:'.$teamId.' from team_groups table with master_team_id:'.$masterTeamId);
+
+        self::logActivity(
+            'Teams Matching',
+            'TeamGroup', // indicate sub-folder if necessary
+            [
+                'master_team_id' => $masterTeamId,
+                'team_id'        => $teamId
+            ],
+            "Unmatched Raw Team ID " . $teamId . " to Master Team ID " . $masterTeamId,
+        );
+
+        if (!$isPrimary) {
+            //Add this home team into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'team',
+                'data_id'       => $teamId,
+                'provider_id'   => $providerId
+            ],
+            ['is_failed'     => false]);
+
+            Log::info('Matching: Recreating unmatched data for team_id:'.$teamId.' - provider_id:'.$providerId);
+        }
+    }
+
+    public static function unmatchEventWithAssocTeams($eventId, $providerId, $sportId, $isPrimary) {
+        $matching = new Matching;
+
+        //Get event information
+        $event = Event::getEventInfo($eventId, $providerId, $sportId);
+
+        if (!empty($event)) {
+            self::unmatchEvent($matching, $event, $providerId, $isPrimary);
+        }
+    }
+
+    public static function unmatchEventByMasterEventId($masterEventId, $eventId, $providerId, $isPrimary) {
+        $matching = new Matching;
+
+        //Delete this event from the event groups table
+        $matching->delete('EventGroup', [
+            'master_event_id' => $masterEventId,
+            'event_id'        => $eventId
+        ]);
+        Log::info('Matching: Removing this event_id:'.$eventId.' from team_groups table with master_team_id:'.$masterEventId);
+
+        self::logActivity(
+            'Events Matching',
+            'EventGroup', // indicate sub-folder if necessary
+            [
+                'master_event_id' => $masterEventId,
+                'event_id'        => $eventId
+            ],
+            "Unmatched Raw Event ID " . $eventId . " to Master Event ID " . $masterEventId,
+        );
+
+        if (!$isPrimary) {
+            //Add this event into the unmatched_table
+            $matching->updateOrCreate('UnmatchedData', [
+                'data_type'     => 'event',
+                'data_id'       => $eventId,
+                'provider_id'   => $providerId
+            ],['is_failed'     => false]);
+            Log::info('Matching: Recreating unmatched data for event_id:'.$eventId.' - provider_id:'.$providerId);
+        }
+    }
+
     public static function unmatchSecondaryEvent(Request $request) 
     {
         try
@@ -723,82 +830,8 @@ class MatchingService
             if (!empty($event))
             {
                 DB::beginTransaction();
-                //Delete this home team from the team groups table
-                $matching->delete('TeamGroup', [
-                    'master_team_id' => $event->team_master_home_id,
-                    'team_id'        => $event->team_home_id
-                ]);
-                Log::info('Matching: Removing this home_team_id:'.$event->team_home_id.' from team_groups table with master_team_id:'.$event->team_master_home_id);
-
-                self::logActivity(
-                    'Teams Matching',
-                    'TeamGroup', // indicate sub-folder if necessary
-                    [
-                        'master_team_id' => $event->team_master_home_id,
-                        'team_id'        => $event->team_home_id
-                    ],
-                    "Unmatched Raw Team ID " . $event->team_home_id . " to Master Team ID " . $event->team_master_home_id,
-                );
-
-                //Add this home team into the unmatched_table
-                $matching->updateOrCreate('UnmatchedData', [
-                    'data_type'     => 'team',
-                    'data_id'       => $event->team_home_id,
-                    'provider_id'   => $request->provider_id
-                ],
-                ['is_failed'     => false]);
-                Log::info('Matching: Recreating unmatched data for home_team_id:'.$event->team_home_id.' - provider_id:'.$request->provider_id);
-
-                //Delete this away team from the team groups table
-                $matching->delete('TeamGroup', [
-                    'master_team_id' => $event->team_master_away_id,
-                    'team_id'        => $event->team_away_id
-                ]);
-                Log::info('Matching: Removing this away_team_id:'.$event->team_away_id.' from team_groups table with master_team_id:'.$event->team_master_away_id);
-
-                self::logActivity(
-                    'Teams Matching',
-                    'TeamGroup', // indicate sub-folder if necessary
-                    [
-                        'master_team_id' => $event->team_master_away_id,
-                        'team_id'        => $event->team_away_id
-                    ],
-                    "Unmatched Raw Team ID " . $event->team_away_id . " to Master Team ID " . $event->team_master_away_id,
-                );
-
-                //Add this away team into the unmatched_table
-                $matching->updateOrCreate('UnmatchedData', [
-                    'data_type'     => 'team',
-                    'data_id'       => $event->team_away_id,
-                    'provider_id'   => $request->provider_id
-                ],
-                ['is_failed'     => false]);
-                Log::info('Matching: Recreating unmatched data for away_team_id:'.$event->team_away_id.' - provider_id:'.$request->provider_id);
-
-                //Delete this event from the event groups table
-                $matching->delete('EventGroup', [
-                    'master_event_id' => $event->master_event_id,
-                    'event_id'        => $event->id
-                ]);
-                Log::info('Matching: Removing this event_id:'.$event->id.' from team_groups table with master_team_id:'.$event->master_event_id);
-
-                self::logActivity(
-                    'Events Matching',
-                    'EventGroup', // indicate sub-folder if necessary
-                    [
-                        'master_event_id' => $event->master_event_id,
-                        'event_id'        => $event->id
-                    ],
-                    "Unmatched Raw Event ID " . $event->id . " to Master Event ID " . $event->master_event_id,
-                );
-
-                //Add this home team into the unmatched_table
-                $matching->updateOrCreate('UnmatchedData', [
-                    'data_type'     => 'event',
-                    'data_id'       => $event->id,
-                    'provider_id'   => $request->provider_id
-                ],['is_failed'     => false]);
-                Log::info('Matching: Recreating unmatched data for event_id:'.$event->id.' - provider_id:'.$request->provider_id);
+                
+                self::unmatchEvent($matching, $event, $request->provider_id, false);
 
                 DB::commit();
                 return response()->json([
@@ -854,6 +887,190 @@ class MatchingService
                     'message'     => 'No data to reprocess'
                 ], 200);
             }
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error('Something went wrong', (array) $e);
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public static function clearDuplicates() 
+    {
+        try {
+            $primaryProviderId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+
+            DB::beginTransaction();
+
+            // clear duplicate leagues
+            $dupLeagues = DB::table('league_groups')
+                ->groupBy('league_id')
+                ->havingRaw('COUNT(league_id) > ?', [1])
+                ->pluck('league_id')
+                ->toArray();
+            
+            $dupLeaguesCount = count($dupLeagues);
+
+            foreach ($dupLeagues as $dupLeagueId) {
+                $dupLeague = League::find($dupLeagueId);
+
+                // ignore if duplicated league is soft deleted
+                if (empty($dupLeague)) {
+                    $dupLeaguesCount--;
+                    continue;
+                }
+                
+                $masterLeagueIds = DB::table('league_groups')
+                    ->where('league_id', $dupLeagueId)
+                    ->distinct()
+                    ->pluck('master_league_id')
+                    ->toArray();
+
+                // if duplicate is not primary, just unmatch itself;
+                // otherwise, unmatch it including secondary leagues
+                if ($dupLeague->provider_id != $primaryProviderId) {
+                    Log::info('Clear duplicates of secondary league '.$dupLeagueId);
+                    foreach ($masterLeagueIds as $masterLeagueId) {
+                        self::unmatchLeague($masterLeagueId, $dupLeagueId, $dupLeague->provider_id, $dupLeague->sport_id, false);
+                    }
+                } else {
+                    Log::info('Clear duplicates of primary league '.$dupLeagueId);
+                    foreach ($masterLeagueIds as $masterLeagueId) {
+                        $secondaryLeagues = DB::table('leagues as l')
+                            ->join('league_groups as lg', 'lg.league_id', 'l.id')
+                            ->where('l.id', '<>', $dupLeagueId)
+                            ->where('lg.master_league_id', $masterLeagueId)
+                            ->select('l.*')
+                            ->get();
+    
+                        foreach ($secondaryLeagues as $secondaryLeague) {
+                            self::unmatchLeague($masterLeagueId, $secondaryLeague->id, $secondaryLeague->provider_id, $secondaryLeague->sport_id, false);
+                        }
+                        self::unmatchLeague($masterLeagueId, $dupLeagueId, $dupLeague->provider_id, $dupLeague->sport_id, true);
+                    }
+                }
+            }
+
+            // clear duplicate teams
+            $dupTeams = DB::table('team_groups')
+                ->groupBy('team_id')
+                ->havingRaw('COUNT(team_id) > ?', [1])
+                ->pluck('team_id')
+                ->toArray();
+            
+            $dupTeamsCount = count($dupTeams);
+
+            foreach ($dupTeams as $dupTeamId) {
+                $dupTeam = Team::find($dupTeamId);
+
+                // ignore if duplicated team is soft deleted
+                if (empty($dupTeam)) {
+                    $dupTeamsCount--;
+                    continue;
+                }
+                
+                $masterTeamIds = DB::table('team_groups')
+                    ->where('team_id', $dupTeamId)
+                    ->distinct()
+                    ->pluck('master_team_id')
+                    ->toArray();
+
+                // if duplicate is not primary, just unmatch itself;
+                // otherwise, unmatch it including secondary teams
+                if ($dupTeam->provider_id != $primaryProviderId) {
+                    Log::info('Clear duplicates of secondary team '.$dupTeamId);
+                    self::unmatchTeamWithAssocEvents($dupTeamId, $dupTeam->provider_id, $dupTeam->sport_id, false);
+                    foreach ($masterTeamIds as $masterTeamId) {
+                        self::unmatchTeamByMasterTeamId($masterTeamId, $dupTeamId, $dupTeam->provider_id, false);
+                    }
+                } else {
+                    Log::info('Clear duplicates of primary team '.$dupTeamId);
+                    foreach ($masterTeamIds as $masterTeamId) {
+                        $secondaryTeams = DB::table('teams as t')
+                            ->join('team_groups as tg', 'tg.team_id', 't.id')
+                            ->where('t.id', '<>', $dupTeamId)
+                            ->where('tg.master_team_id', $masterTeamId)
+                            ->select('t.*')
+                            ->get();
+
+                        foreach ($secondaryTeams as $secondaryTeam) {
+                            self::unmatchTeamWithAssocEvents($secondaryTeam->id, $secondaryTeam->provider_id, $secondaryTeam->sport_id, false);
+                            self::unmatchTeamByMasterTeamId($masterTeamId, $secondaryTeam->id, $secondaryTeam->provider_id, false);
+                        }
+                    }
+
+                    self::unmatchTeamWithAssocEvents($dupTeamId, $dupTeam->provider_id, $dupTeam->sport_id, true);
+                    foreach ($masterTeamIds as $masterTeamId) {
+                        self::unmatchTeamByMasterTeamId($masterTeamId, $dupTeamId, $dupTeam->provider_id, true);
+                    }
+                }
+            }
+
+            // clear duplicate events
+            $dupEvents = DB::table('event_groups')
+                ->groupBy('event_id')
+                ->havingRaw('COUNT(event_id) > ?', [1])
+                ->pluck('event_id')
+                ->toArray();
+            
+            $dupEventsCount = count($dupEvents);
+
+            foreach ($dupEvents as $dupEventId) {
+                $dupEvent = Event::find($dupEventId);
+
+                // ignore if duplicated event is soft deleted
+                if (empty($dupEvent)) {
+                    $dupEventsCount--;
+                    continue;
+                }
+                
+                $masterEventIds = DB::table('event_groups')
+                    ->where('event_id', $dupEventId)
+                    ->distinct()
+                    ->pluck('master_event_id')
+                    ->toArray();
+
+                // if duplicate is not primary, just unmatch itself;
+                // otherwise, unmatch it including secondary events
+                if ($dupEvent->provider_id != $primaryProviderId) {
+                    Log::info('Clear duplicates of secondary event '.$dupEventId);
+                    self::unmatchEventWithAssocTeams($dupEventId, $dupEvent->provider_id, $dupEvent->sport_id, false);
+                    foreach ($masterEventIds as $masterEventId) {
+                        self::unmatchEventByMasterEventId($masterEventId, $dupEventId, $dupEvent->provider_id, false);
+                    }
+                } else {
+                    Log::info('Clear duplicates of primary event '.$dupEventId);
+                    foreach ($masterEventIds as $masterEventId) {
+                        $secondaryEvents = DB::table('events as e')
+                            ->join('event_groups as eg', 'eg.event_id', 'e.id')
+                            ->where('e.id', '<>', $dupEventId)
+                            ->where('eg.master_event_id', $masterEventId)
+                            ->select('e.*')
+                            ->get();
+
+                        foreach ($secondaryEvents as $secondaryEvent) {
+                            self::unmatchEventWithAssocTeams($secondaryEvent->id, $secondaryEvent->provider_id, $secondaryEvent->sport_id, false);
+                            self::unmatchEventByMasterEventId($masterEventId, $secondaryEvent->id, $secondaryEvent->provider_id, false);
+                        }
+                    }
+
+                    self::unmatchEventWithAssocTeams($dupEventId, $dupEvent->provider_id, $dupEvent->sport_id, true);
+                    foreach ($masterEventIds as $masterEventId) {
+                        self::unmatchEventByMasterEventId($masterEventId, $dupEventId, $dupEvent->provider_id, true);
+                    }
+                }
+            }
+
+            DB::commit();
+            Log::info('Matching: Cleared '.$dupLeaguesCount.' duplicate leagues, '.$dupTeamsCount.' duplicate teams, '.$dupEventsCount.' duplicate events.');
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'message'     => 'Cleared '.$dupLeaguesCount.' duplicate leagues, '.$dupTeamsCount.' duplicate teams, '.$dupEventsCount.' duplicate events.'
+            ], 200);
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Something went wrong', (array) $e);
