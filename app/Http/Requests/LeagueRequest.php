@@ -29,7 +29,7 @@ class LeagueRequest extends FormRequest
         if ($path == 'api/leagues/unmatch') {
             return [
                 'league_id'      => 'required|int|check_if_league_is_matched',
-                'provider_id'   => 'required',
+                'provider_id'   => 'required|int|check_if_provider_is_secondary',
                 'sport_id'      => 'required'
             ];
         }        

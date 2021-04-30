@@ -640,15 +640,6 @@ class MatchingService
             if (!empty($masterLeague)) $masterLeague->delete();
 
             ActivityLog::deleteMatchingLogsOfMasterData('league', $masterLeagueId);
-        } else {
-            //Add this league into the unmatched_table
-            $matching->updateOrCreate('UnmatchedData', [
-                'data_type'     => 'league',
-                'data_id'       => $leagueId,
-                'provider_id'   => $providerId
-            ],
-            ['is_failed'     => false]);
-            Log::info('Matching: Recreating unmatched data for league_id:'.$leagueId.' - provider_id:'.$providerId);
         }
 
         //Now let's get all associated events and teams for this league and unmatch them too
@@ -708,16 +699,6 @@ class MatchingService
             if (!empty($masterTeam)) $masterTeam->delete();
 
             ActivityLog::deleteMatchingLogsOfMasterData('team', $masterTeamId);
-        } else {
-            //Add this home team into the unmatched_table
-            $matching->updateOrCreate('UnmatchedData', [
-                'data_type'     => 'team',
-                'data_id'       => $teamId,
-                'provider_id'   => $providerId
-            ],
-            ['is_failed'     => false]);
-
-            Log::info('Matching: Recreating unmatched data for team_id:'.$teamId.' - provider_id:'.$providerId);
         }
     }
 
@@ -755,14 +736,6 @@ class MatchingService
             if (!empty($masterEvent)) $masterEvent->delete();
 
             ActivityLog::deleteMatchingLogsOfMasterData('event', $masterEventId);
-        } else {
-            //Add this event into the unmatched_table
-            $matching->updateOrCreate('UnmatchedData', [
-                'data_type'     => 'event',
-                'data_id'       => $eventId,
-                'provider_id'   => $providerId
-            ],['is_failed'     => false]);
-            Log::info('Matching: Recreating unmatched data for event_id:'.$eventId.' - provider_id:'.$providerId);
         }
     }
 

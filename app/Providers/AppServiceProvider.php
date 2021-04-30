@@ -41,5 +41,10 @@ class AppServiceProvider extends ServiceProvider
             }
             return false;
         });
+
+        Validator::extend('check_if_provider_is_secondary', function($attribute, $value, $parameters, $validator) {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            return (boolean) ($value != $primaryProviderId);
+        });
     }
 }
