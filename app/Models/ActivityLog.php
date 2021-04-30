@@ -40,4 +40,19 @@ class ActivityLog extends Model
 
         return $query;
     }
+
+    /**
+     * $matchingType - ['league', 'team', 'event']
+     */
+    public static function deleteMatchingLogsOfMasterData($matchingType, $masterId) {
+        $logName = [
+            'league' => 'Leagues Matching',
+            'team'   => 'Teams Matching',
+            'event'  => 'Events Matching'
+        ];
+
+        self::whereRaw('log_name LIKE \''.$logName[$matchingType].'\'')
+            ->whereRaw('properties::text ILIKE \'%master_'.$matchingType.'_id":'.$masterId.',%\'')
+            ->delete();
+    }
 }

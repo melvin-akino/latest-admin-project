@@ -191,4 +191,9 @@ class MatchingController extends Controller
     {
         return MatchingFacade::setAllFailedMatchingToFalse();
     }
+
+    public function clearDuplicates()
+    {
+        return MatchingFacade::clearDuplicates();
+    }
 }

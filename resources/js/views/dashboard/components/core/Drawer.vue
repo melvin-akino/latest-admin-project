@@ -135,6 +135,11 @@ export default {
             icon: "mdi-refresh-circle",
             title: "Reprocess Data",
             hasClickEvent: true
+          },
+          {
+            icon: "mdi-delete-variant",
+            title: "Clear Duplicates",
+            hasClickEvent: true
           }
         ]
       }

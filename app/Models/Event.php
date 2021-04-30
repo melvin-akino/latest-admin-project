@@ -267,6 +267,30 @@ class Event extends Model
             ->toArray();
     }
 
+    public static function getTeamEvents($teamId, $providerId, $sportId)
+    {
+        return DB::table('event_groups as eg')
+            ->join('events as e', 'e.id', 'eg.event_id')
+            ->join('team_groups as ht', 'ht.team_id', 'e.team_home_id')
+            ->join('team_groups as at', 'at.team_id', 'e.team_away_id')
+            ->where('e.provider_id', $providerId)
+            ->where('e.sport_id', $sportId)
+            ->where(function($query) use ($teamId) {
+                $query->where('e.team_home_id', $teamId)
+                    ->orWhere('e.team_away_id', $teamId);
+            })
+            ->select(
+                'ht.master_team_id as team_master_home_id',
+                'team_home_id', 
+                'at.master_team_id as team_master_away_id', 
+                'team_away_id',
+                'eg.master_event_id', 
+                'e.id'
+            )
+            ->get()
+            ->toArray();
+    }
+
     public static function getEventInfo($eventId, $providerId, $sportId)
     {
         return DB::table('event_groups as eg')
