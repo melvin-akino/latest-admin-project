@@ -161,18 +161,12 @@ class Event extends Model
 
     public static function getAllOtherProviderUnmatchedEvents(int $primaryProviderId)
     {
-        return self::where('provider_id', '!=',$primaryProviderId)
-            ->whereNotIn('id', function($notInUnmatched) {
-                $notInUnmatched->select('data_id')
-                    ->from('unmatched_data')
-                    ->where('data_type', 'event');
+        return self::where('provider_id', '!=', $primaryProviderId)
+            ->whereNotIn('id', function($query) {
+                return $query->select('event_id')
+                    ->from('event_groups');
             })
-            ->whereNotIn('id', function($notInEventGroups) use ($primaryProviderId) {
-                $notInEventGroups->select('event_id')
-                    ->from('event_groups')
-                    ->join('events', 'events.id', 'event_groups.event_id')
-                    ->where('provider_id', '!=', $primaryProviderId);
-            })
+            ->whereNull('deleted_at')
             ->select('id', 'provider_id')
             ->get();
     }
