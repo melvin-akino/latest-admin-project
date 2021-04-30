@@ -91,21 +91,14 @@ class League extends Model
 
     public static function getAllOtherProviderUnmatchedLeagues(int $primaryProviderId)
     {
-        return self::where('provider_id', '!=',$primaryProviderId)
-            ->whereNotIn('id', function($notInUnmatched) {
-                $notInUnmatched->select('data_id')
-                    ->from('unmatched_data')
-                    ->where('data_type', 'league');
+        return self::where('provider_id', '!=', $primaryProviderId)
+            ->whereNotIn('id', function($query) {
+                return $query->select('league_id')
+                    ->from('league_groups');
             })
-            ->whereNotIn('id', function($notInLeagueGroup) use ($primaryProviderId) {
-                $notInLeagueGroup->select('league_id')
-                    ->from('league_groups')
-                    ->join('leagues','leagues.id','league_groups.league_id')
-                    ->where('provider_id', '!=', $primaryProviderId);
-            })
+            ->whereNull('deleted_at')
             ->select('id', 'provider_id')
-            ->get()
-            ->toArray();
+            ->get();
     }
 
     public static function getMasterLeagueId($leagueName, int $sportId, int $primaryProviderId)

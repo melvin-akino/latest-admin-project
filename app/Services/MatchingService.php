@@ -164,7 +164,7 @@ class MatchingService
                         'league_id'        => $unmatchedLeague['id']
                     ]);
 
-                    Log::info('Matching: League: ' . $unmatchedLeague['name'] . ' is now matched');
+                    Log::info('Matching: Primary League: ' . $unmatchedLeague['name'] . ' with league_id ' . $unmatchedLeague['id'] . ' is now matched');
                     DB::commit();
                 }
                 return 0;
@@ -197,7 +197,7 @@ class MatchingService
                         'team_id'        => $unmatchedTeam['id']
                     ]);
 
-                    Log::info('Matching: Team: ' . $unmatchedTeam['name'] . ' is now matched');
+                    Log::info('Matching: Primary Team: ' . $unmatchedTeam['name'] . ' with team_id ' . $unmatchedTeam['id'] . ' is now matched');
                     DB::commit();                    
                 }
                 return 0;
@@ -218,8 +218,6 @@ class MatchingService
 
             //check if event doesnt exist in event groups
             $unmatchedEvents = Event::getAllActiveNotExistInPivotByProviderId($primaryProviderId);
-            Log::info('Getting all unmatched HG events:');
-            Log::info((array) $unmatchedEvents);
             if ($unmatchedEvents->count() > 0) {
                 foreach ($unmatchedEvents as $unmatchedEvent) {
                     $leagueGroupData = LeagueGroup::getByLeagueId($unmatchedEvent['league_id']);
@@ -230,20 +228,18 @@ class MatchingService
 
                     $teamGroupHomeData = TeamGroup::getByTeamId($unmatchedEvent['team_home_id']);
                     if ($teamGroupHomeData->count() == 0) {
-                        Log::info('No Master Home Team for this team_id: ' . $unmatchedEvent['team_home_id']);
+                        Log::info('No Master Home Team for this primary team_id: ' . $unmatchedEvent['team_home_id']);
                         continue;
                     }
 
                     $teamGroupAwayData = TeamGroup::getByTeamId($unmatchedEvent['team_away_id']);
                     if ($teamGroupAwayData->count() == 0) {
-                        Log::info('No Master Away Team for this team_id: ' . $unmatchedEvent['team_away_id']);
+                        Log::info('No Master Away Team for this primary team_id: ' . $unmatchedEvent['team_away_id']);
                         continue;
                     }                                       
                     
                     //if not, check if event has similar league, home team, away team and ref sched filtered by hour and currently soft deleted and hasEventGroups
                     $event = Event::getSoftDeletedEvent($unmatchedEvent);
-                    Log::info('Getting soft deleted event with the same info as this event:');
-                    Log::info((array) $event);
                     //if yes, reuse master event 
                     if ($event) {
                         $masterEventId = $event->master_event_id;
@@ -291,7 +287,7 @@ class MatchingService
                         'event_id'        => $unmatchedEvent['id']
                     ]);
 
-                    Log::info('Matching: Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
+                    Log::info('Matching: Primary Event: ' . $unmatchedEvent['event_identifier'] . ' is now matched');
                 }
                 return 0;
             } else {
@@ -322,14 +318,17 @@ class MatchingService
             if (!empty($unmatchedLeagueList)) {
                 Log::info('Matching: There are leagues that needs to be added into unmatched_data table.');
                 foreach($unmatchedLeagueList as $league) {
-                    DB::beginTransaction();
-                    $matching->create('UnmatchedData', [
-                        'data_type'     => 'league',
-                        'data_id'       => $league['id'],
-                        'provider_id'   => $league['provider_id']
-                    ]);
-                    Log::info('Matching: Creating unmatched data league_id:'.$league['id'].' - provider_id:'.$league['provider_id']);
-                    DB::commit();
+                    $unmatchedData = UnmatchedData::findUnmatchedData('league', $league['id'], $league['provider_id']);
+                    if (empty($unmatchedData)) {
+                        DB::beginTransaction();
+                        $matching->create('UnmatchedData', [
+                            'data_type'     => 'league',
+                            'data_id'       => $league['id'],
+                            'provider_id'   => $league['provider_id']
+                        ]);
+                        Log::info('Matching: Creating unmatched data league_id:'.$league['id'].' - provider_id:'.$league['provider_id']);
+                        DB::commit();
+                    }
                 }
                 return 0;
             }
@@ -352,14 +351,17 @@ class MatchingService
             Log::info('Matching: Trying to get teams to add to unmatched_data table');
             if (!empty($unmatchedTeamsList)) {
                 foreach($unmatchedTeamsList as $team) {
-                    DB::beginTransaction();
-                    $matching->create('UnmatchedData', [
-                        'data_type'     => 'team',
-                        'data_id'       => $team['id'],
-                        'provider_id'   => $team['provider_id']
-                    ]);
-                    Log::info('Matching: Creating unmatched data team_id:'.$team['id'].' - provider_id:'.$team['provider_id']);
-                    DB::commit();
+                    $unmatchedData = UnmatchedData::findUnmatchedData('team', $team['id'], $team['provider_id']);
+                    if (empty($unmatchedData)) {
+                        DB::beginTransaction();
+                        $matching->create('UnmatchedData', [
+                            'data_type'     => 'team',
+                            'data_id'       => $team['id'],
+                            'provider_id'   => $team['provider_id']
+                        ]);
+                        Log::info('Matching: Creating unmatched data team_id:'.$team['id'].' - provider_id:'.$team['provider_id']);
+                        DB::commit();
+                    }
                 }
                 return 0;
             }
@@ -382,14 +384,17 @@ class MatchingService
             Log::info('Matching: Trying to get events to add to unmatched_data table');
             if (count($unmatchedEventsList) > 0) {
                 foreach($unmatchedEventsList as $event) {
-                    DB::beginTransaction();
-                    $matching->create('UnmatchedData', [
-                        'data_type'     => 'event',
-                        'data_id'       => $event['id'],
-                        'provider_id'   => $event['provider_id']
-                    ]);
-                    Log::info('Matching: Creating unmatched data event_id:'.$event['id'].' - provider_id:'.$event['provider_id']);
-                    DB::commit();
+                    $unmatchedData = UnmatchedData::findUnmatchedData('event', $event['id'], $event['provider_id']);
+                    if (empty($unmatchedData)) {
+                        DB::beginTransaction();
+                        $matching->create('UnmatchedData', [
+                            'data_type'     => 'event',
+                            'data_id'       => $event['id'],
+                            'provider_id'   => $event['provider_id']
+                        ]);
+                        Log::info('Matching: Creating unmatched data event_id:'.$event['id'].' - provider_id:'.$event['provider_id']);
+                        DB::commit();
+                    }
                 }
                 return 0;
             }
@@ -431,19 +436,18 @@ class MatchingService
                             DB::commit();
                             continue 2;
                         }
-                        else {
-                            //update the is_failed to true here
-                            DB::beginTransaction();
-                            Log::info('No primary league found for automatching league_id: ' . $league['data_id'] . ' setting is_failed TRUE');    
-                            $matching->updateOrCreate('UnmatchedData', [
-                                'data_type'     => 'league',
-                                'data_id'       => $league['data_id'],
-                                'provider_id'   => $league['provider_id']
-                            ],
-                            ['is_failed'     => true]);
-                            DB::commit();
-                        }
                     }
+
+                    //update the is_failed to true here
+                    DB::beginTransaction();
+                    Log::info('No primary league found for automatching league_id: ' . $league['data_id'] . ' setting is_failed TRUE');    
+                    $matching->updateOrCreate('UnmatchedData', [
+                        'data_type'     => 'league',
+                        'data_id'       => $league['data_id'],
+                        'provider_id'   => $league['provider_id']
+                    ],
+                    ['is_failed'     => true]);
+                    DB::commit();
                 }
                 return 0;
             }
@@ -485,19 +489,18 @@ class MatchingService
                             DB::commit();
                             continue 2;
                         }
-                        else {
-                            //update the is_failed to true here
-                            DB::beginTransaction();
-                            Log::info('No primary team found for automatching team_id: ' . $team['data_id'] . ' setting is_failed TRUE');    
-                            $matching->updateOrCreate('UnmatchedData', [
-                                'data_type'     => 'team',
-                                'data_id'       => $team['data_id'],
-                                'provider_id'   => $team['provider_id']
-                            ],
-                            ['is_failed'     => true]);
-                            DB::commit();
-                        }
                     }
+                    
+                    //update the is_failed to true here
+                    DB::beginTransaction();
+                    Log::info('No primary team found for automatching team_id: ' . $team['data_id'] . ' setting is_failed TRUE');    
+                    $matching->updateOrCreate('UnmatchedData', [
+                        'data_type'     => 'team',
+                        'data_id'       => $team['data_id'],
+                        'provider_id'   => $team['provider_id']
+                    ],
+                    ['is_failed'     => true]);
+                    DB::commit();
                 }
                 return 0;
             }
