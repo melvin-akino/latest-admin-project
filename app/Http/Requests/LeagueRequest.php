@@ -28,9 +28,9 @@ class LeagueRequest extends FormRequest
         $path = $this->path();
         if ($path == 'api/leagues/unmatch') {
             return [
-                'league_id'      => 'required|int|check_if_league_is_matched',
-                'provider_id'   => 'required|int|check_if_provider_is_secondary',
-                'sport_id'      => 'required'
+                'league_id'   => 'required|int|check_if_league_is_matched',
+                'provider_id' => 'required|int|check_if_provider_is_secondary',
+                'sport_id'    => 'required'
             ];
         }        
     }
@@ -38,7 +38,8 @@ class LeagueRequest extends FormRequest
     public function messages()
     {
         return [
-            'league_id.check_if_league_is_matched' => 'The supplied :attribute has no valid matched leagues.'
+            'league_id.check_if_league_is_matched'       => 'The supplied :attribute has no valid matched leagues.',
+            'provider_id.check_if_provider_is_secondary' => 'The supplied :attribute is must not be from Primary.'
         ];
     }
 

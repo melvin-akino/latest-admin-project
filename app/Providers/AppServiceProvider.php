@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-use App\Models\{Event, LeagueGroup};
+use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration};
 use Validator;
 use Illuminate\Support\ServiceProvider;
 
