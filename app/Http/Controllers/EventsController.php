@@ -54,13 +54,13 @@ class EventsController extends Controller
         $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
 
         $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
-        $leagueIds = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
+        $leagueIds  = LeagueGroup::getNonPrimaryLeagueIds($masterLeagueId, $providerId)->toArray();
 
         $events = [];
         $total  = 0;
 
         if(!empty($leagueIds)) {
-            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder, $gameSchedule)->offset(($page - 1) * $limit)->limit($limit)->get();
+            $events = Event::getEvents($leagueIds, null, false, $searchKey, $sortOrder, $gameSchedule);
             $total  = $events->count();
         }
 
@@ -69,7 +69,7 @@ class EventsController extends Controller
             'status_code' => 200,
             'total'       => $total,
             'pageNum'     => $page,
-            'pageData'    => $events
+            'pageData'    => !empty($leagueIds) ? $events->offset(($page - 1) * $limit)->limit($limit)->get() : $events
         ]);
     }
 
@@ -90,7 +90,7 @@ class EventsController extends Controller
         $paginated    = $request->has('paginated') ? $request->paginated : false;
         $gameSchedule = $request->has('gameSchedule') ? $request->gameSchedule : null;
         $leagueId     = $leagueId ? [$leagueId] : [];
-        $providerId = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
+        $providerId   = Provider::getIdFromAlias(SC::getValueByType('PRIMARY_PROVIDER'));
 
         $events = Event::getEvents($leagueId, $providerId, true, '', $sortOrder, $gameSchedule);
 
