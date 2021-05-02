@@ -25,9 +25,9 @@ class AdminSettlementService
                     'request_ts'    => getMilliseconds(),
                     'command'       => 'settlement',
                     'sub_command'   => 'transform',
-                    'data' => [
-                        'provider'      => $request->provider,
-                        'sport'         => $request->sport,
+                    'data' => [[
+                        'provider'      => strtolower($request->provider),
+                        'sport'         => (string) $request->sport,
                         'id'            => $id[0][0],
                         'username'      => $request->username,
                         'status'        => $request->status,
@@ -37,7 +37,7 @@ class AdminSettlementService
                         'profit_loss'   => $request->pl,
                         'bet_id'        => $request->bet_id,
                         'reason'        => $request->reason
-                    ]
+                    ]]
 
                 ];
 

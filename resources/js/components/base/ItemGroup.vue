@@ -39,11 +39,12 @@
         v-else
         :key="`item-${i}`"
         :item="child"
+        :title="child.title"
         :hasClickEvent="child.hasClickEvent"
         text
       />
     </template>
-    <button-dialog activator=".listClicked" :width="500">
+    <button-dialog activator=".listClickedReprocess" :width="500">
       <v-card>
         <v-toolbar color="primary" dark height="40px">
           <v-toolbar-title class="text-uppercase subtitle-1"
@@ -69,6 +70,35 @@
             >Cancel</v-btn
           >
           <v-btn dark right class="success" @click="reProcess">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </button-dialog>
+    <button-dialog activator=".listClickedClearDuplicates" :width="500">
+      <v-card>
+        <v-toolbar color="primary" dark height="40px">
+          <v-toolbar-title class="text-uppercase subtitle-1"
+            >Confirm Clear Duplicates</v-toolbar-title
+          >
+          <v-spacer></v-spacer>
+          <v-btn @click="closeDialog" icon>
+            <v-icon dark>mdi-close-circle</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text class="text-center">
+          <v-progress-circular
+            indeterminate
+            color="success"
+            :size="50"
+            v-if="isSubmitting"
+          ></v-progress-circular>
+          <p class="font-weight-regular text-center mt-4">{{ isSubmitting ? 'Clearing duplicates...' : 'Click "Confirm" to proceed clearing duplicates...' }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn dark right class="red darken-2" @click="closeDialog"
+            >Cancel</v-btn
+          >
+          <v-btn dark right class="success" @click="clearDuplicates">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </button-dialog>
@@ -149,6 +179,27 @@
       reProcess() {
         this.isSubmitting = true
         axios.get('matching/reprocess', { headers: { 'Authorization': `Bearer ${getToken()}` } })
+        .then(response => {
+          this.closeDialog()
+          this.isSubmitting = false
+          bus.$emit("SHOW_SNACKBAR", {
+            color: "success",
+            text: response.data.message
+          });
+        })
+        .catch(err => {
+          if(!axios.isCancel(err)) {
+            this.logoutOnError(err.response.status)
+            bus.$emit("SHOW_SNACKBAR", {
+              color: "error",
+              text: err.response.data.message
+            });
+          }
+        })
+      },
+      clearDuplicates() {
+        this.isSubmitting = true
+        axios.get('matching/clear-duplicates', { headers: { 'Authorization': `Bearer ${getToken()}` } })
         .then(response => {
           this.closeDialog()
           this.isSubmitting = false

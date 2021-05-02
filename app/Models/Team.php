@@ -66,21 +66,14 @@ class Team extends Model
 
     public static function getAllOtherProviderUnmatchedTeams(int $primaryProviderId)
     {
-        return self::where('provider_id', '!=',$primaryProviderId)
-            ->whereNotIn('id', function($notInUnmatched) {
-                $notInUnmatched->select('data_id')
-                    ->from('unmatched_data')
-                    ->where('data_type', 'team');
+        return self::where('provider_id', '!=', $primaryProviderId)
+            ->whereNotIn('id', function($query) {
+                return $query->select('team_id')
+                    ->from('team_groups');
             })
-            ->whereNotIn('id', function($notInTeamGroups) use ($primaryProviderId) {
-                $notInTeamGroups->select('team_id')
-                    ->from('team_groups')
-                    ->join('teams','teams.id','team_groups.team_id')
-                    ->where('provider_id', '!=', $primaryProviderId);
-            })
+            ->whereNull('deleted_at')
             ->select('id', 'provider_id')
-            ->get()
-            ->toArray();
+            ->get();
     }
 
     public static function getMasterTeamId($teamName, int $sportId, int $primaryProviderId)

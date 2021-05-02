@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Providers;
-use App\Models\{Event, LeagueGroup};
+use App\Models\{Event, LeagueGroup, Provider, SystemConfiguration};
 use Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -40,6 +40,11 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
             return false;
+        });
+
+        Validator::extend('check_if_provider_is_secondary', function($attribute, $value, $parameters, $validator) {
+            $primaryProviderId    = Provider::getIdFromAlias(SystemConfiguration::getValueByType('PRIMARY_PROVIDER'));
+            return (boolean) ($value != $primaryProviderId);
         });
     }
 }

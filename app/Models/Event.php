@@ -161,18 +161,12 @@ class Event extends Model
 
     public static function getAllOtherProviderUnmatchedEvents(int $primaryProviderId)
     {
-        return self::where('provider_id', '!=',$primaryProviderId)
-            ->whereNotIn('id', function($notInUnmatched) {
-                $notInUnmatched->select('data_id')
-                    ->from('unmatched_data')
-                    ->where('data_type', 'event');
+        return self::where('provider_id', '!=', $primaryProviderId)
+            ->whereNotIn('id', function($query) {
+                return $query->select('event_id')
+                    ->from('event_groups');
             })
-            ->whereNotIn('id', function($notInEventGroups) use ($primaryProviderId) {
-                $notInEventGroups->select('event_id')
-                    ->from('event_groups')
-                    ->join('events', 'events.id', 'event_groups.event_id')
-                    ->where('provider_id', '!=', $primaryProviderId);
-            })
+            ->whereNull('deleted_at')
             ->select('id', 'provider_id')
             ->get();
     }
@@ -255,6 +249,30 @@ class Event extends Model
             ->where('e.league_id', $leagueId)
             ->where('e.provider_id', $providerId)
             ->where('e.sport_id', $sportId)
+            ->select(
+                'ht.master_team_id as team_master_home_id',
+                'team_home_id', 
+                'at.master_team_id as team_master_away_id', 
+                'team_away_id',
+                'eg.master_event_id', 
+                'e.id'
+            )
+            ->get()
+            ->toArray();
+    }
+
+    public static function getTeamEvents($teamId, $providerId, $sportId)
+    {
+        return DB::table('event_groups as eg')
+            ->join('events as e', 'e.id', 'eg.event_id')
+            ->join('team_groups as ht', 'ht.team_id', 'e.team_home_id')
+            ->join('team_groups as at', 'at.team_id', 'e.team_away_id')
+            ->where('e.provider_id', $providerId)
+            ->where('e.sport_id', $sportId)
+            ->where(function($query) use ($teamId) {
+                $query->where('e.team_home_id', $teamId)
+                    ->orWhere('e.team_away_id', $teamId);
+            })
             ->select(
                 'ht.master_team_id as team_master_home_id',
                 'team_home_id', 

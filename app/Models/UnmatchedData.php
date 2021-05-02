@@ -72,4 +72,11 @@ class UnmatchedData extends Model
             ->get()
             ->toArray();
     }
+
+    public static function findUnmatchedData($dataType, $dataId, $providerId) {
+        return self::where('data_type', $dataType)
+            ->where('data_id', $dataId)
+            ->where('provider_id', $providerId)
+            ->first();
+    }
 }
