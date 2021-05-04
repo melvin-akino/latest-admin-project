@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services;
-use App\Models\{ User, Currency };
+use App\Models\{ User, Currency, SystemConfiguration };
 use Illuminate\Support\Facades\{DB, Hash, Log };
 use Carbon\Carbon;
 use Exception;
@@ -73,6 +73,7 @@ class UserService {
     DB::beginTransaction();
     try {
       if (empty($request->id)) {
+
           $user = new User([
               'name'          => explode('@', $request->email)[0],
               'email'         => $request->email,
@@ -81,13 +82,15 @@ class UserService {
               'lastname'      => $request->lastname,
               'status'        => $request->status,
               'currency_id'   => $request->currency_id,
-              'uuid'          => uniqid()
+              'uuid'          => uniqid(),
+              'max_bet_limit' => !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
           ]);
       } else {
           $user = User::where('id', $request->id)->first();
-          $user->firstname    = $request->firstname;
-          $user->lastname     = $request->lastname;
-          $user->status       = $request->status;
+          $user->firstname      = $request->firstname;
+          $user->lastname       = $request->lastname;
+          $user->status         = $request->status;
+          $user->max_bet_limit  = $request->max_bet_limit;
           if ($request->password) 
           {
               $user->password = Hash::make($request->password);
@@ -124,6 +127,7 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
+            'max_bet_limit' => $user->max_bet_limit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]
