@@ -21,6 +21,7 @@ class UserService {
         'users.created_at',
         'users.updated_at',
         'uuid',
+        'max_bet_limit',
         'c.code as currency_code',
         DB::raw("(SELECT created_at FROM oauth_access_tokens WHERE user_id = users.id ORDER BY created_at DESC LIMIT 1)
         as last_login_date"),

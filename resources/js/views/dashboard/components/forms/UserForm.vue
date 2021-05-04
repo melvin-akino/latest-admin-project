@@ -93,7 +93,6 @@
       </v-toolbar>
       <v-card-text v-if="!update">
         <v-container>
-          <p class="caption mb-4" v-if="userToUpdate">Wallet credit can be updated by clicking on <v-icon small>mdi-currency-gbp</v-icon>icon.</p>
           <v-row>
             <v-col cols="12" md="6" class="formColumn">
               <v-text-field
@@ -122,6 +121,26 @@
                 @input="$v.user.currency_id.$touch()"
                 @blur="$v.user.currency_id.$touch()"
               ></v-select>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+      <v-toolbar color="primary" dark height="40px">
+        <v-toolbar-title class="text-uppercase subtitle-1"
+        >Max Bet Limit</v-toolbar-title
+        >
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-text-field
+                label="Limit"
+                type="text"
+                outlined
+                dense
+                v-model="user.max_bet_limit"
+              ></v-text-field>
             </v-col>
           </v-row>
         </v-container>
@@ -169,7 +188,8 @@ export default {
       lastname: "",
       status: 1,
       balance: "",
-      currency_id: 1
+      currency_id: 1,
+      max_bet_limit: null
     }
   }),
   validations: {
