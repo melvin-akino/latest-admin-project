@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services;
-use App\Models\{ User, Currency, SystemConfiguration };
+use App\Models\{ User, Currency, SystemConfiguration, UserMaxBetLimit };
 use Illuminate\Support\Facades\{DB, Hash, Log };
 use Carbon\Carbon;
 use Exception;
@@ -74,7 +74,6 @@ class UserService {
     DB::beginTransaction();
     try {
       if (empty($request->id)) {
-
           $user = new User([
               'name'          => explode('@', $request->email)[0],
               'email'         => $request->email,
@@ -83,19 +82,20 @@ class UserService {
               'lastname'      => $request->lastname,
               'status'        => $request->status,
               'currency_id'   => $request->currency_id,
-              'uuid'          => uniqid(),
-              'max_bet_limit' => !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
+              'uuid'          => uniqid()
           ]);
       } else {
           $user = User::where('id', $request->id)->first();
           $user->firstname      = $request->firstname;
           $user->lastname       = $request->lastname;
           $user->status         = $request->status;
-          $user->max_bet_limit  = $request->max_bet_limit;
+
           if ($request->password) 
           {
               $user->password = Hash::make($request->password);
           }
+
+          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $request->max_bet_limit]);
       }
 
       if ($user->save()) {
@@ -109,6 +109,11 @@ class UserService {
           ];
 
           Wallet::walletCredit((object) $walletData);
+
+          UserMaxBetLimit::create([
+            'user_id' => $user->id,
+            'max_bet_limit' => !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
+          ]);
         }
       }
 
@@ -128,7 +133,7 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
-            'max_bet_limit' => $user->max_bet_limit,
+            'max_bet_limit' => UserMaxBetLimit::where('user_id', $user->id)->first()->max_bet_limit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]

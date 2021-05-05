@@ -22,8 +22,7 @@ class User extends Model
         'lastname',
         'currency_id',
         'status',
-        'uuid',
-        'max_bet_limit'
+        'uuid'
     ];
 
     /**
@@ -36,7 +35,7 @@ class User extends Model
         'remember_token',
     ];
 
-    protected static $logAttributes = ['name', 'email', 'firstname', 'lastname', 'currency_id', 'status','max_bet_limit'];
+    protected static $logAttributes = ['name', 'email', 'firstname', 'lastname', 'currency_id', 'status'];
 
     protected static $logOnlyDirty = true;
 
