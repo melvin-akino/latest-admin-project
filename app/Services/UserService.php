@@ -74,6 +74,7 @@ class UserService {
   {
     DB::beginTransaction();
     try {
+      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
       if (empty($request->id)) {
           $user = new User([
               'name'          => explode('@', $request->email)[0],
@@ -96,7 +97,7 @@ class UserService {
               $user->password = Hash::make($request->password);
           }
 
-          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $request->max_bet_limit]);
+          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $maxBetLimit]);
       }
 
       if ($user->save()) {
@@ -113,7 +114,7 @@ class UserService {
 
           UserMaxBetLimit::create([
             'user_id' => $user->id,
-            'max_bet_limit' => !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
+            'max_bet_limit' => $maxBetLimit
           ]);
         }
       }
@@ -134,7 +135,7 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
-            'max_bet_limit' => UserMaxBetLimit::where('user_id', $user->id)->first()->max_bet_limit,
+            'max_bet_limit' => $maxBetLimit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]
