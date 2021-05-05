@@ -73,7 +73,6 @@ class UserService {
     DB::beginTransaction();
     try {
       if (empty($request->id)) {
-
           $user = new User([
               'name'          => explode('@', $request->email)[0],
               'email'         => $request->email,
@@ -133,7 +132,7 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
-            'max_bet_limit' => $user->max_bet_limit,
+            'max_bet_limit' => UserMaxBetLimit::where('user_id', $user->id)->first()->max_bet_limit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]
