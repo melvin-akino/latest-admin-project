@@ -11,6 +11,7 @@ class UserService {
   public function getUsers()
   {
     $users = User::join('currency as c', 'c.id', 'users.currency_id')
+      ->join('user_max_bet_limit as umbl', 'umbl.user_id', 'users.id')
       ->select([
         'users.id',
         'email',
