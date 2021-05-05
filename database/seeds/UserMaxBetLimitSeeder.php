@@ -12,12 +12,12 @@ class UserMaxBetLimitSeeder extends Seeder
      */
     public function run()
     {
-        $users = User::all();
-
+        $users  = User::all();
+        $maxBet = SystemConfiguration::getValueByType('MAX_BET')
         foreach($users as $user) {
             UserMaxBetLimit::updateOrCreate(
-              [ 'user_id' => $user->id ], 
-              [ 'max_bet_limit' => SystemConfiguration::getValueByType('MAX_BET') ]
+                [ 'user_id' => $user->id ], 
+                [ 'max_bet_limit' =>  $maxBet ]
             );
         }
     }

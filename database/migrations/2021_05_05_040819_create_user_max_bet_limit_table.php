@@ -27,7 +27,7 @@ class CreateUserMaxBetLimitTable extends Migration
         Artisan::call('db:seed', [
             '--class' => UserMaxBetLimitSeeder::class
         ]);
-      }
+    }
 
     /**
      * Reverse the migrations.
