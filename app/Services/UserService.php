@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services;
-use App\Models\{ User, Currency };
+use App\Models\{ User, Currency, SystemConfiguration, UserMaxBetLimit };
 use Illuminate\Support\Facades\{DB, Hash, Log };
 use Carbon\Carbon;
 use Exception;
@@ -72,6 +72,7 @@ class UserService {
   {
     DB::beginTransaction();
     try {
+      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
       if (empty($request->id)) {
           $user = new User([
               'name'          => explode('@', $request->email)[0],
@@ -85,13 +86,16 @@ class UserService {
           ]);
       } else {
           $user = User::where('id', $request->id)->first();
-          $user->firstname    = $request->firstname;
-          $user->lastname     = $request->lastname;
-          $user->status       = $request->status;
+          $user->firstname      = $request->firstname;
+          $user->lastname       = $request->lastname;
+          $user->status         = $request->status;
+
           if ($request->password) 
           {
               $user->password = Hash::make($request->password);
           }
+
+          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $maxBetLimit]);
       }
 
       if ($user->save()) {
@@ -105,6 +109,11 @@ class UserService {
           ];
 
           Wallet::walletCredit((object) $walletData);
+
+          UserMaxBetLimit::create([
+            'user_id' => $user->id,
+            'max_bet_limit' => $maxBetLimit
+          ]);
         }
       }
 
@@ -124,6 +133,7 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
+            'max_bet_limit' => $maxBetLimit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]
