@@ -94,7 +94,7 @@ class UserService {
               $user->password = Hash::make($request->password);
           }
 
-          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit', $request->max_bet_limit]);
+          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $request->max_bet_limit]);
       }
 
       if ($user->save()) {
