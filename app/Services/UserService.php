@@ -11,6 +11,7 @@ class UserService {
   public function getUsers()
   {
     $users = User::join('currency as c', 'c.id', 'users.currency_id')
+      ->join('user_max_bet_limit as umbl', 'umbl.user_id', 'users.id')
       ->select([
         'users.id',
         'email',
@@ -21,6 +22,7 @@ class UserService {
         'users.created_at',
         'users.updated_at',
         'uuid',
+        'max_bet_limit',
         'c.code as currency_code',
         DB::raw("(SELECT created_at FROM oauth_access_tokens WHERE user_id = users.id ORDER BY created_at DESC LIMIT 1)
         as last_login_date"),
@@ -72,7 +74,7 @@ class UserService {
   {
     DB::beginTransaction();
     try {
-      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
+      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET');
       if (empty($request->id)) {
           $user = new User([
               'name'          => explode('@', $request->email)[0],
