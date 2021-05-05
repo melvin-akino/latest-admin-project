@@ -74,7 +74,7 @@ class UserService {
   {
     DB::beginTransaction();
     try {
-      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET')
+      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET');
       if (empty($request->id)) {
           $user = new User([
               'name'          => explode('@', $request->email)[0],
