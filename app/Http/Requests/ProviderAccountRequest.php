@@ -41,9 +41,10 @@ class ProviderAccountRequest extends FormRequest
         }      
         
         return [
-            'username'   => 'required|max:50'.$uniqueUsername,
-            'password' => 'required',
-            'punter_percentage'   => 'required|numeric'
+            'line'              => 'required',
+            'username'          => 'required|max:50'.$uniqueUsername,
+            'password'          => 'required',
+            'punter_percentage' => 'required|numeric'
         ];
     }
 
