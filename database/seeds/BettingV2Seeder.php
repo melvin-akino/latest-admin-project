@@ -70,7 +70,7 @@ class BettingV2Seeder extends Seeder
 
     private static function populateUserBets($orderData)
     {
-        $id = UserBet::create([
+        $insert = UserBet::create([
             'user_id'                       => $orderData->user_id,
             'sport_id'                      => $orderData->sport_id,
             'odd_type_id'                   => $orderData->odd_type_id,
@@ -91,12 +91,12 @@ class BettingV2Seeder extends Seeder
             'master_team_away_name'         => $orderData->master_team_away_name,
         ]);
 
-        return $id;
+        return $insert->id;
     }
 
     private static function populateProviderBets($orderData, int $userBetId)
     {
-        $id = ProviderBet::create([
+        $insert = ProviderBet::create([
             'user_bet_id'               => $userBetId,
             'provider_id'               => $orderData->provider_id,
             'provider_account_id'       => $orderData->provider_account_id,
@@ -110,6 +110,8 @@ class BettingV2Seeder extends Seeder
             'reason'                    => $orderData->reason,
             'settled_date'              => $orderData->settled_date,
         ]);
+
+        return $insert->id;
     }
 
     private static function populateProviderBetLogs(int $providerBetId, string $status)
