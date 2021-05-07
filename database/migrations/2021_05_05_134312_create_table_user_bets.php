@@ -30,7 +30,7 @@ class CreateTableUserBets extends Migration
                 'AWAY'
             ]);
             $table->string('order_expiry', 10);
-            $table->string('odd_label', 10)->nullable();
+            $table->string('odds_label', 10)->nullable();
             $table->string('ml_bet_identifier', 20)->index();
             $table->string('score_on_bet', 10)->nullable();
             $table->string('final_score', 10)->nullable();
