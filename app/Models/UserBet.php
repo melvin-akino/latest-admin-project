@@ -70,6 +70,6 @@ class UserBet extends Model
     {
         $currency = auth()->user() ? trim(Currency::getCodeById(auth()->user()->currency_id)) : "CNY";
 
-        return ucfirst($eventName) . " User Bet on market_id: " . request()->market_id . " with $currency " . request()->stake . " @ " . request()->odds;
+        return ucfirst($eventName) . " User Bet on market_id: " . $this->market_id . " with $currency " . $this->stake . " @ " . $this->odds;
     }
 }

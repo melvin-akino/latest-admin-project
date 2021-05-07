@@ -60,15 +60,15 @@ class ProviderBet extends Model
 
     public function getDescriptionForEvent(string $eventName): string
     {
-        $provider = Provider::find(request()->provider_id);
+        $provider = Provider::find($this->provider_id);
         $currency = trim(Currency::getCodeById($provider->currency_id));
 
-        if (request()->settled_date) {
-            return "Settled Provider Bet on " . $provider->alias . " with $currency " . request()->stake . " @ " . request()->odds . ". " . request()->status . " $currency " . request()->profit_loss;
-        } else if (request()->provider_error_message_id) {
-            return ucfirst($eventName) . " Provider Bet on " . $provider->alias . ": " . request()->reason;
+        if ($this->settled_date) {
+            return "Settled Provider Bet on " . $provider->alias . " with $currency " . $this->stake . " @ " . $this->odds . ". " . $this->status . " $currency " . $this->profit_loss;
+        } else if ($this->provider_error_message_id) {
+            return ucfirst($eventName) . " Provider Bet on " . $provider->alias . ": " . $this->reason;
         }
 
-        return ucfirst($eventName) . " Provider Bet on " . $provider->alias . " with $currency " . request()->stake . " @ " . request()->odds;
+        return ucfirst($eventName) . " Provider Bet on " . $provider->alias . " with $currency " . $this->stake . " @ " . $this->odds;
     }
 }

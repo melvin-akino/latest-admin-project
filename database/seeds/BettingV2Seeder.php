@@ -41,10 +41,10 @@ class BettingV2Seeder extends Seeder
         $betIds      = [];
         $settledBets = Order::join('order_logs AS ol', 'orders.id', 'ol.order_id')
             ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
-            ->leftJoin('providers AS p', 'p.id', 'o.provider_id')
+            ->leftJoin('providers AS p', 'p.id', 'orders.provider_id')
             ->leftJoin('user_provider_configurations AS upc', function ($join) {
-                $join->on('upc.user_id', 'o.user_id');
-                $join->where('upc.provider_id', 'o.provider_id');
+                $join->on('upc.user_id', 'orders.user_id');
+                $join->where('upc.provider_id', DB::raw('orders.provider_id'));
             })
             ->whereIn('ol.status', self::$settled)
             ->select([
