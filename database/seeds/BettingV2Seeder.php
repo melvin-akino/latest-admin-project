@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class BettingV2Seeder extends Seeder
 {
-    protected $settled = [
+    protected static $settled = [
         'WIN',
         'WON',
         'LOSE',
@@ -46,7 +46,7 @@ class BettingV2Seeder extends Seeder
                 $join->on('upc.user_id', 'o.user_id');
                 $join->where('upc.provider_id', 'o.provider_id');
             })
-            ->whereIn('ol.status', $this->settled)
+            ->whereIn('ol.status', self::$settled)
             ->select([
                 DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
                 'ol.id AS order_log_id',
@@ -123,7 +123,7 @@ class BettingV2Seeder extends Seeder
             'status'          => 'PENDING',
         ]);
 
-        if (in_array(strtoupper($status), $this->settled)) {
+        if (in_array(strtoupper($status), self::$settled)) {
             # Create SUCCESS Status Record for Settled Bets
             ProviderBetLog::create([
                 'provider_bet_id' => $providerBetId,
