@@ -15,6 +15,7 @@ class ProviderBetTransaction extends Model
         'actual_to_win',
         'actual_profit_loss',
         'exchange_rate',
+        'punter_percentage',
         'created_at',
         'updated_at',
     ];
@@ -26,5 +27,6 @@ class ProviderBetTransaction extends Model
         'actual_to_win',
         'actual_profit_loss',
         'exchange_rate',
+        'punter_percentage',
     ];
 }

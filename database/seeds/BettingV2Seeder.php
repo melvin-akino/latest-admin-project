@@ -1,7 +1,8 @@
 <?php
 
-use App\Models\{Order, UserBet, ProviderBet, ProviderBetLog, ProviderBetTransaction};
+use App\Models\{Order, Provider, UserBet, ProviderBet, ProviderBetLog, ProviderBetTransaction};
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BettingV2Seeder extends Seeder
 {
@@ -40,8 +41,14 @@ class BettingV2Seeder extends Seeder
         $betIds      = [];
         $settledBets = Order::join('order_logs AS ol', 'orders.id', 'ol.order_id')
             ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
+            ->leftJoin('providers AS p', 'p.id', 'o.provider_id')
+            ->leftJoin('user_provider_configurations AS upc', function ($join) {
+                $join->on('upc.user_id', 'o.user_id');
+                $join->where('upc.provider_id', 'o.provider_id');
+            })
             ->whereIn('ol.status', $this->settled)
             ->select([
+                DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
                 'ol.id AS order_log_id',
                 'ol.bet_id',
                 'exchange_rate_id',
@@ -73,7 +80,7 @@ class BettingV2Seeder extends Seeder
             'stake'                         => $orderData->stake,
             'market_flag'                   => $orderData->market_flag,
             'order_expiry'                  => $orderData->order_expiry,
-            'odd_label'                     => $orderData->odd_label,
+            'odds_label'                    => $orderData->odd_label,
             'ml_bet_identifier'             => $orderData->ml_bet_identifier,
             'score_on_bet'                  => $orderData->score_on_bet,
             'final_score'                   => $orderData->final_score,
@@ -138,6 +145,7 @@ class BettingV2Seeder extends Seeder
             'actual_to_win'      => $data->actual_to_win,
             'actual_profit_loss' => $data->actual_profit_loss,
             'exchange_rate'      => $data->exchange_rate,
+            'punter_percentage'  => $data->punter_percentage,
         ]);
     }
 }

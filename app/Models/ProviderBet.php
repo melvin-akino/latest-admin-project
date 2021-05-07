@@ -25,6 +25,8 @@ class ProviderBet extends Model
         'profit_loss',
         'reason',
         'settled_date',
+        'min',
+        'max',
         'created_at',
         'updated_at',
     ];
@@ -42,6 +44,8 @@ class ProviderBet extends Model
         'profit_loss',
         'reason',
         'settled_date',
+        'min',
+        'max',
     ];
 
     protected static $logOnlyDirty = true;
