@@ -31,7 +31,7 @@ class BettingV2Seeder extends Seeder
     {
         try {
             if (file_exists(storage_path('logs/monitor/database/laravel.log')) {
-                unlink(storage_path('logs/monitor/database/laravel.log');
+                unlink(storage_path('logs/monitor/database/laravel.log'));
             }
 
             $orders = Order::orderBy('id', 'ASC')->get();
