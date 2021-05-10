@@ -14,6 +14,7 @@
                 v-model="search.provider"
                 background-color="#fff"
                 @change="setCurrencyFilter(search.provider)"
+                class="filter"
               ></v-select>
             </v-col>
           </v-row>
@@ -26,14 +27,23 @@
                 dense
                 v-model="search.currency"
                 background-color="#fff"
+                class="filter"
               ></v-select>
             </v-col>
           </v-row>
-          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Generate</v-btn>
+          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Apply Filters</v-btn>
         </v-form>
       </div>
       <v-toolbar flat color="transparent">
         <v-spacer></v-spacer>
+        <v-text-field
+          v-model="searchKey"
+          append-icon="mdi-magnify"
+          label="Search Accounts"
+          hide-details
+          class="subtitle-1"
+          style="max-width: 200px;"
+        ></v-text-field>
         <button-dialog icon="mdi-plus" label="New Account" width="600" @clearFilters="clearFilters">
           <provider-account-form :update="false"></provider-account-form>
         </button-dialog>
@@ -42,6 +52,7 @@
         :headers="headers"
         :items="filteredProviderAccounts"
         :items-per-page="10"
+        :search="searchKey"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
         :page="page"
@@ -165,6 +176,7 @@ export default {
   },
   data: () => ({
     headers: [
+      { text: "LINE", value: "line" },
       { text: "USERNAME", value: "username" },
       { text: "CREDITS", value: "credits" },
       { text: "P/L", value: "pl" },
@@ -186,7 +198,8 @@ export default {
       provider: 'all',
       currency: 'all'
     },
-    page: null
+    page: null,
+    searchKey: null
   }),
   computed: {
     ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus"]),
@@ -284,7 +297,7 @@ export default {
   padding: 16px;
 }
 
-.providers .theme--light.v-label {
+.filter .theme--light.v-label {
   color: #000;
 }
 
