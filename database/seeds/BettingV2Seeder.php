@@ -39,7 +39,11 @@ class BettingV2Seeder extends Seeder
         }
 
         $betIds      = [];
-        $settledBets = Order::join('order_logs AS ol', 'orders.id', 'ol.order_id')
+        $settledBets = Order::join('order_logs AS ol', function ($join) {
+                $join->on('orders.id', 'ol.order_id');
+                $join->whereNotNull('orders.settled_date');
+                $join->whereNotNull('ol.settled_date');
+            })
             ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
             ->leftJoin('providers AS p', 'p.id', 'orders.provider_id')
             ->leftJoin('user_provider_configurations AS upc', function ($join) {
@@ -71,24 +75,24 @@ class BettingV2Seeder extends Seeder
     private static function populateUserBets($orderData)
     {
         $insert = UserBet::create([
-            'user_id'                       => $orderData->user_id,
-            'sport_id'                      => $orderData->sport_id,
-            'odd_type_id'                   => $orderData->odd_type_id,
-            'market_id'                     => $orderData->market_id,
-            'status'                        => $orderData->status,
-            'odds'                          => $orderData->odds,
-            'stake'                         => $orderData->stake,
-            'market_flag'                   => $orderData->market_flag,
-            'order_expiry'                  => $orderData->order_expiry,
-            'odds_label'                    => $orderData->odd_label,
-            'ml_bet_identifier'             => $orderData->ml_bet_identifier,
-            'score_on_bet'                  => $orderData->score_on_bet,
-            'final_score'                   => $orderData->final_score,
-            'master_event_market_unique_id' => $orderData->master_event_market_unique_id,
-            'master_event_unique_id'        => $orderData->master_event_unique_id,
-            'master_league_name'            => $orderData->master_league_name,
-            'master_team_home_name'         => $orderData->master_team_home_name,
-            'master_team_away_name'         => $orderData->master_team_away_name,
+            'user_id'                => $orderData->user_id,
+            'sport_id'               => $orderData->sport_id,
+            'odd_type_id'            => $orderData->odd_type_id,
+            'market_id'              => $orderData->market_id,
+            'status'                 => $orderData->status,
+            'odds'                   => $orderData->odds,
+            'stake'                  => $orderData->stake,
+            'market_flag'            => $orderData->market_flag,
+            'order_expiry'           => $orderData->order_expiry,
+            'odds_label'             => $orderData->odd_label,
+            'ml_bet_identifier'      => $orderData->ml_bet_identifier,
+            'score_on_bet'           => $orderData->score_on_bet,
+            'final_score'            => $orderData->final_score,
+            'mem_uid'                => $orderData->master_event_market_unique_id,
+            'master_event_unique_id' => $orderData->master_event_unique_id,
+            'master_league_name'     => $orderData->master_league_name,
+            'master_team_home_name'  => $orderData->master_team_home_name,
+            'master_team_away_name'  => $orderData->master_team_away_name,
         ]);
 
         return $insert->id;
