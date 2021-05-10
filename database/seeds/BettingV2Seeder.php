@@ -139,7 +139,7 @@ class BettingV2Seeder extends Seeder
             'profit_loss'               => $orderData->profit_loss,
             'reason'                    => $orderData->reason,
             'settled_date'              => $orderData->settled_date,
-            'created_date'              => $orderData->created_date,
+            'created_at'                => $orderData->created_at,
         ]);
 
         return $insert->id;
