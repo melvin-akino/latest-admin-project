@@ -27,6 +27,7 @@ class ProviderBet extends Model
         'settled_date',
         'min',
         'max',
+        'game_schedule',
         'created_at',
         'updated_at',
     ];
@@ -46,6 +47,7 @@ class ProviderBet extends Model
         'settled_date',
         'min',
         'max',
+        'game_schedule',
     ];
 
     protected static $logOnlyDirty = true;

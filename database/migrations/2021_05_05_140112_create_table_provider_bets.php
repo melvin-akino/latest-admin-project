@@ -29,6 +29,7 @@ class CreateTableProviderBets extends Migration
             $table->float('profit_loss', 15, 2)->nullable();
             $table->float('min', 15, 2)->nullable();
             $table->float('max', 15, 2)->nullable();
+            $table->string('game_schedule', 10)->nullable()->index();
             $table->text('reason')->nullable();
             $table->dateTimeTz('settled_date')->nullable()->index();
             $table->timestamps();
