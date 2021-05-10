@@ -99,10 +99,17 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
         'monitor_api' => [
-          'driver' => 'single',
-          'path'   => storage_path('logs/monitor/api/laravel.log'),
-          'level'  => 'debug',
-        ]
+            'driver' => 'single',
+            'path'   => storage_path('logs/monitor/api/laravel.log'),
+            'level'  => 'debug',
+        ],
+
+        'monitor_database' => [
+            'driver' => 'single',
+            'path'   => storage_path('logs/monitor/database/laravel.log'),
+            'level'  => 'debug',
+        ],
     ],
 ];

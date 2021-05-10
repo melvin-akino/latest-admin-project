@@ -29,47 +29,65 @@ class BettingV2Seeder extends Seeder
      */
     public function run()
     {
-        $orders = Order::orderBy('id', 'ASC')->get();
-
-        foreach ($orders AS $row) {
-            $userBetId     = self::populateUserBets($row);
-            $providerBetId = self::populateProviderBets($row, $userBetId);
-
-            self::populateProviderBetLogs($providerBetId, $row->status);
-        }
-
-        $betIds      = [];
-        $settledBets = Order::join('order_logs AS ol', function ($join) {
-                $join->on('orders.id', 'ol.order_id');
-                $join->whereNotNull(DB::raw('orders.settled_date'));
-                $join->whereNotNull('ol.settled_date');
-            })
-            ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
-            ->leftJoin('providers AS p', 'p.id', 'orders.provider_id')
-            ->leftJoin('user_provider_configurations AS upc', function ($join) {
-                $join->on('upc.user_id', 'orders.user_id');
-                $join->where('upc.provider_id', DB::raw('orders.provider_id'));
-            })
-            ->whereIn('ol.status', self::$settled)
-            ->orderBy('ol.id', 'ASC')
-            ->select([
-                DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
-                'orders.id AS order_id',
-                'ol.bet_id',
-                'exchange_rate_id',
-                'actual_stake',
-                'actual_to_win',
-                'actual_profit_loss',
-                'exchange_rate',
-            ])
-            ->get();
-
-        foreach ($settledBets AS $row) {
-            if (!in_array($row->bet_id, $betIds)) {
-                self::populateProviderBetTransactions($row);
-
-                $betIds[] = $row->bet_id;
+        try {
+            if (file_exists(storage_path('logs/monitor/database/laravel.log')) {
+                unlink(storage_path('logs/monitor/database/laravel.log');
             }
+
+            $orders = Order::orderBy('id', 'ASC')->get();
+
+            foreach ($orders AS $row) {
+                $userBetId     = self::populateUserBets($row);
+                $providerBetId = self::populateProviderBets($row, $userBetId);
+
+                self::populateProviderBetLogs($providerBetId, $row->status);
+            }
+
+            $betIds      = [];
+            $settledBets = Order::join('order_logs AS ol', function ($join) {
+                    $join->on('orders.id', 'ol.order_id');
+                    $join->whereNotNull(DB::raw('orders.settled_date'));
+                    $join->whereNotNull('ol.settled_date');
+                })
+                ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
+                ->leftJoin('providers AS p', 'p.id', 'orders.provider_id')
+                ->leftJoin('user_provider_configurations AS upc', function ($join) {
+                    $join->on('upc.user_id', 'orders.user_id');
+                    $join->where('upc.provider_id', DB::raw('orders.provider_id'));
+                })
+                ->whereIn('ol.status', self::$settled)
+                ->groupBy([
+                    DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage)'),
+                    'orders.id',
+                    'ol.bet_id',
+                    'exchange_rate_id',
+                    'actual_stake',
+                    'actual_to_win',
+                    'actual_profit_loss',
+                    'exchange_rate',
+                ])
+                ->orderBy('o.id', 'ASC')
+                ->select([
+                    DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
+                    'orders.id AS order_id',
+                    'ol.bet_id',
+                    'exchange_rate_id',
+                    'actual_stake',
+                    'actual_to_win',
+                    'actual_profit_loss',
+                    'exchange_rate',
+                ])
+                ->get();
+
+            foreach ($settledBets AS $row) {
+                if (!in_array($row->bet_id, $betIds)) {
+                    self::populateProviderBetTransactions($row);
+
+                    $betIds[] = $row->bet_id;
+                }
+            }
+        } catch (Exception $e) {
+            \Log::channel('monitor_database')->error(json_encode($e));
         }
     }
 
@@ -115,6 +133,24 @@ class BettingV2Seeder extends Seeder
             'reason'                    => $orderData->reason,
             'settled_date'              => $orderData->settled_date,
         ]);
+
+        \Log::channel('monitor_database')->debug(json_encode([
+            'qwe' => [
+                'user_bet_id'               => $userBetId,
+                'provider_id'               => $orderData->provider_id,
+                'provider_account_id'       => $orderData->provider_account_id,
+                'provider_error_message_id' => $orderData->provider_error_message_id,
+                'status'                    => $orderData->status,
+                'bet_id'                    => $orderData->bet_id,
+                'odds'                      => $orderData->odds,
+                'stake'                     => $orderData->stake,
+                'to_win'                    => $orderData->to_win,
+                'profit_loss'               => $orderData->profit_loss,
+                'reason'                    => $orderData->reason,
+                'settled_date'              => $orderData->settled_date,
+            ],
+            'asd' => $insert->id,
+        ]));
 
         return $insert->id;
     }
