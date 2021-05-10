@@ -88,7 +88,10 @@ class BettingV2Seeder extends Seeder
                 }
             }
         } catch (Exception $e) {
-            \Log::channel('monitor_database')->error(json_encode($e));
+            \Log::channel('monitor_database')->error(json_encode([
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
+            ]));
         }
     }
 
@@ -140,7 +143,6 @@ class BettingV2Seeder extends Seeder
 
     private static function populateProviderBetLogs(int $providerBetId, string $status)
     {
-
         # Create Initial PENDING Record
         ProviderBetLog::create([
             'provider_bet_id' => $providerBetId,
