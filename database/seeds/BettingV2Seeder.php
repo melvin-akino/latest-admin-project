@@ -41,7 +41,7 @@ class BettingV2Seeder extends Seeder
         $betIds      = [];
         $settledBets = Order::join('order_logs AS ol', function ($join) {
                 $join->on('orders.id', 'ol.order_id');
-                $join->whereNotNull('orders.settled_date');
+                $join->whereNotNull(DB::raw('orders.settled_date'));
                 $join->whereNotNull('ol.settled_date');
             })
             ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
@@ -54,7 +54,7 @@ class BettingV2Seeder extends Seeder
             ->orderBy('ol.id', 'ASC')
             ->select([
                 DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
-                'ol.id AS order_log_id',
+                'o.id AS order_id',
                 'ol.bet_id',
                 'exchange_rate_id',
                 'actual_stake',
@@ -146,7 +146,7 @@ class BettingV2Seeder extends Seeder
     private static function populateProviderBetTransactions($data)
     {
         ProviderBetTransaction::create([
-            'provider_bet_id'    => $data->order_log_id,
+            'provider_bet_id'    => $data->order_id,
             'exchange_rate_id'   => $data->exchange_rate_id,
             'actual_stake'       => $data->actual_stake,
             'actual_to_win'      => $data->actual_to_win,
