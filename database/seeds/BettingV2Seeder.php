@@ -31,7 +31,7 @@ class BettingV2Seeder extends Seeder
     {
         try {
             if (file_exists(storage_path('logs/monitor/database/laravel.log'))) {
-                unlink(storage_path('logs/monitor/database/laravel.log'));
+                file_put_contents(storage_path('logs/monitor/database/laravel.log'), "=====");
             }
 
             $orders = Order::orderBy('id', 'ASC')->get();
@@ -44,21 +44,22 @@ class BettingV2Seeder extends Seeder
             }
 
             $betIds      = [];
-            $settledBets = Order::join('order_logs AS ol', function ($join) {
-                    $join->on('orders.bet_id', 'ol.bet_id');
-                    $join->whereNotNull(DB::raw('orders.settled_date'));
+            $settledBets = ProviderBet::join('user_bets AS ub', 'ub.id', 'provider_bets.user_bet_id')
+                ->join('order_logs AS ol', function ($join) {
+                    $join->on('provider_bets.bet_id', 'ol.bet_id');
+                    $join->whereNotNull(DB::raw('provider_bets.settled_date'));
                     $join->whereNotNull('ol.settled_date');
                 })
                 ->leftJoin('provider_account_orders AS pao', 'pao.order_log_id', 'ol.id')
-                ->leftJoin('providers AS p', 'p.id', 'orders.provider_id')
+                ->leftJoin('providers AS p', 'p.id', 'provider_bets.provider_id')
                 ->leftJoin('user_provider_configurations AS upc', function ($join) {
-                    $join->on('upc.user_id', 'orders.user_id');
-                    $join->where('upc.provider_id', DB::raw('orders.provider_id'));
+                    $join->on('upc.user_id', 'ub.user_id');
+                    $join->where('upc.provider_id', DB::raw('provider_bets.provider_id'));
                 })
                 ->whereIn('ol.status', self::$settled)
                 ->groupBy([
                     DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage)'),
-                    'orders.id',
+                    'provider_bets.id',
                     'ol.bet_id',
                     'exchange_rate_id',
                     'actual_stake',
@@ -66,10 +67,10 @@ class BettingV2Seeder extends Seeder
                     'actual_profit_loss',
                     'exchange_rate',
                 ])
-                ->orderBy('orders.id', 'ASC')
+                ->orderBy('provider_bets.id', 'ASC')
                 ->select([
                     DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
-                    'orders.id AS order_id',
+                    'provider_bets.id AS order_id',
                     'ol.bet_id',
                     'exchange_rate_id',
                     'actual_stake',
