@@ -34,7 +34,7 @@ class CreateTableUserBets extends Migration
             $table->string('ml_bet_identifier', 20)->index();
             $table->string('score_on_bet', 10)->nullable();
             $table->string('final_score', 10)->nullable();
-            $table->string('master_event_market_unique_id', 100)->index();
+            $table->string('mem_uid', 100)->index();
             $table->string('master_event_unique_id', 30)->index();
             $table->string('master_league_name', 100)->index();
             $table->string('master_team_home_name', 100)->index();
