@@ -51,6 +51,7 @@ class BettingV2Seeder extends Seeder
                 $join->where('upc.provider_id', DB::raw('orders.provider_id'));
             })
             ->whereIn('ol.status', self::$settled)
+            ->orderBy('ol.id', 'ASC')
             ->select([
                 DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
                 'ol.id AS order_log_id',
