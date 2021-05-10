@@ -45,7 +45,7 @@ class BettingV2Seeder extends Seeder
 
             $betIds      = [];
             $settledBets = Order::join('order_logs AS ol', function ($join) {
-                    $join->on('orders.id', 'ol.order_id');
+                    $join->on('orders.bet_id', 'ol.bet_id');
                     $join->whereNotNull(DB::raw('orders.settled_date'));
                     $join->whereNotNull('ol.settled_date');
                 })
