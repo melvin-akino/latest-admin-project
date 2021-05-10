@@ -42,6 +42,7 @@ const mutations = {
   ADD_PROVIDER_ACCOUNT: (state, providerAccount) => {
     let newProviderAccount = {
       id: providerAccount.id,
+      line: providerAccount.line,
       username: providerAccount.username,
       password: providerAccount.password,
       type: providerAccount.type,
@@ -62,6 +63,7 @@ const mutations = {
   },
   UPDATE_PROVIDER_ACCOUNT: (state, providerAccount) => {
     let updatedProviderAccount = {
+      line: providerAccount.line,
       username: providerAccount.username,
       password: providerAccount.password,
       type: providerAccount.type,
