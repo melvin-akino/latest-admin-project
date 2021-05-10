@@ -181,6 +181,18 @@ class BettingV2Seeder extends Seeder
 
     private static function populateProviderBetTransactions($data)
     {
+        \Log::channel('monitor_database')->debug(json_encode([
+            'zxc' => [
+                'provider_bet_id'    => $data->order_id,
+                'exchange_rate_id'   => $data->exchange_rate_id,
+                'actual_stake'       => $data->actual_stake,
+                'actual_to_win'      => $data->actual_to_win,
+                'actual_profit_loss' => $data->actual_profit_loss,
+                'exchange_rate'      => $data->exchange_rate,
+                'punter_percentage'  => $data->punter_percentage,
+            ],
+        ]));
+
         ProviderBetTransaction::create([
             'provider_bet_id'    => $data->order_id,
             'exchange_rate_id'   => $data->exchange_rate_id,
