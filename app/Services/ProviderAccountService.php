@@ -32,7 +32,8 @@ class ProviderAccountService
                     'provider_id',
                     'p.currency_id',
                     'c.code as currency',
-                    'uuid'
+                    'uuid',
+                    'line'
                 ])                                    
                 ->orderBy('provider_accounts.created_at', 'DESC')
                 ->skip($request->offset)
@@ -54,7 +55,8 @@ class ProviderAccountService
                         'provider_id'       => $account['provider_id'],
                         'currency_id'       => $account['currency_id'],
                         'currency'          => $account['currency'],
-                        'uuid'              => $account['uuid']
+                        'uuid'              => $account['uuid'],
+                        'line'              => $account['line']
                     ];
                 }
             }
@@ -117,6 +119,7 @@ class ProviderAccountService
                 !empty($request->credits) ? $data['credits'] = $request->credits : 0;
                 !empty($request->is_enabled) ? $data['is_enabled'] = true : $data['is_enabled'] = false;
                 !empty($request->is_idle) ? $data['is_idle'] = true : $data['is_idle'] = false;
+                !empty($request->line) ? $data['line'] = $request->line : null;
                 $data['updated_at'] = Carbon::now();
 
                 //Record is on update process
