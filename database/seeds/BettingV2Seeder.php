@@ -30,7 +30,7 @@ class BettingV2Seeder extends Seeder
     public function run()
     {
         try {
-            if (file_exists(storage_path('logs/monitor/database/laravel.log')) {
+            if (file_exists(storage_path('logs/monitor/database/laravel.log'))) {
                 unlink(storage_path('logs/monitor/database/laravel.log'));
             }
 
