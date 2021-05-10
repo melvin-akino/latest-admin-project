@@ -40,7 +40,7 @@ class BettingV2Seeder extends Seeder
                 $userBetId     = self::populateUserBets($row);
                 $providerBetId = self::populateProviderBets($row, $userBetId);
 
-                self::populateProviderBetLogs($providerBetId, $row->status);
+                self::populateProviderBetLogs($providerBetId, $row->created_at, $row->status);
             }
 
             $betIds      = [];
@@ -66,6 +66,7 @@ class BettingV2Seeder extends Seeder
                     'actual_to_win',
                     'actual_profit_loss',
                     'exchange_rate',
+                    'ub.created_at',
                 ])
                 ->orderBy('provider_bets.id', 'ASC')
                 ->select([
@@ -77,6 +78,7 @@ class BettingV2Seeder extends Seeder
                     'actual_to_win',
                     'actual_profit_loss',
                     'exchange_rate',
+                    'ub.created_at',
                 ])
                 ->get();
 
@@ -116,6 +118,7 @@ class BettingV2Seeder extends Seeder
             'master_league_name'     => $orderData->master_league_name,
             'master_team_home_name'  => $orderData->master_team_home_name,
             'master_team_away_name'  => $orderData->master_team_away_name,
+            'created_at'             => $orderData->created_at,
         ]);
 
         return $insert->id;
@@ -136,17 +139,19 @@ class BettingV2Seeder extends Seeder
             'profit_loss'               => $orderData->profit_loss,
             'reason'                    => $orderData->reason,
             'settled_date'              => $orderData->settled_date,
+            'created_date'              => $orderData->created_date,
         ]);
 
         return $insert->id;
     }
 
-    private static function populateProviderBetLogs(int $providerBetId, string $status)
+    private static function populateProviderBetLogs(int $providerBetId, $createdAt, string $status)
     {
         # Create Initial PENDING Record
         ProviderBetLog::create([
             'provider_bet_id' => $providerBetId,
             'status'          => 'PENDING',
+            'created_at'      => $createdAt,
         ]);
 
         if (in_array(strtoupper($status), self::$settled)) {
@@ -154,6 +159,7 @@ class BettingV2Seeder extends Seeder
             ProviderBetLog::create([
                 'provider_bet_id' => $providerBetId,
                 'status'          => 'SUCCESS',
+                'created_at'      => $createdAt,
             ]);
         }
 
@@ -161,6 +167,7 @@ class BettingV2Seeder extends Seeder
         ProviderBetLog::create([
             'provider_bet_id' => $providerBetId,
             'status'          => strtoupper($status),
+            'created_at'      => $createdAt,
         ]);
     }
 
@@ -174,6 +181,7 @@ class BettingV2Seeder extends Seeder
             'actual_profit_loss' => $data->actual_profit_loss,
             'exchange_rate'      => $data->exchange_rate,
             'punter_percentage'  => $data->punter_percentage,
+            'created_at'         => $data->created_at,
         ]);
     }
 }
