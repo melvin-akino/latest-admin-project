@@ -66,7 +66,7 @@ class BettingV2Seeder extends Seeder
                     'actual_profit_loss',
                     'exchange_rate',
                 ])
-                ->orderBy('o.id', 'ASC')
+                ->orderBy('orders.id', 'ASC')
                 ->select([
                     DB::raw('COALESCE(upc.punter_percentage, p.punter_percentage) AS punter_percentage'),
                     'orders.id AS order_id',
