@@ -135,24 +135,6 @@ class BettingV2Seeder extends Seeder
             'settled_date'              => $orderData->settled_date,
         ]);
 
-        \Log::channel('monitor_database')->debug(json_encode([
-            'qwe' => [
-                'user_bet_id'               => $userBetId,
-                'provider_id'               => $orderData->provider_id,
-                'provider_account_id'       => $orderData->provider_account_id,
-                'provider_error_message_id' => $orderData->provider_error_message_id,
-                'status'                    => $orderData->status,
-                'bet_id'                    => $orderData->bet_id,
-                'odds'                      => $orderData->odds,
-                'stake'                     => $orderData->stake,
-                'to_win'                    => $orderData->to_win,
-                'profit_loss'               => $orderData->profit_loss,
-                'reason'                    => $orderData->reason,
-                'settled_date'              => $orderData->settled_date,
-            ],
-            'asd' => $insert->id,
-        ]));
-
         return $insert->id;
     }
 
@@ -182,18 +164,6 @@ class BettingV2Seeder extends Seeder
 
     private static function populateProviderBetTransactions($data)
     {
-        \Log::channel('monitor_database')->debug(json_encode([
-            'zxc' => [
-                'provider_bet_id'    => $data->order_id,
-                'exchange_rate_id'   => $data->exchange_rate_id,
-                'actual_stake'       => $data->actual_stake,
-                'actual_to_win'      => $data->actual_to_win,
-                'actual_profit_loss' => $data->actual_profit_loss,
-                'exchange_rate'      => $data->exchange_rate,
-                'punter_percentage'  => $data->punter_percentage,
-            ],
-        ]));
-
         ProviderBetTransaction::create([
             'provider_bet_id'    => $data->order_id,
             'exchange_rate_id'   => $data->exchange_rate_id,
