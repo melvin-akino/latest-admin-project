@@ -11,7 +11,6 @@ class UserService {
   public function getUsers()
   {
     $users = User::join('currency as c', 'c.id', 'users.currency_id')
-      ->join('user_max_bet_limit as umbl', 'umbl.user_id', 'users.id')
       ->select([
         'users.id',
         'email',
@@ -22,7 +21,6 @@ class UserService {
         'users.created_at',
         'users.updated_at',
         'uuid',
-        'max_bet_limit',
         'c.code as currency_code',
         DB::raw("(SELECT created_at FROM oauth_access_tokens WHERE user_id = users.id ORDER BY created_at DESC LIMIT 1)
         as last_login_date"),
@@ -74,7 +72,6 @@ class UserService {
   {
     DB::beginTransaction();
     try {
-      $maxBetLimit = !empty($request->max_bet_limit) ? $request->max_bet_limit : SystemConfiguration::getValueByType('MAX_BET');
       if (empty($request->id)) {
           $user = new User([
               'name'          => explode('@', $request->email)[0],
@@ -96,8 +93,6 @@ class UserService {
           {
               $user->password = Hash::make($request->password);
           }
-
-          UserMaxBetLimit::where('user_id', $user->id)->update(['max_bet_limit' => $maxBetLimit]);
       }
 
       if ($user->save()) {
@@ -111,11 +106,6 @@ class UserService {
           ];
 
           Wallet::walletCredit((object) $walletData);
-
-          UserMaxBetLimit::create([
-            'user_id' => $user->id,
-            'max_bet_limit' => $maxBetLimit
-          ]);
         }
       }
 
@@ -135,7 +125,6 @@ class UserService {
             'credits'       => empty($request->id) ? $request->balance : "",
             'status'        => $user->status,
             'uuid'          => $user->uuid,
-            'max_bet_limit' => $maxBetLimit,
             'created_at'    => Carbon::parse($user->created_at)->format('Y-m-d H:i:s'),
             'updated_at'    => Carbon::parse($user->updated_at)->format('Y-m-d H:i:s')
         ]

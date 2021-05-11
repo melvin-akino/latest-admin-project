@@ -41,7 +41,6 @@ const mutations = {
       currency: user.currency,
       status: user.status,
       uuid: user.uuid,
-      max_bet_limit: user.max_bet_limit,
       created_at: user.created_at,
       last_login_date: '-',
       open_bets: '-',
@@ -54,7 +53,6 @@ const mutations = {
       firstname: user.firstname,
       lastname: user.lastname,
       status: user.status,
-      max_bet_limit: user.max_bet_limit
     }
     state.users.map(account => {
       if (account.id == user.id) {

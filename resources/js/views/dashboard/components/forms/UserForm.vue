@@ -125,26 +125,6 @@
           </v-row>
         </v-container>
       </v-card-text>
-      <v-toolbar color="primary" dark height="40px">
-        <v-toolbar-title class="text-uppercase subtitle-1"
-        >Max Bet Limit</v-toolbar-title
-        >
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="6" class="formColumn">
-              <v-text-field
-                label="Limit"
-                type="text"
-                outlined
-                dense
-                v-model="user.max_bet_limit"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn dark right class="red darken-2" @click="closeDialog"
@@ -189,7 +169,6 @@ export default {
       status: 1,
       balance: "",
       currency_id: 1,
-      max_bet_limit: null
     }
   }),
   validations: {
