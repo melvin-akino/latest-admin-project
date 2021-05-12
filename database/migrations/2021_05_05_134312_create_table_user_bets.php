@@ -39,6 +39,7 @@ class CreateTableUserBets extends Migration
             $table->string('master_league_name', 100)->index();
             $table->string('master_team_home_name', 100)->index();
             $table->string('master_team_away_name', 100)->index();
+            $table->string('market_providers', 50)->index();
             $table->timestamps();
 
             $table->foreign('user_id')

@@ -118,6 +118,7 @@ class BettingV2Seeder extends Seeder
             'master_league_name'     => $orderData->master_league_name,
             'master_team_home_name'  => $orderData->master_team_home_name,
             'master_team_away_name'  => $orderData->master_team_away_name,
+            'market_providers'       => $orderData->provider_id,
             'created_at'             => $orderData->created_at,
         ]);
 

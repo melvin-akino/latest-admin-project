@@ -31,6 +31,7 @@ class UserBet extends Model
         'master_league_name',
         'master_team_home_name',
         'master_team_away_name',
+        'market_providers',
         'created_at',
         'updated_at',
     ];
@@ -54,6 +55,7 @@ class UserBet extends Model
         'master_league_name',
         'master_team_home_name',
         'master_team_away_name',
+        'market_providers',
     ];
 
     protected static $logOnlyDirty = true;
