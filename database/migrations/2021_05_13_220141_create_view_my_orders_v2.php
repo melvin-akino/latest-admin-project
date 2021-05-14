@@ -25,7 +25,8 @@ class CreateViewMyOrdersV2 extends Migration
                             ot.type
                     END
                 ) AS odd_type,
-                (SELECT SUM(pb.stake) FROM provider_bets AS pb WHERE pb.user_bet_id = ub.id AND pb.settled_date IS NOT NULL)
+                ub.odds * ub.stake AS to_win,
+                (SELECT SUM(pb.stake) FROM provider_bets AS pb WHERE pb.user_bet_id = ub.id AND pb.settled_date IS NOT NULL) * ub.odds AS profit_loss
             FROM user_bets AS ub
             JOIN odd_types AS ot
                 ON ot.id = ub.odd_type_id
