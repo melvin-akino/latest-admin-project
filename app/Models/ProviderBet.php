@@ -37,6 +37,7 @@ class ProviderBet extends Model
         'provider_id',
         'provider_account_id',
         'provider_error_message_id',
+        'market_id',
         'status',
         'bet_id',
         'odds',
@@ -45,8 +46,6 @@ class ProviderBet extends Model
         'profit_loss',
         'reason',
         'settled_date',
-        'min',
-        'max',
         'game_schedule',
     ];
 

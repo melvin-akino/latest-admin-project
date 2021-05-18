@@ -21,14 +21,13 @@ class CreateTableProviderBets extends Migration
             $table->integer('provider_id')->index();
             $table->integer('provider_account_id')->index();
             $table->integer('provider_error_message_id')->nullable()->index();
+            $table->string('market_id', 100)->index();
             $table->string('status', 30)->index();
             $table->string('bet_id', 30)->nullable()->index();
             $table->float('odds', 10, 2);
             $table->float('stake', 15, 2);
             $table->float('to_win', 15, 2);
             $table->float('profit_loss', 15, 2)->nullable();
-            $table->float('min', 15, 2)->nullable();
-            $table->float('max', 15, 2)->nullable();
             $table->string('game_schedule', 10)->nullable()->index();
             $table->text('reason')->nullable();
             $table->dateTimeTz('settled_date')->nullable()->index();

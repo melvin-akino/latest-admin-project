@@ -20,9 +20,10 @@ class CreateTableUserBets extends Migration
             $table->integer('user_id')->index();
             $table->integer('sport_id')->index();
             $table->integer('odd_type_id')->index();
-            $table->string('market_id', 100)->index();
             $table->string('status', 30)->index();
             $table->float('odds', 10, 2);
+            $table->double('min_odds');
+            $table->double('max_odds');
             $table->float('stake', 15, 2);
             $table->enum('market_flag', [
                 'HOME',
