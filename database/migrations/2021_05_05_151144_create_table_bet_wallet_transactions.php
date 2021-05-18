@@ -47,11 +47,6 @@ class CreateTableBetWalletTransactions extends Migration
                 ->on('currency')
                 ->onUpdate('cascade');
 
-            $table->foreign('wallet_ledger_id')
-                ->references('id')
-                ->on('wallet_ledger')
-                ->onUpdate('cascade');
-
             $table->foreign('provider_account_id')
                 ->references('id')
                 ->on('provider_accounts')
