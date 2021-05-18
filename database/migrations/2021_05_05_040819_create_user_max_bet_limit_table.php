@@ -14,19 +14,19 @@ class CreateUserMaxBetLimitTable extends Migration
      */
     public function up()
     {
-        Schema::create($this->tablename, function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->integer('user_id')->index();
-            $table->double('max_bet_limit')->default(0);
-            $table->timestamps();
+        // Schema::create($this->tablename, function (Blueprint $table) {
+        //     $table->bigIncrements('id');
+        //     $table->integer('user_id')->index();
+        //     $table->double('max_bet_limit')->default(0);
+        //     $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+        //     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-        });
+        // });
 
-        Artisan::call('db:seed', [
-            '--class' => UserMaxBetLimitSeeder::class
-        ]);
+        // Artisan::call('db:seed', [
+        //     '--class' => UserMaxBetLimitSeeder::class
+        // ]);
     }
 
     /**
