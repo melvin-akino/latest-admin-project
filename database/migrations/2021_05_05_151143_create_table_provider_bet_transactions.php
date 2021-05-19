@@ -21,7 +21,7 @@ class CreateTableProviderBetTransactions extends Migration
             $table->integer('exchange_rate_id')->index();
             $table->float('actual_stake', 15, 2);
             $table->float('actual_to_win', 15, 2);
-            $table->float('actual_profit_loss', 15, 2);
+            $table->float('actual_profit_loss', 15, 2)->nullable();
             $table->float('punter_percentage', 3, 2);
             $table->float('exchange_rate');
             $table->timestamps();
