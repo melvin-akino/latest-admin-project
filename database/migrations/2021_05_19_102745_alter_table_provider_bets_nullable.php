@@ -27,9 +27,6 @@ class AlterTableProviderBetsNullable extends Migration
      */
     public function down()
     {
-        Schema::table($this->tablename, function (Blueprint $table) {
-            $table->integer('provider_id')->nullable(false)->change();
-            $table->integer('provider_account_id')->nullable(false)->change();
-        });
+
     }
 }
