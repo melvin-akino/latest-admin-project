@@ -91,54 +91,6 @@ class OrderService
         }
     }
 
-    public static function getOpenOrders(Request $request)
-    {
-        try {    
-            $lastBetDate = '-';
-            $openOrdersSum = 0;
-
-            $openOrders = Order::where('user_id', $request->userId)
-                ->whereNotNull('bet_id')
-                ->where('status', ['SUCCESS','PENDING'])
-                ->select('stake', 'settled_date', 'created_at')
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->toArray();
-
-            if ($openOrders)
-            {
-                foreach($openOrders as $key=>$order) 
-                {
-                    if ($key == 0) {
-                        $lastBetDate = $order['created_at'];
-                    }
-
-                    $openOrdersSum += $order['stake'];
-                }
-            }
-
-            $data = [
-                'open_orders'   => $openOrdersSum,
-                'last_bet'      => $lastBetDate
-            ];
-
-            return response()->json([
-                'status'      => true,
-                'status_code' => 200,
-                'data'        => $data
-            ], 200);
-        }
-        catch (Exception $e) 
-        {
-            DB::rollBack();
-            return response()->json([
-                'status'      => false,
-                'status_code' => 500,
-                'errors'     => $e->getMessage()
-            ], 500);
-        }
-    }
-
     public static function getUserTransactions(Request $request)
     {
         try 
