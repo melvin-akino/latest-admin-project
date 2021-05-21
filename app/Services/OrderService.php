@@ -160,62 +160,111 @@ class OrderService
             }
             if ($request->provider_id) 
             {
-                $where[] = ['orders.provider_id', $request->provider_id];
+                $where[] = ['pb.provider_id', $request->provider_id];
             }
             if ($request->currency_id) 
             {
-                $where[] = ['providers.currency_id', $request->currency_id];
+                $where[] = ['p.currency_id', $request->currency_id];
             }
-            $orders = Order::leftJoin('providers', 'providers.id', 'orders.provider_id')
-                    ->leftJoin('odd_types AS ot', 'ot.id', 'orders.odd_type_id')
-                    ->leftJoin('event_scores as es', 'es.master_event_unique_id', 'orders.master_event_unique_id')
-                    ->leftJoin('provider_error_messages As pe','pe.id','orders.provider_error_message_id')
-                    ->leftJoin('error_messages as em', 'em.id','pe.error_message_id')
-                    ->leftJoin('users', 'users.id','orders.user_id')
+            $bets = DB::table('user_bets as ub')
+                    ->join('provider_bets as pb', 'pb.user_bet_id', 'ub.id')
+                    ->join('providers as p', 'pb.provider_id', 'p.id')
+                    ->join('users as u', 'ub.user_id', 'u.id')
+                    ->join('odd_types as ot', 'ot.id', 'ub.odd_type_id')
+                    ->join('sport_odd_type as sot', 'ot.id', 'sot.odd_type_id')
                     ->select(
                         [
-                            'orders.id',
-                            'users.name as username',
-                            'orders.bet_id',
-                            'orders.bet_selection',
-                            'orders.odds',
-                            'orders.master_event_market_unique_id',
-                            'orders.stake',
-                            'orders.to_win',
-                            'orders.created_at',
-                            'orders.settled_date',
-                            'orders.profit_loss',
-                            'orders.status',
-                            'orders.odd_label',
-                            'orders.reason',
-                            'orders.master_event_unique_id',
-                            'es.score as current_score',
-                            'ot.id AS odd_type_id',
-                            'providers.alias',
+                            'ub.id',
+                            'u.name as username',
                             'ml_bet_identifier',
-                            'orders.final_score',
-                            'orders.market_flag',
-                            'orders.master_team_home_name',
-                            'orders.master_team_away_name',
-                            'em.error as multiline_error'
+                            'ub.created_at',
+                            'ub.odds',
+                            'odds_label',
+                            'ub.status',
+                            'score_on_bet',
+                            'final_score',
+                            'ub.odd_type_id',
+                            'sot.name as column_type',
+                            'market_flag',
+                            'master_league_name',
+                            'master_team_home_name',
+                            'master_team_away_name',
+                            DB::raw("(SELECT SUM(stake) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as stake"),
+                            DB::raw("(SELECT SUM(to_win) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as to_win"),
+                            DB::raw("(SELECT SUM(profit_loss) FROM provider_bets WHERE user_bet_id = ub.id) as profit_loss"),
+                            'pb.provider_id',
+                            'p.currency_id'
                         ]
                     )
                     ->where($where)
-                    ->where('orders.status', '!=', 'FAILED')
+                    ->where('sot.sport_id', DB::raw('ub.sport_id'))
                     ->when($dateFrom, function($query, $dateFrom) {
-                    return $query->whereDate('orders.created_at', '>=', $dateFrom);
+                        return $query->whereDate('ub.created_at', '>=', $dateFrom);
                     })
                     ->when($dateTo, function($query, $dateTo) {
-                    return $query->whereDate('orders.created_at', '<=', $dateTo);
+                        return $query->whereDate('ub.created_at', '<=', $dateTo);
                     })
-                    ->orderBy('orders.created_at', 'desc')
+                    ->orderBy('ub.created_at', 'desc')
+                    ->distinct()
                     ->get()
                     ->toArray();
+
+            $data = [];
+            $ouLabels = DB::table('odd_types')->where('type', 'LIKE', '%OU%')->pluck('id')->toArray();
+            $oeLabels = DB::table('odd_types')->where('type', 'LIKE', '%OE%')->pluck('id')->toArray();
+
+            foreach($bets as $bet) {
+                if (strtoupper($bet->market_flag) == "DRAW") {
+                    $teamname = "DRAW";
+                } else {
+                    $objectKey = "master_team_" . strtolower($bet->market_flag) . "_name";
+                    $teamname  = $bet->{$objectKey};
+                }
+
+                if (in_array($bet->odd_type_id, $ouLabels)) {
+                    $ou        = explode(' ', $bet->odds_label)[0];
+                    $teamname  = $ou == "O" ? "Over" : "Under";
+                    $teamname .= " " . explode(' ', $bet->odds_label)[1];
+                }
+
+                if (in_array($bet->odd_type_id, $oeLabels)) {
+                    $teamname  = $bet->odds_label == "O" ? "Odd" : "Even";
+                }
+
+                $betSelection     = implode("\n", [
+                    $bet->master_team_home_name . " vs " . $bet->master_team_away_name,
+                    $teamname . " @ " . $bet->odds,
+                    $bet->column_type. " ". $bet->odds_label ."(" . $bet->score_on_bet .")"
+                ]);
+
+                if (in_array($bet->odd_type_id, $ouLabels) || in_array($bet->odd_type_id, $oeLabels)) {
+                    $betPeriod            = strpos($bet->column_type, "FT") !== false ? "FT " : (strpos($bet->column_type, "HT") !== false ? "HT " : "");
+                    $betSelection         = implode("\n", [
+                        $bet->master_team_home_name . " vs " . $bet->master_team_away_name,
+                        $betPeriod . $teamname . " @ " . $bet->odds ."(" . $bet->score_on_bet .")"
+                    ]);
+                }
+
+                $data[] = [
+                    'bet_id'        => $bet->ml_bet_identifier,
+                    'created_at'    => $bet->created_at,
+                    'bet_selection' => nl2br($betSelection),
+                    'username'      => $bet->username,
+                    'stake'         => $bet->stake,
+                    'odds'          => $bet->odds,
+                    'to_win'        => $bet->to_win,
+                    'status'        => $bet->status,
+                    'valid_stake'   => $bet->profit_loss ? abs($bet->profit_loss) : 0,
+                    'profit_loss'   => $bet->profit_loss,
+                    'provider_id'   => $bet->provider_id,
+                    'currency_id'   => $bet->currency_id
+                ];
+            }
                     
             return response()->json([
                 'status'      => true,
                 'status_code' => 200,
-                'data'        => $orders
+                'data'        => $data
             ], 200);
         }
         catch (Exception $e) 
