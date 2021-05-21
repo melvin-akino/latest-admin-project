@@ -86,7 +86,7 @@
               ></v-select>
             </v-col>
           </v-row>
-          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Generate</v-btn>
+          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Apply Filters</v-btn>
         </v-form>
       </div>
       <v-data-table
@@ -102,7 +102,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.bet_selection`]="{ item }">
-          <span class="betSelection">{{item.bet_selection}}</span>
+          <span v-html="item.bet_selection"></span>
         </template>
         <template v-slot:[`item.stake`]="{ item }">
           <span>{{ item.stake | moneyFormat}}</span>
@@ -117,7 +117,7 @@
           <span>{{ item.profit_loss | moneyFormat}}</span>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Adjust Transaction" v-if="!item.settled_date">
+          <table-action-dialog icon="mdi-pencil" width="600" tooltipText="Adjust Transaction">
             <admin-settlement-form :order="item" type="user"></admin-settlement-form>
           </table-action-dialog>
         </template>
@@ -157,7 +157,6 @@ export default {
         { text: 'STATUS', value: 'status' },
         { text: 'VALID STAKE', value: 'valid_stake' },
         { text: 'P/L', value: 'profit_loss' },
-        { text: 'REMARKS', value: 'reason' },
         { text: '', value: 'actions' },
       ],
       search: {
