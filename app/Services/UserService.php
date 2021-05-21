@@ -24,9 +24,9 @@ class UserService {
         'c.code as currency_code',
         DB::raw("(SELECT created_at FROM oauth_access_tokens WHERE user_id = users.id ORDER BY created_at DESC LIMIT 1)
         as last_login_date"),
-        DB::raw("(SELECT created_at FROM orders WHERE status IN ('SUCCESS', 'PENDING') AND user_id = users.id AND bet_id IS NOT NULL
+        DB::raw("(SELECT ub.created_at FROM user_bets as ub JOIN provider_bets as pb ON ub.id = pb.user_bet_id WHERE pb.status IN ('SUCCESS', 'PENDING') AND user_id = users.id
         ORDER BY created_at DESC LIMIT 1) as last_bet"),
-        DB::raw("(SELECT SUM (stake) FROM orders WHERE status IN ('SUCCESS', 'PENDING') AND user_id = users.id AND bet_id IS NOT NULL)
+        DB::raw("(SELECT SUM(pb.stake) FROM user_bets as ub JOIN provider_bets as pb ON ub.id = pb.user_bet_id WHERE pb.status IN ('SUCCESS', 'PENDING') AND user_id = users.id)
         as open_bets")
       ])
       ->orderBy('created_at', 'DESC')

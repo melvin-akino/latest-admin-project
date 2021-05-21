@@ -13,10 +13,7 @@ class OrdersController extends Controller
     {
         return OrderFacade::getProviderOrders($request);
     }
-    public function getUserOpenOrders(Request $request)
-    {
-        return OrderFacade::getOpenOrders($request);
-    }
+    
     public function getUserTransactions(Request $request)
     {
         return OrderFacade::getUserTransactions($request);
