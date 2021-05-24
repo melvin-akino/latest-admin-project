@@ -55,7 +55,7 @@
           </v-toolbar>
         </template>
         <template v-slot:[`item.bet_selection`]="{ item }">
-          <span class="betSelection">{{item.bet_selection}}</span>
+          <span v-html="item.bet_selection"></span>
         </template>
         <template v-slot:[`item.actual_stake`]="{ item }">
           <span>{{ item.actual_stake | moneyFormat }}</span>
