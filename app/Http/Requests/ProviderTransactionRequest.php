@@ -25,16 +25,17 @@ class ProviderTransactionRequest extends FormRequest
      */
     public function rules()
     {
-        $path = $this->path();        
+        $path  = $this->path();
+        $rules = [];
 
         if (!empty($this->input('created_from'))) {
             $rules['created_from'] = 'required|date';
-            $rules['created_to'] = 'required|date|after_or_equal:created_from';
+            $rules['created_to']   = 'required|date|after_or_equal:created_from';
         }
 
         if (!empty($this->input('settled_from'))) {
             $rules['settled_from'] = 'required|date';
-            $rules['settled_to'] = 'required|date|after_or_equal:settled_from';
+            $rules['settled_to']   = 'required|date|after_or_equal:settled_from';
         }
 
         return $rules;

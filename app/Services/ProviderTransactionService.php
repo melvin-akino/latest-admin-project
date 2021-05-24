@@ -14,27 +14,27 @@ class ProviderTransactionService
         {    
             $dups = [];
             //filter out failed orders by default
-            $where[] = ['o.status', '<>', 'FAILED'];
+            $where[] = ['pb.status', '<>', 'FAILED'];
             $whereDate = [];
             if ($request->created_from)
             {
-                $where[] = ['o.created_at', '>=', $request->created_from . ' 00:00:00'];
-                $where[] = ['o.created_at', '<=', $request->created_to . ' 23:59:59'];
+                $where[] = ['ub.created_at', '>=', $request->created_from . ' 00:00:00'];
+                $where[] = ['ub.created_at', '<=', $request->created_to . ' 23:59:59'];
             }
 
             if ($request->settled_from)
             {
-                $where[] = ['o.settled_at', '>=', $request->settled_from . ' 00:00:00'];
-                $where[] = ['o.settled_at', '<=', $request->settled_to . ' 23:59:59'];
+                $where[] = ['pb.settled_at', '>=', $request->settled_from . ' 00:00:00'];
+                $where[] = ['pb.settled_at', '<=', $request->settled_to . ' 23:59:59'];
             }
 
             if ($request->status)
             {
                 if ($request->status == 'open') {
-                    $where[] = ['o.settled_date', null];
+                    $where[] = ['pb.settled_date', null];
                 }
                 else {
-                    $where[] = ['o.settled_date', '<>', null];
+                    $where[] = ['pb.settled_date', '<>', null];
                 }
             }
             
@@ -45,48 +45,89 @@ class ProviderTransactionService
                 
             if ($request->provider_account_id)
             {
-                $where[] = ['o.provider_account_id', $request->provider_account_id];
+                $where[] = ['pb.provider_account_id', $request->provider_account_id];
             }
-            
-            $data = DB::table('orders AS o')
-                ->join('sports AS s', 's.id', '=', 'o.sport_id')
-                ->join('provider_accounts AS pa', 'pa.id', '=', 'o.provider_account_id')
-                ->join('providers AS p', 'p.id', '=', 'pa.provider_id')
-                ->join('users AS u', 'u.id', '=', 'o.user_id')
-                ->join('order_logs AS ol', 'ol.order_id', '=', 'o.id')
-                ->join('provider_account_orders AS pao', 'pao.order_log_id', '=', 'ol.id')
-                ->join('odd_types AS ot', 'ot.id', '=', 'o.odd_type_id')
+
+            $data = DB::table('user_bets AS ub')
+                ->join('provider_bets AS pb', 'pb.user_bet_id', 'ub.id')
+                ->join('sports AS s', 's.id', 'ub.sport_id')
+                ->join('providers AS p', 'p.id', 'pb.provider_id')
+                ->join('provider_accounts AS pa', 'pa.id', 'pb.provider_account_id')
+                ->join('users AS u', 'u.id', 'ub.user_id')
+                ->join('provider_bet_transactions AS pbt', 'pbt.provider_bet_id', 'pb.id')
+                ->join('odd_types AS ot', 'ot.id', 'ub.odd_type_id')
+                ->join('sport_odd_type AS sot', 'sot.odd_type_id', 'ot.id')
                 ->where($where)
-                ->orderBy('o.id', 'ASC')
-                ->orderBy('pao.order_log_id', 'DESC')
+                ->orderBy('ub.id', 'DESC')
+                ->orderBy('pbt.id', 'DESC')
                 ->distinct()
                 ->get([
-                    'o.id',
+                    'ub.id',
+                    'pbt.id AS provider_bet_transaction_id',
                     'p.id as provider_id',
                     'p.alias as provider',
                     's.id as sport_id',
                     's.sport',
-                    'o.bet_selection',
-                    'pao.order_log_id',
                     'u.email',
-                    'o.ml_bet_identifier',
-                    'o.bet_id',
+                    'ub.ml_bet_identifier',
+                    'pb.bet_id',
                     'pa.username',
-                    'o.created_at',
-                    'o.status',
-                    'o.stake',
-                    'o.to_win',
-                    'o.profit_loss',
-                    'pao.actual_stake',
-                    'pao.actual_to_win',
-                    'pao.actual_profit_loss',
-                    'o.odds',
-                    'o.odd_label'
+                    'ub.created_at',
+                    'pb.status',
+                    'pb.stake',
+                    'pb.to_win',
+                    'pb.profit_loss',
+                    'pbt.actual_stake',
+                    'pbt.actual_to_win',
+                    'pbt.actual_profit_loss',
+                    'ub.odds',
+                    'ub.odds_label',
+                    'ub.master_league_name',
+                    'ub.master_team_home_name',
+                    'ub.master_team_away_name',
+                    'ub.market_flag',
+                    'ub.score_on_bet',
+                    'ub.final_score',
+                    'ub.odd_type_id',
+                    'sot.name as column_type',
                 ]);
 
+            $ouLabels = DB::table('odd_types')->where('type', 'LIKE', '%OU%')->pluck('id')->toArray();
+            $oeLabels = DB::table('odd_types')->where('type', 'LIKE', '%OE%')->pluck('id')->toArray();
 
             foreach ($data as $row) {
                 if (!in_array($row->id, $dups)) {
+                    if (strtoupper($row->market_flag) == "DRAW") {
+                        $teamname = "DRAW";
+                    } else {
+                        $objectKey = "master_team_" . strtolower($row->market_flag) . "_name";
+                        $teamname  = $row->{$objectKey};
+                    }
+
+                    if (in_array($row->odd_type_id, $ouLabels)) {
+                        $ou        = explode(' ', $row->odds_label)[0];
+                        $teamname  = $ou == "O" ? "Over" : "Under";
+                        $teamname .= " " . explode(' ', $row->odds_label)[1];
+                    }
+
+                    if (in_array($row->odd_type_id, $oeLabels)) {
+                        $teamname  = $row->odds_label == "O" ? "Odd" : "Even";
+                    }
+
+                    $betSelection = implode("\n", [
+                        $row->master_team_home_name . " vs " . $row->master_team_away_name,
+                        $teamname . " @ " . $row->odds,
+                        $row->column_type. " ". $row->odds_label ."(" . $row->score_on_bet .")"
+                    ]);
+
+                    if (in_array($row->odd_type_id, $ouLabels) || in_array($row->odd_type_id, $oeLabels)) {
+                        $betPeriod    = strpos($row->column_type, "FT") !== false ? "FT " : (strpos($row->column_type, "HT") !== false ? "HT " : "");
+                        $betSelection = implode("\n", [
+                            $row->master_team_home_name . " vs " . $row->master_team_away_name,
+                            $betPeriod . $teamname . " @ " . $row->odds ."(" . $row->score_on_bet .")"
+                        ]);
+                    }
+
                     $transactions[] = [
                         'email'                 => $row->email,
                         'bet_identifier'        => $row->ml_bet_identifier,
@@ -95,7 +136,7 @@ class ProviderTransactionService
                         'sport_id'              => $row->sport_id,
                         'sport'                 => $row->sport,
                         'bet_id'                => $row->bet_id,
-                        'bet_selection'         => $row->bet_selection,
+                        'bet_selection'         => nl2br($betSelection),
                         'username'              => $row->username,
                         'created_at'            => $row->created_at,
                         'status'                => $row->status,
@@ -106,7 +147,7 @@ class ProviderTransactionService
                         'actual_to_win'         => $row->actual_to_win,
                         'actual_profit_loss'    => $row->actual_profit_loss,
                         'odds'                  => $row->odds,
-                        'odds_label'            => $row->odd_label
+                        'odds_label'            => $row->odds_label
                     ];
 
                     $dups[] = $row->id;
