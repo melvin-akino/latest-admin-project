@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Order;
+use App\Models\{UserBet, ProviderBet};
 use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
 use Illuminate\Support\Facades\{DB, Log};
@@ -143,7 +143,8 @@ class OrderService
                             DB::raw("(SELECT SUM(to_win) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'UNPLACED', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as to_win"),
                             DB::raw("(SELECT SUM(profit_loss) FROM provider_bets WHERE user_bet_id = ub.id) as profit_loss"),
                             'pb.provider_id',
-                            'p.currency_id'
+                            'p.currency_id',
+                            'ub.sport_id'
                         ]
                     )
                     ->where($where)
@@ -164,6 +165,12 @@ class OrderService
             $oeLabels = DB::table('odd_types')->where('type', 'LIKE', '%OE%')->pluck('id')->toArray();
 
             foreach($bets as $bet) {
+                if (!empty($bet->final_score)) {
+                    $score = $bet->final_score;
+                } else {
+                    $score = $bet->score_on_bet;
+                }
+
                 if (strtoupper($bet->market_flag) == "DRAW") {
                     $teamname = "DRAW";
                 } else {
@@ -196,6 +203,7 @@ class OrderService
                 }
 
                 $data[] = [
+                    'id'            => $bet->id,
                     'bet_id'        => $bet->ml_bet_identifier,
                     'created_at'    => $bet->created_at,
                     'bet_selection' => nl2br($betSelection),
@@ -207,7 +215,8 @@ class OrderService
                     'valid_stake'   => $bet->profit_loss ? abs($bet->profit_loss) : 0,
                     'profit_loss'   => $bet->profit_loss,
                     'provider_id'   => $bet->provider_id,
-                    'currency_id'   => $bet->currency_id
+                    'currency_id'   => $bet->currency_id,
+                    'score'         => $score
                 ];
             }
                     
@@ -233,20 +242,22 @@ class OrderService
         DB::beginTransaction();
         try
         {
-            $order = Order::where('id', $request->id)->first();
-            $forUpdate = [
-                'status'        => $request->status,        
-                'profit_loss'   => $request->pl,
-                'reason'        => $request->reason
-            ];
-            if ($order->update($forUpdate))
+            $userBet = UserBet::where('id', $request->id)->first();
+
+            if ($userBet->update([ 'status' => $request->status ]))
             {
+                $providerBet = ProviderBet::where('user_bet_id', $userBet->id)->where('status', 'SUCCESS')->get();
+
+                foreach($providerBet as $bet) {
+                    $bet->update([ 'status' => $request->status, 'profit_loss' => $request->pl, 'reason' => $request->reason ]);
+                }
+
                 DB::commit();
                 return response()->json([
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => 'Order successfully updated.',
-                    'data'        => $order
+                    'data'        => $userBet
                 ], 200);
             }
         }

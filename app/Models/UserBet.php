@@ -71,7 +71,8 @@ class UserBet extends Model
 
     public function getDescriptionForEvent(string $eventName): string
     {
-        $currency = auth()->user() ? trim(Currency::getCodeById(auth()->user()->currency_id)) : "CNY";
+        $user     = User::where('id', request()->user_id)->first();
+        $currency = $user ? trim(Currency::getCodeById($user->currency_id)) : "CNY";
 
         return ucfirst($eventName) . " User Bet on market_id: " . $this->market_id . " with $currency " . $this->stake . " @ " . $this->odds;
     }
