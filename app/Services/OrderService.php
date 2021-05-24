@@ -15,57 +15,55 @@ class OrderService
     {
         try 
         {
-            $orders = Order::where('provider_account_id', $request->id)
-                ->whereNotNull('orders.bet_id')
-                ->join('order_logs', 'orders.id', 'order_logs.order_id')
-                ->join('provider_accounts', 'orders.provider_account_id', 'provider_accounts.id')
-                ->join('provider_account_orders', 'order_logs.id', 'provider_account_orders.order_log_id')
+            $bets = DB::table('provider_bets as pb')
+                ->join('provider_bet_transactions as pbt', 'pb.id', 'pbt.provider_bet_id')
+                ->join('provider_accounts as pa', 'pb.provider_account_id', 'pa.id')
+                ->where('pb.provider_account_id', $request->id)
                 ->select(
-                    'orders.id',
-                    'provider_account_id',
+                    'provider_bet_id',
+                    'pb.status',
                     'actual_stake',
                     'actual_profit_loss',
-                    'orders.created_at',
-                    'orders.settled_date',
-                    'provider_accounts.updated_at',
-                    'orders.status'
+                    'pb.created_at',
+                    'pb.settled_date',
+                    'pa.updated_at',
                 )
-                ->orderBy('created_at', 'desc')
+                ->orderBy('pbt.created_at', 'desc')
                 ->get()
                 ->toArray();
             
             $data = [];
-            if (!empty($orders)) {
+            if (!empty($bets)) {
                 $pl = 0;
                 $openOrders = 0;
                 $lastBetDate = '';
                 $providerAccountLastUpdate = '';
                 $dups = [];
-                foreach($orders as $key => $order) {
-                    if (!in_array($order['id'], $dups)) {
+                foreach($bets as $key => $bet) {
+                    if (!in_array($bet->provider_bet_id, $dups)) {
                         if ($key == 0) {
-                            $lastBetDate = $order['created_at'];
-                            $providerAccountLastUpdate = $order['updated_at'];
+                            $lastBetDate = $bet->created_at;
+                            $providerAccountLastUpdate = $bet->updated_at;
                             $lastAction = 'Check Balance';
                         }
         
-                        if (!empty($order['settled_date'])) {
-                            $pl += $order['actual_profit_loss'];
+                        if (!empty($bet->settled_date)) {
+                            $pl += $bet->actual_profit_loss;
         
-                            if (Carbon::create($providerAccountLastUpdate)->lte(Carbon::create($order['settled_date']))) {
-                                $providerAccountLastUpdate = $order['settled_date'];
+                            if (Carbon::create($providerAccountLastUpdate)->lte(Carbon::create($bet->settled_date))) {
+                                $providerAccountLastUpdate = $bet->settled_date;
                                 $lastAction = 'Settlement';
                             }
                         }
-                        if (in_array($order['status'], ['SUCCESS', 'PENDING'])) {
-                            $openOrders += $order['actual_stake'];                    
+                        if (in_array($bet->status, ['SUCCESS', 'PENDING'])) {
+                            $openOrders += $bet->actual_stake;                    
                         }
-                        $dups[] = $order['id'];
+                        $dups[] = $bet->provider_bet_id;
                     }                
                 }
 
                 $data = [
-                    'provider_account_id' => $request->providerAccountId,
+                    'provider_account_id' => $request->id,
                     'pl' => $pl,
                     'open_orders' => $openOrders,
                     'last_bet' => $lastBetDate,
