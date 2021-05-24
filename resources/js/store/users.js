@@ -83,8 +83,7 @@ const mutations = {
   UPDATE_USER_TRANSACTION: (state, payload) => {
     let updatedTransaction = {
       status: payload.status,
-      profit_loss: payload.profit_loss,
-      reason: payload.reason,
+      profit_loss: payload.profit_loss
     }
 
     state.userTransactions.map(transaction => {
