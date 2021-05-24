@@ -15,7 +15,7 @@
           <span class="body-1 font-weight-medium">{{order.bet_id}}</span>
           <v-row>
             <v-col cols="12" md="6" class="mb-2">
-              <span class="betSelection">{{order.bet_selection}}</span>
+              <span v-html="order.bet_selection"></span>
             </v-col>
           </v-row>
           <v-row>
@@ -140,7 +140,7 @@ export default {
         odds: this.order.odds,
         to_win: this.type == 'user' ? this.order.to_win : this.order.actual_to_win,
         status: '',
-        score: this.type == 'user' ? this.order.current_score : '',
+        score: this.type == 'user' ? this.order.score : '',
         pl: '',
         reason: '',
         id: this.type == 'user'? this.order.id : null
@@ -246,9 +246,5 @@ export default {
 <style>
 .formColumn {
   padding: 0px 10px;
-}
-
-.betSelection {
-  white-space: pre-line;
 }
 </style>

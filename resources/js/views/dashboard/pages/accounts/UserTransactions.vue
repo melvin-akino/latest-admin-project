@@ -298,8 +298,4 @@ export default {
 .formColumn {
   padding: 0px 10px;
 }
-
-.betSelection {
-  white-space: pre-line;
-}
 </style>
