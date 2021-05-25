@@ -119,7 +119,7 @@ class PreviousBetExtraction extends Command
                         $row->actual_stake,
                         $row->actual_profit_loss,
                         $row->odds,
-                        $row->odd_label
+                        $row->odds_label
                     ]);
 
                     $dups[] = $row->id;
