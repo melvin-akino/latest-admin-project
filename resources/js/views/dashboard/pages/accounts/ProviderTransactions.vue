@@ -94,7 +94,7 @@ export default {
   data() {
     return {
       headers: [
-        { text: 'BET ID', value: 'bet_id' },
+        { text: 'BET ID', value: 'bet_identifier' },
         { text: 'POST DATE', value: 'created_at' },
         { text: 'BET SELECTION', value: 'bet_selection', width: "20%" },
         { text: 'PROVIDER', value: 'provider' },
@@ -112,8 +112,7 @@ export default {
       search: {
         provider_account_id: this.$route.params.id,
         created_from: moment().startOf('isoweek').format('YYYY-MM-DD'),
-        created_to: moment().format('YYYY-MM-DD'),
-        status: 'open'
+        created_to: moment().format('YYYY-MM-DD')
       },
       providerAccount: '',
       providerTransactions: [],

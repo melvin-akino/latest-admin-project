@@ -17,7 +17,7 @@ class OrderService
         {
             $bets = DB::table('provider_bets as pb')
                 ->join('provider_bet_transactions as pbt', 'pb.id', 'pbt.provider_bet_id')
-                ->join('provider_accounts as pa', 'pb.provider_account_id', 'pa.id')
+                ->leftJoin('provider_accounts as pa', 'pb.provider_account_id', 'pa.id')
                 ->where('pb.provider_account_id', $request->id)
                 ->select(
                     'provider_bet_id',
@@ -118,7 +118,7 @@ class OrderService
             }
             $bets = DB::table('user_bets as ub')
                     ->join('provider_bets as pb', 'pb.user_bet_id', 'ub.id')
-                    ->join('providers as p', 'pb.provider_id', 'p.id')
+                    ->leftJoin('providers as p', 'pb.provider_id', 'p.id')
                     ->join('users as u', 'ub.user_id', 'u.id')
                     ->join('odd_types as ot', 'ot.id', 'ub.odd_type_id')
                     ->join('sport_odd_type as sot', 'ot.id', 'sot.odd_type_id')
@@ -161,63 +161,68 @@ class OrderService
                     ->toArray();
 
             $data = [];
+            $dups = [];
             $ouLabels = DB::table('odd_types')->where('type', 'LIKE', '%OU%')->pluck('id')->toArray();
             $oeLabels = DB::table('odd_types')->where('type', 'LIKE', '%OE%')->pluck('id')->toArray();
 
             foreach($bets as $bet) {
-                if (!empty($bet->final_score)) {
-                    $score = $bet->final_score;
-                } else {
-                    $score = $bet->score_on_bet;
-                }
+                if (!in_array($bet->id, $dups)) {
+                    if (!empty($bet->final_score)) {
+                        $score = $bet->final_score;
+                    } else {
+                        $score = $bet->score_on_bet;
+                    }
 
-                if (strtoupper($bet->market_flag) == "DRAW") {
-                    $teamname = "DRAW";
-                } else {
-                    $objectKey = "master_team_" . strtolower($bet->market_flag) . "_name";
-                    $teamname  = $bet->{$objectKey};
-                }
+                    if (strtoupper($bet->market_flag) == "DRAW") {
+                        $teamname = "DRAW";
+                    } else {
+                        $objectKey = "master_team_" . strtolower($bet->market_flag) . "_name";
+                        $teamname  = $bet->{$objectKey};
+                    }
 
-                if (in_array($bet->odd_type_id, $ouLabels)) {
-                    $ou        = explode(' ', $bet->odds_label)[0];
-                    $teamname  = $ou == "O" ? "Over" : "Under";
-                    $teamname .= " " . explode(' ', $bet->odds_label)[1];
-                }
+                    if (in_array($bet->odd_type_id, $ouLabels)) {
+                        $ou        = explode(' ', $bet->odds_label)[0];
+                        $teamname  = $ou == "O" ? "Over" : "Under";
+                        $teamname .= " " . explode(' ', $bet->odds_label)[1];
+                    }
 
-                if (in_array($bet->odd_type_id, $oeLabels)) {
-                    $teamname  = $bet->odds_label == "O" ? "Odd" : "Even";
-                }
+                    if (in_array($bet->odd_type_id, $oeLabels)) {
+                        $teamname  = $bet->odds_label == "O" ? "Odd" : "Even";
+                    }
 
-                $betSelection     = implode("\n", [
-                    $bet->master_team_home_name . " vs " . $bet->master_team_away_name,
-                    $teamname . " @ " . $bet->odds,
-                    $bet->column_type. " ". $bet->odds_label ."(" . $bet->score_on_bet .")"
-                ]);
-
-                if (in_array($bet->odd_type_id, $ouLabels) || in_array($bet->odd_type_id, $oeLabels)) {
-                    $betPeriod            = strpos($bet->column_type, "FT") !== false ? "FT " : (strpos($bet->column_type, "HT") !== false ? "HT " : "");
-                    $betSelection         = implode("\n", [
+                    $betSelection     = implode("\n", [
                         $bet->master_team_home_name . " vs " . $bet->master_team_away_name,
-                        $betPeriod . $teamname . " @ " . $bet->odds ."(" . $bet->score_on_bet .")"
+                        $teamname . " @ " . $bet->odds,
+                        $bet->column_type. " ". $bet->odds_label ."(" . $bet->score_on_bet .")"
                     ]);
-                }
 
-                $data[] = [
-                    'id'            => $bet->id,
-                    'bet_id'        => $bet->ml_bet_identifier,
-                    'created_at'    => $bet->created_at,
-                    'bet_selection' => nl2br($betSelection),
-                    'username'      => $bet->username,
-                    'stake'         => $bet->stake,
-                    'odds'          => $bet->odds,
-                    'to_win'        => $bet->to_win,
-                    'status'        => $bet->status,
-                    'valid_stake'   => $bet->profit_loss ? abs($bet->profit_loss) : 0,
-                    'profit_loss'   => $bet->profit_loss,
-                    'provider_id'   => $bet->provider_id,
-                    'currency_id'   => $bet->currency_id,
-                    'score'         => $score
-                ];
+                    if (in_array($bet->odd_type_id, $ouLabels) || in_array($bet->odd_type_id, $oeLabels)) {
+                        $betPeriod            = strpos($bet->column_type, "FT") !== false ? "FT " : (strpos($bet->column_type, "HT") !== false ? "HT " : "");
+                        $betSelection         = implode("\n", [
+                            $bet->master_team_home_name . " vs " . $bet->master_team_away_name,
+                            $betPeriod . $teamname . " @ " . $bet->odds ."(" . $bet->score_on_bet .")"
+                        ]);
+                    }
+
+                    $data[] = [
+                        'id'            => $bet->id,
+                        'bet_id'        => $bet->ml_bet_identifier,
+                        'created_at'    => $bet->created_at,
+                        'bet_selection' => nl2br($betSelection),
+                        'username'      => $bet->username,
+                        'stake'         => $bet->stake,
+                        'odds'          => $bet->odds,
+                        'to_win'        => $bet->to_win,
+                        'status'        => $bet->status,
+                        'valid_stake'   => $bet->profit_loss ? abs($bet->profit_loss) : 0,
+                        'profit_loss'   => $bet->profit_loss,
+                        'provider_id'   => $bet->provider_id,
+                        'currency_id'   => $bet->currency_id,
+                        'score'         => $score
+                    ];
+
+                    $dups[] = $bet->id;
+                }    
             }
                     
             return response()->json([
