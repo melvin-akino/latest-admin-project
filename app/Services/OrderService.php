@@ -139,8 +139,8 @@ class OrderService
                             'master_league_name',
                             'master_team_home_name',
                             'master_team_away_name',
-                            DB::raw("(SELECT SUM(stake) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'UNPLACED', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as stake"),
-                            DB::raw("(SELECT SUM(to_win) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'UNPLACED', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as to_win"),
+                            DB::raw("(SELECT SUM(stake) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as stake"),
+                            DB::raw("(SELECT SUM(to_win) FROM provider_bets WHERE user_bet_id = ub.id AND status NOT IN ('PENDING', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED')) as to_win"),
                             DB::raw("(SELECT SUM(profit_loss) FROM provider_bets WHERE user_bet_id = ub.id) as profit_loss"),
                             'pb.provider_id',
                             'p.currency_id',
@@ -246,7 +246,7 @@ class OrderService
 
             if ($userBet->update([ 'status' => $request->status ]))
             {
-                $providerBet = ProviderBet::where('user_bet_id', $userBet->id)->where('status', 'SUCCESS')->get();
+                $providerBet = ProviderBet::where('user_bet_id', $userBet->id)->whereNotIn('status', ['PENDING', 'FAILED', 'CANCELLED', 'REJECTED', 'VOID', 'ABNORMAL BET', 'REFUNDED'])->get();
 
                 foreach($providerBet as $bet) {
                     $bet->update([ 'status' => $request->status, 'profit_loss' => $request->pl, 'reason' => $request->reason ]);
@@ -257,7 +257,11 @@ class OrderService
                     'status'      => true,
                     'status_code' => 200,
                     'message'     => 'Order successfully updated.',
-                    'data'        => $userBet
+                    'data'        => [
+                        'id'          => $userBet->id,
+                        'status'      => $request->status,
+                        'profit_loss' => $request->pl
+                    ]
                 ], 200);
             }
         }
