@@ -73,4 +73,15 @@ class SystemConfiguration extends Model
             throw new Exception('Type does not exist.');
         }
     }
+
+    public static function getSystemConfigurationValue(string $type, string $module = "")
+    {
+        $data = self::where('type', $type);
+
+        if ($module != "") {
+            $data = $data->where('module', $module);
+        }
+
+        return $data->first();
+    }
 }
