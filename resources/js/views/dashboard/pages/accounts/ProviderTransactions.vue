@@ -39,7 +39,7 @@
               ></v-text-field>
             </v-col>
           </v-row>
-          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Generate</v-btn>
+          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Apply Filters</v-btn>
         </v-form>
       </div>
       <v-data-table
