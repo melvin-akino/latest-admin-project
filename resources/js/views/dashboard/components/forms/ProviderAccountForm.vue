@@ -15,6 +15,20 @@
           <v-row>
             <v-col cols="12" md="6" class="formColumn">
               <v-text-field
+                label="Line"
+                type="text"
+                outlined
+                dense
+                v-model="$v.providerAccount.line.$model"
+                :error-messages="lineErrors"
+                @input="$v.providerAccount.line.$touch()"
+                @blur="$v.providerAccount.line.$touch()"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-text-field
                 label="Username"
                 type="text"
                 outlined
@@ -137,6 +151,7 @@ export default {
   data: () => ({
     providerAccount: {
       id: null,
+      line: null,
       username: '',
       password: '',
       punter_percentage: '',
@@ -149,6 +164,7 @@ export default {
   validations: {
     providerAccount: {
       username: { required, alphaNum },
+      line: { required },
       password: {
         required: requiredIf(function() {
           return !this.update
@@ -170,6 +186,12 @@ export default {
       if(!this.$v.providerAccount.username.$dirty) return errors
       !this.$v.providerAccount.username.required && errors.push('Username is required.')
       !this.$v.providerAccount.username.alphaNum && errors.push('Username must be alphanumeric.')
+      return errors
+    },
+    lineErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.line.$dirty) return errors
+      !this.$v.providerAccount.line.required && errors.push('Line is required.')
       return errors
     },
     passwordErrors() {
