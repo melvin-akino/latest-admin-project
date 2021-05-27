@@ -5,7 +5,7 @@
         &nbsp;
 
         <div class="absolute shadow-md rounded-lg py-2 px-4 bg-white inset-auto mt-8 items-center justify-center">
-            <img class="object-center" width="75" src="{{ asset('images/icon.png') }}">
+            <img class="object-center" width="75" src="{{ asset('images/logo.png') }}">
         </div>
     </div>
 
