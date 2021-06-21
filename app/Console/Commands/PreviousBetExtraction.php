@@ -98,7 +98,7 @@ class PreviousBetExtraction extends Command
 
             $filename = strtoupper(env('APP_ENV')) . "_Extracted_Bet_Transactions_" . Carbon::now()->format('YmdHis') . ".csv";
             $file     = fopen($filename, 'w');
-            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Status', 'Settled Date', 'Stake', 'Profit Loss', 'Exchange Rate', 'Actual Stake', 'Actual Profit Loss', 'Odds', 'Odd Label'];
+            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status',  'Stake', 'Currency', 'User Stake', 'User PL', 'ML Stake', 'ML PL', 'ML VS', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
             $dups     = [];
             $data     = DB::table('orders AS o')
                 ->join('provider_accounts AS pa', 'pa.id', '=', 'o.provider_account_id')
@@ -106,6 +106,8 @@ class PreviousBetExtraction extends Command
                 ->join('order_logs AS ol', 'ol.order_id', '=', 'o.id')
                 ->join('provider_account_orders AS pao', 'pao.order_log_id', '=', 'ol.id')
                 ->join('odd_types AS ot', 'ot.id', '=', 'o.odd_type_id')
+                ->join('providers AS p', 'p.id', 'o.provider_id')
+                ->join('currency AS c', 'c.id', 'p.currency_id')
                 ->where('o.created_at', '>=', $from)
                 ->where('o.created_at', '<=', $to)
                 ->where('o.bet_id', '!=', "")
@@ -120,15 +122,17 @@ class PreviousBetExtraction extends Command
                     'o.bet_id',
                     'pa.username',
                     'o.created_at',
-                    'o.status',
                     'o.settled_date',
+                    'o.status',
                     'o.stake',
+                    'c.code',
                     'o.profit_loss',
-                    'pao.exchange_rate',
                     'pao.actual_stake',
                     'pao.actual_profit_loss',
                     'o.odds',
-                    'o.odd_label'
+                    'o.odd_label',
+                    'p.alias',
+                    'pao.exchange_rate',
                 ]);
 
             fputcsv($file, $columns);
@@ -141,15 +145,23 @@ class PreviousBetExtraction extends Command
                         $row->bet_id,
                         $row->username,
                         $row->created_at,
-                        $row->status,
                         $row->settled_date,
+                        $row->status,
                         $row->stake,
                         $row->profit_loss,
-                        $row->exchange_rate,
+                        trim($row->code),
+                        $row->stake,
+                        $row->profit_loss,
                         $row->actual_stake,
                         $row->actual_profit_loss,
+                        abs($row->actual_profit_loss),
+                        '',
+                        '',
                         $row->odds,
-                        $row->odd_label
+                        $row->odd_label,
+                        '',
+                        $row->alias,
+                        $row->exchange_rate,
                     ]);
 
                     $dups[] = $row->id;
