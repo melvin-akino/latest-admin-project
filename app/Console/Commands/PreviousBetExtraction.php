@@ -98,7 +98,7 @@ class PreviousBetExtraction extends Command
 
             $filename = strtoupper(env('APP_ENV')) . "_Extracted_Bet_Transactions_" . Carbon::now()->format('YmdHis') . ".csv";
             $file     = fopen($filename, 'w');
-            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status',  'Stake', 'Currency', 'User Stake', 'User PL', 'ML Stake', 'ML PL', 'ML VS', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
+            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status', 'Currency', 'User Stake', 'User PL', 'ML Stake', 'ML PL', 'ML VS', 'Book Stake', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
             $dups     = [];
             $data     = DB::table('orders AS o')
                 ->join('provider_accounts AS pa', 'pa.id', '=', 'o.provider_account_id')
@@ -147,14 +147,13 @@ class PreviousBetExtraction extends Command
                         $row->created_at,
                         $row->settled_date,
                         $row->status,
-                        $row->stake,
-                        $row->profit_loss,
                         trim($row->code),
                         $row->stake,
                         $row->profit_loss,
                         $row->actual_stake,
                         $row->actual_profit_loss,
                         abs($row->actual_profit_loss),
+                        '',
                         '',
                         '',
                         $row->odds,
