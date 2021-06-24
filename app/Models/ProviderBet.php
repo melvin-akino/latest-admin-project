@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Contracts\Activity;
+use Illuminate\Support\Facades\DB;
 
 class ProviderBet extends Model
 {
@@ -71,5 +72,38 @@ class ProviderBet extends Model
         }
 
         return ucfirst($eventName) . " Provider Bet on " . $provider->alias . " with $currency " . $this->stake . " @ " . $this->odds;
+    }
+
+    public static function getReportData($from, $to)
+    {
+        return DB::table('provider_bets AS pb')
+                ->join('user_bets AS ub', 'ub.id', 'pb.user_bet_id')
+                ->join('provider_accounts AS pa', 'pa.id', '=', 'pb.provider_account_id')
+                ->join('users AS u', 'u.id', '=', 'ub.user_id')
+                ->join('provider_bet_transactions AS pbt', 'pbt.provider_bet_id', '=', 'pb.id')
+                ->join('odd_types AS ot', 'ot.id', '=', 'ub.odd_type_id')
+                ->where('pb.created_at', '>=', $from)
+                ->where('pb.created_at', '<=', $to)
+                ->where('pb.bet_id', '!=', "")
+                ->orderBy('pb.id', 'ASC')
+                ->orderBy('pbt.id', 'DESC')
+                ->distinct()
+                ->get([
+                    'pb.id',
+                    'pbt.id',
+                    'u.email',
+                    'ub.ml_bet_identifier',
+                    'pb.bet_id',
+                    'pa.username',
+                    'pb.created_at',
+                    'pb.status',
+                    'pb.settled_date',
+                    'pb.stake',
+                    'pb.profit_loss',
+                    'pbt.actual_stake',
+                    'pbt.actual_profit_loss',
+                    'pb.odds',
+                    'ub.odds_label'
+                ]);
     }
 }
