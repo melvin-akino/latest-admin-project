@@ -14,11 +14,10 @@ class RetryTypesSeeder extends Seeder
     public function run()
     {
         $seedArray = [
-            'auto-new-account'      => "auto retry using new account",
-            'auto-new-account-line' => "auto retry using new account regardless of line",
-            'auto-new-line'         => "auto retry using the new account from the different line",
-            'auto-same-account'     => "auto retry using same account",
-            'manual-same-account'   => "manual retry using same account",
+            'auto-new-account'    => "auto retry using new account",
+            'auto-new-line'       => "auto retry using the new account from the different line",
+            'auto-same-account'   => "auto retry using same account",
+            'manual-same-account' => "manual retry using same account",
         ];
 
         foreach ($seedArray AS $key => $desc) {
