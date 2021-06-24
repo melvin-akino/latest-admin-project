@@ -21,7 +21,7 @@ class RetryTypesSeeder extends Seeder
         ];
 
         foreach ($seedArray AS $key => $desc) {
-            RetryType::create([
+            RetryType::firstOrCreate([
                 'type'        => $key,
                 'description' => $desc,
                 'created_at'  => Carbon::now(),
