@@ -22,7 +22,8 @@ class ProviderAccount extends Model
         'is_idle',
         'deleted_at',
         'uuid',
-        'line'
+        'line',
+        'usage',
     ];
 
     protected $hidden = [
