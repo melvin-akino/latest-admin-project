@@ -7,6 +7,7 @@ use App\Http\Requests\ProviderErrorMessageRequest;
 use App\Models\ProviderErrorMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class ProviderErrorMessagesController extends Controller
 {
