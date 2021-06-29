@@ -34,7 +34,7 @@ class PreviousBetExtraction extends Command
      *
      * @var string
      */
-    protected $signature = 'bets:extract {--dt=} {--step=}';
+    protected $signature = 'bets:extract {--dt=} {--step=} {--provider=}';
 
     /**
      * The console command description.
@@ -53,6 +53,11 @@ class PreviousBetExtraction extends Command
         parent::__construct();
     }
 
+    private $providerTimezones = [
+        'hg'  => 'Etc/GMT+4',
+        'isn' => 'Etc/GMT+4'
+    ];
+
     /**
      * Execute the console command.
      *
@@ -62,7 +67,8 @@ class PreviousBetExtraction extends Command
     {
         try {
             $this->line('Running command...');
-
+            $provider = $this->option('provider') ?? 'hg';
+            $timezone = $this->providerTimezones[$provider];
             $date = is_null($this->option('dt')) ? Carbon::now()->subDay()->format('Y-m-d H:i:') . "00" : $this->option('dt');
             $step = is_null($this->option('step')) ? Carbon::createFromFormat('Y-m-d H:i:s', $date)->diffInDays(Carbon::now()) : $this->option('step');
             $date = is_null($this->option('dt')) && !is_null($this->option('step')) ? Carbon::now()->subDay($step)->format('Y-m-d H:i:') . "00" : $date;
@@ -98,7 +104,7 @@ class PreviousBetExtraction extends Command
 
             $filename = strtoupper(env('APP_ENV')) . "_Extracted_Bet_Transactions_" . Carbon::now()->format('YmdHis') . ".csv";
             $file     = fopen($filename, 'w');
-            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status', 'Currency', 'User Stake', 'User PL', 'ML Stake', 'ML PL', 'ML VS', 'Book Stake', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
+            $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status', 'Currency', 'User Stake', 'User PL', 'User VS', 'ML Stake', 'ML PL', 'ML VS', 'Book Stake', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
             $dups     = [];
             $data     = DB::table('orders AS o')
                 ->join('provider_accounts AS pa', 'pa.id', '=', 'o.provider_account_id')
@@ -111,6 +117,8 @@ class PreviousBetExtraction extends Command
                 ->where('o.created_at', '>=', $from)
                 ->where('o.created_at', '<=', $to)
                 ->where('o.bet_id', '!=', "")
+                ->where('p.alias', strtoupper($provider))
+                ->whereNotIn('o.status', ['FAILED'])
                 ->orderBy('o.id', 'ASC')
                 ->orderBy('pao.order_log_id', 'DESC')
                 ->distinct()
@@ -144,12 +152,13 @@ class PreviousBetExtraction extends Command
                         $row->ml_bet_identifier,
                         $row->bet_id,
                         $row->username,
-                        $row->created_at,
-                        $row->settled_date,
+                        Carbon::createFromFormat("Y-m-d H:i:s", $row->created_at, 'Etc/UTC')->setTimezone($timezone)->format("Y-m-d H:i:s"),
+                        Carbon::createFromFormat("Y-m-d H:i:sO", $row->settled_date, 'Etc/UTC')->setTimezone($timezone)->format("Y-m-d H:i:sO"),
                         $row->status,
                         trim($row->code),
                         $row->stake,
                         $row->profit_loss,
+                        abs($row->profit_loss),
                         $row->actual_stake,
                         $row->actual_profit_loss,
                         abs($row->actual_profit_loss),
