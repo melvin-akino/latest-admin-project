@@ -90,7 +90,7 @@ class PreviousBetExtraction extends Command
                 return;
             }
 
-            $subject = "Your Order Summary";
+            $subject = "Your Order Summary for " . strtoupper($provider);
             $coverage = '';
             if (!is_null($this->option('dt')) || !is_null($this->option('step'))) {
                 if (!is_null($this->option('dt')) && is_null($this->option('step'))) {
@@ -102,7 +102,7 @@ class PreviousBetExtraction extends Command
                 }
             }
 
-            $filename = strtoupper(env('APP_ENV')) . "_Extracted_Bet_Transactions_" . Carbon::now()->format('YmdHis') . ".csv";
+            $filename = strtoupper(env('APP_ENV')) . "_" . strtoupper($provider) . "_Extracted_Bet_Transactions_" . Carbon::now()->format('YmdHis') . ".csv";
             $file     = fopen($filename, 'w');
             $columns  = ['Email Address', 'ML Bet Identifier', 'Provider Bet ID', 'Username', 'Created At', 'Settled Date', 'Status', 'Currency', 'User Stake', 'User PL', 'User VS', 'ML Stake', 'ML PL', 'ML VS', 'Book Stake', 'Book PL', 'Book VS', 'Odds', 'Odd Label', 'Verified', 'Bookmaker', 'Exchange Rate'];
             $dups     = [];
@@ -185,6 +185,8 @@ class PreviousBetExtraction extends Command
 
             $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
             $bcc = explode(',', $bcc->value);
+
+            $coverage .= " for provider " . strtoupper($provider);
 
             Mail::to($to)
               ->cc($cc)
