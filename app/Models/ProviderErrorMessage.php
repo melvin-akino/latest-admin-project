@@ -13,7 +13,9 @@ class ProviderErrorMessage extends Model
      protected $table = "provider_error_messages";
      protected $fillable = [
      	'message',
-     	'error_message_id'
+     	'error_message_id',
+         'retry_type_id',
+         'odds_have_changed'
      ];
 
      protected $hidden = [
