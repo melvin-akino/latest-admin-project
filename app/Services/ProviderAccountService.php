@@ -120,6 +120,7 @@ class ProviderAccountService
                 !empty($request->is_enabled) ? $data['is_enabled'] = true : $data['is_enabled'] = false;
                 !empty($request->is_idle) ? $data['is_idle'] = true : $data['is_idle'] = false;
                 !empty($request->line) ? $data['line'] = $request->line : null;
+                !empty($request->usage) ? $data['usage'] = $request->usage : null;
                 $data['updated_at'] = Carbon::now();
 
                 //Record is on update process
