@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-accounts/orders', 'ProviderTransactionsController@transactions')->name('provider-transactions.api');
     Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
+    Route::get('/provider-accounts/usages', 'ProviderAccountsController@getProviderAccountUsages')->name('get-provider-account-usages.api');
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
