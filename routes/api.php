@@ -97,6 +97,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Provider Errors related routes
     Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
     Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
+    Route::get('retry-types', 'RetryTypesController@index')->name('retry-types.api');
 
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');

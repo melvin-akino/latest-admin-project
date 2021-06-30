@@ -35,6 +35,8 @@ class ProviderErrorMessagesController extends Controller
                     $error = ProviderErrorMessage::where('id', $request->id)->first();
                     $error->message = $request->message;               
                     $error->error_message_id = $request->error_message_id;
+                    $error->odds_have_changed = $request->odds_have_changed;
+                    $error->retry_type_id = $request->retry_type_id;
                     $error->save();
                     $data    = $error;
                     $message = 'success';
