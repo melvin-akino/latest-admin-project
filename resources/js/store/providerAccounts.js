@@ -54,6 +54,7 @@ const mutations = {
       credits: 0,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
+      provider: providerAccount.provider,
       provider_id: providerAccount.provider_id,
       currency_id: providerAccount.currency_id,
       uuid: providerAccount.uuid,
@@ -75,6 +76,7 @@ const mutations = {
       punter_percentage: providerAccount.punter_percentage,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
+      provider: providerAccount.provider,
       provider_id: providerAccount.provider_id,
       currency_id: providerAccount.currency_id,
       usage: providerAccount.usage
