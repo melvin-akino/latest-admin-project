@@ -101,7 +101,10 @@
           <span v-else>{{ item.open_orders | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
+          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccount(item)"></v-select>
+        </template>
+        <template v-slot:[`item.usage`]="{ item }">
+          <v-select :items="providerAccountUsages" dense v-model="item.usage" @change="updateProviderAccount(item)"></v-select>
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
           <span v-if="!item.hasOwnProperty('last_bet')">
@@ -187,6 +190,7 @@ export default {
       { text: "OPEN ORDERS", value: "open_orders" },
       { text: "TYPE", value: "type" },
       { text: "STATUS", value: "status", width: "15%" },
+      { text: "USAGE", value: "usage", width: "15%" },
       { text: "LAST BET", value: "last_bet" },
       { text: "LAST SCRAPE", value: "last_scrape" },
       { text: "LAST SYNC", value: "last_sync" },
@@ -206,7 +210,7 @@ export default {
     searchKey: null
   }),
   computed: {
-    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus"]),
+    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus", "providerAccountUsages"]),
     ...mapState("providers", ["providers"]),
     ...mapGetters("providers", ["providerFilters"]),
     ...mapGetters("currencies", ["currencyFilters"])
@@ -221,7 +225,7 @@ export default {
     ...mapActions("providerAccounts", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('currencies', ['getCurrencies']),
-    async updateProviderAccountStatus(providerAccount) {
+    async updateProviderAccount(providerAccount) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",

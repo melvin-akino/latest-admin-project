@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderAccountRequest;
-use App\Models\{Currency, ProviderAccount, SystemConfiguration as SC};
+use App\Models\{Currency, ProviderAccount, SystemConfiguration as SC, Provider };
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use App\Services\WalletService;
@@ -182,6 +182,8 @@ class ProviderAccountService
 
                     $message = 'success';       
                 }
+
+                $providerAccount->provider = Provider::where('id', $request->provider_id)->first()->alias;
             
                 DB::commit();
                 return response()->json([
