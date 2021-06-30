@@ -30,8 +30,10 @@ class ProviderErrorMessageRequest extends FormRequest
         $uniqueName = "|unique:provider_error_messages,message$update";
 
         return [
-            'message'   => "required|min:2|max:255$uniqueName",
-            'error_message_id'   => "required",
+            'message'           => "required|min:2|max:255$uniqueName",
+            'error_message_id'  => "required",
+            'retry_type_id'     => 'required',
+            'odds_have_changed' => 'required'
         ];
     }
 
