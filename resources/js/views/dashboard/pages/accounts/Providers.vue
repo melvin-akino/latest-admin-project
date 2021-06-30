@@ -52,6 +52,7 @@
         :headers="headers"
         :items="filteredProviderAccounts"
         :items-per-page="10"
+        group-by="line"
         :search="searchKey"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
@@ -60,8 +61,11 @@
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Summary</p>
+            <p class="subtitle-1">Total Accounts: {{ filteredProviderAccounts.length }}</p>
           </v-toolbar>
+        </template>
+        <template v-slot:[`group.header`]="{ headers, toggle, group }">
+          <td :colspan="headers.length" @click="toggle" id="providerGroupHeader">Line: {{group}}</td>
         </template>
         <template v-slot:[`item.credits`]="{ item }">
           <span v-if="!item.hasOwnProperty('credits')">
@@ -176,7 +180,7 @@ export default {
   },
   data: () => ({
     headers: [
-      { text: "LINE", value: "line" },
+      { text: "PROVIDER", value: "provider" },
       { text: "USERNAME", value: "username" },
       { text: "CREDITS", value: "credits" },
       { text: "P/L", value: "pl" },
@@ -303,5 +307,10 @@ export default {
 
 .formColumn {
   padding: 0px 10px;
+}
+
+#providerGroupHeader {
+  cursor: pointer;
+  background-color: #EDEDED;
 }
 </style>
