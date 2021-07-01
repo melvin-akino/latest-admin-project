@@ -15,14 +15,14 @@ class OrderService
     {
         try 
         {
-            $orders = Order::where('provider_account_id', $request->id)
+            $orders = Order::where('orders.provider_account_id', $request->id)
                 ->whereNotNull('orders.bet_id')
                 ->join('order_logs', 'orders.id', 'order_logs.order_id')
                 ->join('provider_accounts', 'orders.provider_account_id', 'provider_accounts.id')
                 ->join('provider_account_orders', 'order_logs.id', 'provider_account_orders.order_log_id')
                 ->select(
                     'orders.id',
-                    'provider_account_id',
+                    'orders.provider_account_id',
                     'actual_stake',
                     'actual_profit_loss',
                     'orders.created_at',
