@@ -4,8 +4,7 @@ import bus from '../eventBus'
 
 const state = {
   providerErrors: [],
-  isLoadingProviderErrors: false,
-  retryTypes: []
+  isLoadingProviderErrors: false
 }
 
 const getters = {
@@ -21,9 +20,6 @@ const mutations = {
   SET_IS_LOADING_PROVIDER_ERRORS: (state, loadingState) => {
     state.isLoadingProviderErrors = loadingState
   },
-  SET_RETRY_TYPES: (state, retryTypes) => {
-    state.retryTypes = retryTypes
-  },
   ADD_PROVIDER_MESSAGE: (state, error) => {
     state.providerErrors.push(error)
   },
@@ -31,9 +27,7 @@ const mutations = {
     state.providerErrors.map(providerError => {
       if(providerError.id == error.id) {
         Vue.set(providerError, 'message', error.message)
-        Vue.set(providerError, 'error', error.error) 
-        Vue.set(providerError, 'retry_type_id', error.retry_type_id) 
-        Vue.set(providerError, 'odds_have_changed', error.odds_have_changed) 
+        Vue.set(providerError, 'error', error.error)
       }
     })
   }
@@ -76,22 +70,7 @@ const actions = {
         dispatch('auth/logoutOnError', err.response.status, { root: true })
       })
     })
-  },
-  getRetryTypes({commit, dispatch}) {
-    axios.get('retry-types', { headers: { 'Authorization': `Bearer ${getToken()}` } })
-    .then(response => {
-      commit('SET_RETRY_TYPES', response.data.data)
-    })
-    .catch(err => {
-      if(!axios.isCancel(err)) {
-        dispatch('auth/logoutOnError', err.response.status, { root: true })
-        bus.$emit("SHOW_SNACKBAR", {
-          color: "error",
-          text: err.response.data.message
-        });
-      }
-    })
-  },
+  }
 }
 
 export default {

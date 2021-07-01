@@ -52,7 +52,6 @@
         :headers="headers"
         :items="filteredProviderAccounts"
         :items-per-page="10"
-        group-by="line"
         :search="searchKey"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
@@ -61,11 +60,8 @@
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Total Accounts: {{ filteredProviderAccounts.length }}</p>
+            <p class="subtitle-1">Summary</p>
           </v-toolbar>
-        </template>
-        <template v-slot:[`group.header`]="{ headers, toggle, group }">
-          <td :colspan="headers.length" @click="toggle" id="providerGroupHeader">Line: {{group}}</td>
         </template>
         <template v-slot:[`item.credits`]="{ item }">
           <span v-if="!item.hasOwnProperty('credits')">
@@ -101,10 +97,7 @@
           <span v-else>{{ item.open_orders | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccount(item)"></v-select>
-        </template>
-        <template v-slot:[`item.usage`]="{ item }">
-          <v-select :items="providerAccountUsages" dense v-model="item.usage" @change="updateProviderAccount(item)"></v-select>
+          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
           <span v-if="!item.hasOwnProperty('last_bet')">
@@ -183,14 +176,13 @@ export default {
   },
   data: () => ({
     headers: [
-      { text: "PROVIDER", value: "provider" },
+      { text: "LINE", value: "line" },
       { text: "USERNAME", value: "username" },
       { text: "CREDITS", value: "credits" },
       { text: "P/L", value: "pl" },
       { text: "OPEN ORDERS", value: "open_orders" },
       { text: "TYPE", value: "type" },
       { text: "STATUS", value: "status", width: "15%" },
-      { text: "USAGE", value: "usage", width: "15%" },
       { text: "LAST BET", value: "last_bet" },
       { text: "LAST SCRAPE", value: "last_scrape" },
       { text: "LAST SYNC", value: "last_sync" },
@@ -210,7 +202,7 @@ export default {
     searchKey: null
   }),
   computed: {
-    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus", "providerAccountUsages"]),
+    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus"]),
     ...mapState("providers", ["providers"]),
     ...mapGetters("providers", ["providerFilters"]),
     ...mapGetters("currencies", ["currencyFilters"])
@@ -225,7 +217,7 @@ export default {
     ...mapActions("providerAccounts", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('currencies', ['getCurrencies']),
-    async updateProviderAccount(providerAccount) {
+    async updateProviderAccountStatus(providerAccount) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
@@ -311,10 +303,5 @@ export default {
 
 .formColumn {
   padding: 0px 10px;
-}
-
-#providerGroupHeader {
-  cursor: pointer;
-  background-color: #EDEDED;
 }
 </style>

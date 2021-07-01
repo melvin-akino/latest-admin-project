@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\ProviderAccountRequest;
-use App\Models\{Currency, ProviderAccount, SystemConfiguration as SC, Provider };
+use App\Models\{Currency, ProviderAccount};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Log};
 use App\Services\WalletService;
@@ -33,9 +33,7 @@ class ProviderAccountService
                     'p.currency_id',
                     'c.code as currency',
                     'uuid',
-                    'line',
-                    'p.alias as provider',
-                    'usage'
+                    'line'
                 ])                                    
                 ->orderBy('provider_accounts.created_at', 'DESC')
                 ->skip($request->offset)
@@ -55,12 +53,10 @@ class ProviderAccountService
                         'is_enabled'        => $account['is_enabled'],
                         'is_idle'           => $account['is_idle'],
                         'provider_id'       => $account['provider_id'],
-                        'provider'          => $account['provider'],
                         'currency_id'       => $account['currency_id'],
                         'currency'          => $account['currency'],
                         'uuid'              => $account['uuid'],
-                        'line'              => $account['line'],
-                        'usage'             => $account['usage'],
+                        'line'              => $account['line']
                     ];
                 }
             }
@@ -78,25 +74,6 @@ class ProviderAccountService
                 'status'      => false,
                 'status_code' => 500,
                 'error'       => trans('responses.internal-error')
-            ], 500);
-        }
-    }
-
-    public static function getProviderAccountUsages() 
-    {
-        try {
-          $providerAccountUsages = explode(',', SC::getSystemConfigurationValue('PROVIDER_ACCOUNT_USAGE')->value);
-
-          return response()->json([
-              'status'      => true,
-              'status_code' => 200,
-              'data'        => $providerAccountUsages
-          ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'status'      => false,
-                'status_code' => 500,
-                'message'     => trans('generic.internal-server-error')
             ], 500);
         }
     }
@@ -143,7 +120,6 @@ class ProviderAccountService
                 !empty($request->is_enabled) ? $data['is_enabled'] = true : $data['is_enabled'] = false;
                 !empty($request->is_idle) ? $data['is_idle'] = true : $data['is_idle'] = false;
                 !empty($request->line) ? $data['line'] = $request->line : null;
-                !empty($request->usage) ? $data['usage'] = $request->usage : null;
                 $data['updated_at'] = Carbon::now();
 
                 //Record is on update process
@@ -182,8 +158,6 @@ class ProviderAccountService
 
                     $message = 'success';       
                 }
-
-                $providerAccount->provider = Provider::where('id', $request->provider_id)->first()->alias;
             
                 DB::commit();
                 return response()->json([

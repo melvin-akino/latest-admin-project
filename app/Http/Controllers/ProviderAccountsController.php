@@ -31,9 +31,4 @@ class ProviderAccountsController extends Controller
     {
         return ProviderAccountFacade::getProviderAccountByUuid($uuid);
     }
-
-    public function getProviderAccountUsages()
-    {
-        return ProviderAccountFacade::getProviderAccountUsages();
-    }
 }

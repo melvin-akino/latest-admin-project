@@ -26,8 +26,7 @@ const state = {
       text: 'No',
       value: false
     }
-  ],
-  providerAccountUsages: []
+  ]
 }
 
 const mutations = {
@@ -40,9 +39,6 @@ const mutations = {
   SET_IS_LOADING_PROVIDER_ACCOUNTS: (state, loadingState) => {
     state.isLoadingProviderAccounts = loadingState
   },
-  SET_PROVIDER_ACCOUNT_USAGES: (state, usages) => {
-    state.providerAccountUsages = usages
-  },
   ADD_PROVIDER_ACCOUNT: (state, providerAccount) => {
     let newProviderAccount = {
       id: providerAccount.id,
@@ -54,11 +50,9 @@ const mutations = {
       credits: 0,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider: providerAccount.provider,
       provider_id: providerAccount.provider_id,
       currency_id: providerAccount.currency_id,
       uuid: providerAccount.uuid,
-      usage: providerAccount.usage,
       pl: '-',
       open_orders: '-',
       last_bet: '-',
@@ -76,10 +70,8 @@ const mutations = {
       punter_percentage: providerAccount.punter_percentage,
       is_enabled: providerAccount.is_enabled,
       is_idle: providerAccount.is_idle,
-      provider: providerAccount.provider,
       provider_id: providerAccount.provider_id,
-      currency_id: providerAccount.currency_id,
-      usage: providerAccount.usage
+      currency_id: providerAccount.currency_id
     }
     state.providerAccounts.map(account => {
       if (account.id == providerAccount.id) {
@@ -124,7 +116,6 @@ const actions = {
     try {
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', true)
       let providerAccounts = await dispatch('getProviderAccounts')
-      await dispatch('getProviderAccountUsages')
       commit('SET_PROVIDER_ACCOUNTS', providerAccounts)
       commit('SET_FILTERED_PROVIDER_ACCOUNTS', providerAccounts)
       commit('SET_IS_LOADING_PROVIDER_ACCOUNTS', false)
@@ -184,21 +175,6 @@ const actions = {
       .catch(err => {
         reject(err)
         dispatch('auth/logoutOnError', err.response.status, { root: true })
-      })
-    })
-  },
-  getProviderAccountUsages({commit, dispatch}) {
-    return new Promise((resolve, reject) => {
-      axios.get('provider-accounts/usages', { headers: { 'Authorization': `Bearer ${getToken()}` } })
-      .then(response => {
-        commit('SET_PROVIDER_ACCOUNT_USAGES', response.data.data)
-        resolve()
-      })
-      .catch(err => {
-        if(!axios.isCancel(err)) {
-          reject(err)
-          dispatch('auth/logoutOnError', err.response.status, { root: true })
-        }
       })
     })
   }

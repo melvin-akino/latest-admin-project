@@ -40,7 +40,6 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-accounts/orders', 'ProviderTransactionsController@transactions')->name('provider-transactions.api');
     Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
-    Route::get('/provider-accounts/usages', 'ProviderAccountsController@getProviderAccountUsages')->name('get-provider-account-usages.api');
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
@@ -97,7 +96,6 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Provider Errors related routes
     Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
     Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
-    Route::get('retry-types', 'RetryTypesController@index')->name('retry-types.api');
 
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');

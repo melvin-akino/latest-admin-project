@@ -29,13 +29,9 @@ class ProviderErrorMessageRequest extends FormRequest
         $update = !empty($existingErrorMessage->id) ? ",$existingErrorMessage->id" : '';  
         $uniqueName = "|unique:provider_error_messages,message$update";
 
-        $retryType = $this->input('retry_type_id') ? 'exists:retry_types,id' : '';
-
         return [
-            'message'           => "required|min:2|max:255$uniqueName",
-            'error_message_id'  => "required",
-            'retry_type_id'     => $retryType,
-            'odds_have_changed' => "required|boolean"
+            'message'   => "required|min:2|max:255$uniqueName",
+            'error_message_id'   => "required",
         ];
     }
 

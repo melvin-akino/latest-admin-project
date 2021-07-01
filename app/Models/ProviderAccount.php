@@ -22,8 +22,7 @@ class ProviderAccount extends Model
         'is_idle',
         'deleted_at',
         'uuid',
-        'line',
-        'usage',
+        'line'
     ];
 
     protected $hidden = [
@@ -31,7 +30,7 @@ class ProviderAccount extends Model
         'updated_at',
     ];
 
-    protected static $logAttributes = ['username', 'type', 'punter_percentage', 'provider_id', 'is_enabled', 'is_idle', 'line', 'usage'];
+    protected static $logAttributes = ['username', 'type', 'punter_percentage', 'provider_id', 'is_enabled', 'is_idle'];
 
     protected static $logOnlyDirty = true;
 

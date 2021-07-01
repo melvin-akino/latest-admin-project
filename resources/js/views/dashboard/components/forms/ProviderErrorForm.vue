@@ -43,29 +43,6 @@
               ></v-select>
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="12" md="12" class="formColumn">
-              <v-select
-                :items="retryTypes"
-                label="Retry Type"
-                placeholder="Select Retry Type"
-                item-text="type"
-                item-value="id"
-                outlined
-                clearable
-                dense
-                v-model="providerError.retry_type_id"
-              ></v-select>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="12" class="formColumn">
-              <v-checkbox
-                label="Odds Have Changed"
-                v-model="providerError.odds_have_changed"
-              ></v-checkbox>
-            </v-col>
-          </v-row>
         </v-container>
       </v-card-text>
       <v-card-actions>
@@ -93,14 +70,12 @@ import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions } from 'vuex'
 
 export default {
-  props: ["update", "errorToUpdate", "generalErrors", "retryTypes"],
+  props: ["update", "errorToUpdate", "generalErrors"],
   data: () => ({
     providerError: {
       id: null,
       message: '',
-      error_message_id: null,
-      retry_type_id: null,
-      odds_have_changed: false
+      error_message_id: null
     }
   }),
   validations: {
@@ -207,10 +182,5 @@ export default {
 <style>
 .formColumn {
   padding: 5px 10px;
-}
-
-.providerErrorForm .formColumn .v-input--selection-controls {
-  margin: 0;
-  padding: 0;
 }
 </style>
