@@ -41,7 +41,8 @@
             "App\\": "app/"
         },
         "classmap": [
-            "database/factories"
+            "database/factories",
+            "database/seeds"
         ],
         "files": [
             "app/helper.php"
