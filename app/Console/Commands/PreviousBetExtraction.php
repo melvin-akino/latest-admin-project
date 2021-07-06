@@ -153,7 +153,7 @@ class PreviousBetExtraction extends Command
                         $row->bet_id,
                         $row->username,
                         Carbon::createFromFormat("Y-m-d H:i:s", $row->created_at, 'Etc/UTC')->setTimezone($timezone)->format("Y-m-d H:i:s"),
-                        (is_null($row->settled_date) ? null : Carbon::createFromFormat("Y-m-d H:i:sO", $row->settled_date, 'Etc/UTC')->setTimezone($timezone)->format("Y-m-d H:i:sO")),
+                        updateSettledDateTimezone($row->settled_date, $timezone),
                         $row->status,
                         trim($row->code),
                         $row->stake,
