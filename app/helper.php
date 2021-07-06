@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 if (!function_exists('getMilliseconds')) {
     function getMilliseconds()
@@ -47,5 +48,12 @@ if (!function_exists('monitorLog')) {
     function monitorLog(string $channel, string $level, $data)
     {
       Log::channel($channel)->{$level}(json_encode($data));
+    }
+}
+
+if (!function_exists('updateDateTimezone')) {
+    function updateDateTimezone($date = null, $format, $timezone = 'Etc/UTC')
+    {
+        return empty($date) ? $date : Carbon::createFromFormat($format, $date, 'Etc/UTC')->setTimezone($timezone)->format($format);
     }
 }
