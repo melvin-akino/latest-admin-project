@@ -51,9 +51,9 @@ if (!function_exists('monitorLog')) {
     }
 }
 
-if (!function_exists('updateSettledDateTimezone')) {
-    function updateSettledDateTimezone($date = null, $timezone = 'Etc/UTC')
+if (!function_exists('updateDateTimezone')) {
+    function updateDateTimezone($date = null, $format, $timezone = 'Etc/UTC')
     {
-        return empty($date) ? $date : Carbon::createFromFormat("Y-m-d H:i:sO", $date, 'Etc/UTC')->setTimezone($timezone)->format("Y-m-d H:i:sO");
+        return empty($date) ? $date : Carbon::createFromFormat($format, $date, 'Etc/UTC')->setTimezone($timezone)->format($format);
     }
 }
