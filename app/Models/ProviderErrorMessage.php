@@ -13,7 +13,9 @@ class ProviderErrorMessage extends Model
      protected $table = "provider_error_messages";
      protected $fillable = [
      	'message',
-     	'error_message_id'
+     	'error_message_id',
+         'retry_type_id',
+         'odds_have_changed'
      ];
 
      protected $hidden = [
@@ -21,7 +23,7 @@ class ProviderErrorMessage extends Model
         'updated_at',
     ];
 
-    protected static $logAttributes = ['message', 'error_message_id'];
+    protected static $logAttributes = ['message', 'error_message_id', 'retry_type_id', 'odds_have_changed'];
 
     protected static $logOnlyDirty = true;
 
@@ -44,7 +46,10 @@ class ProviderErrorMessage extends Model
             ->select(
                 'provider_error_messages.id',
                 'message',
+                'error_message_id',
                 'em.error',
+                'odds_have_changed',
+                'retry_type_id'
             )
             ->orderBy('provider_error_messages.created_at', 'desc')
             ->get()
