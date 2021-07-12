@@ -118,6 +118,18 @@
                 @blur="$v.providerAccount.provider_id.$touch()"
               ></v-select>
             </v-col>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-select
+                :items="providerAccountUsages"
+                label="Usage"
+                outlined
+                dense
+                v-model="$v.providerAccount.usage.$model"
+                :error-messages="usageErrors"
+                @input="$v.providerAccount.usage.$touch()"
+                @blur="$v.providerAccount.usage.$touch()"
+              ></v-select>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -158,7 +170,8 @@ export default {
       type: 'BET_NORMAL',
       is_enabled: true,
       is_idle: true,
-      provider_id: 1
+      provider_id: 1,
+      usage: 'OPEN'
     }
   }),
   validations: {
@@ -175,11 +188,12 @@ export default {
       type: { required },
       is_enabled: { required },
       is_idle: { required },
-      provider_id: { required }
+      provider_id: { required },
+      usage: { required }
     }
   },
   computed: {
-    ...mapState("providerAccounts", ["providerAccountStatus", "providerAccountTypes", "providerAccountIdleOptions"]),
+    ...mapState("providerAccounts", ["providerAccountStatus", "providerAccountTypes", "providerAccountIdleOptions", "providerAccountUsages"]),
     ...mapState("providers", ["providers"]),
     usernameErrors() {
       let errors = []
@@ -229,10 +243,15 @@ export default {
     providerErrors() {
       let errors = []
       if(!this.$v.providerAccount.provider_id.$dirty) return errors
-      !this.$v.providerAccount.provider_id.required && errors.push('Idle is required.')
+      !this.$v.providerAccount.provider_id.required && errors.push('Provider is required.')
+      return errors
+    },
+    usageErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.usage.$dirty) return errors
+      !this.$v.providerAccount.usage.required && errors.push('Usage is required.')
       return errors
     }
-
   },
   mounted() {
     this.initializeProviderAccount()
