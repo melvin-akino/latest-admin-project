@@ -140,6 +140,11 @@ const router = new Router({
               path: 'history',
               component: () => import('./views/dashboard/pages/matching/MatchingHistory'),
             },
+            {
+              name: 'Aliases',
+              path: 'aliases',
+              component: () => import('./views/dashboard/pages/matching/Aliases'),
+            },
           ]
         },
         {

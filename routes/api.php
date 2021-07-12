@@ -54,12 +54,14 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
         Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
         Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
+        Route::post('/alias', 'LeaguesController@updateAlias')->name('update-leagues-alias.api');
     });
         
     // Teams routes
-    Route::get('/raw-teams', 'TeamsController@getRawTeams')->name('teams.api');
-    Route::get('/matched-teams', 'TeamsController@getTeams')->name('matched-teams.api');
-    Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
+    Route::prefix('teams')->group(function() {
+        Route::get('/matched', 'TeamsController@getMatchedTeams')->name('matched-teams.api');
+        Route::post('/alias', 'TeamsController@updateAlias')->name('update-teams-alias.api');
+    });
 
     // Events routes
     Route::prefix('events')->group(function() {
