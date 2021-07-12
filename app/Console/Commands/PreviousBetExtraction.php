@@ -98,7 +98,7 @@ class PreviousBetExtraction extends Command
                 } else if (is_null($this->option('dt')) && !is_null($this->option('step'))) {
                     $coverage .= 'from present minus ' . $this->option('step') . ' days';
                 } else {
-                    $coverage .= Carbon::createFromFormat('Y-m-d H:i:s', $this->option('dt'))->format('F d, Y H:i:s') . " - " . Carbon::createFromFormat('Y-m-d H:i:s', $this->option('dt'))->addDays($this->option('step'))->format('F d, Y H:i:s');
+                    $coverage .= updateDateTimezone(Carbon::createFromFormat('Y-m-d H:i:s', $this->option('dt'))->addSecond()->format('F d, Y H:i:s'), 'F d, Y H:i:s', $timezone) . " - " . updateDateTimezone(Carbon::createFromFormat('Y-m-d H:i:s', $this->option('dt'))->addDays($this->option('step'))->format('F d, Y H:i:s'), 'F d, Y H:i:s', $timezone);
                 }
             }
 
