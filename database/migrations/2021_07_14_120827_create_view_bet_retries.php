@@ -18,6 +18,7 @@ class CreateViewBetRetries extends Migration
         DB::statement("CREATE VIEW bet_retries AS
             SELECT
                 o.id,
+                o.ml_bet_identifier,
                 pa.username,
                 p.alias,
                 o.bet_selection,
