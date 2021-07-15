@@ -24,7 +24,8 @@ class CreateViewBetRetries extends Migration
                 o.bet_selection,
                 ol.status,
                 ol.reason,
-                rt.\"type\"
+                rt.\"type\",
+                u.email
             FROM orders AS o
             LEFT JOIN order_logs AS ol
                 ON ol.order_id = o.id
@@ -36,6 +37,8 @@ class CreateViewBetRetries extends Migration
                 ON pa.id = o.provider_account_id
             LEFT JOIN providers AS p
                 ON p.id = o.provider_id
+            LEFT JOIN users AS u
+                ON u.id = o.user_id
             ORDER BY ol.id DESC;
         ");
     }
