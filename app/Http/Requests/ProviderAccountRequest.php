@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\ProviderAccount;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Log;
 
 class ProviderAccountRequest extends FormRequest
 {
