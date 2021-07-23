@@ -265,5 +265,21 @@ class OrderService
             ], 500);
         }
     }
+
+    public static function getBetRetries($request) {
+        $searchKey = $request->has('searchKey') ? $request->searchKey : '';
+        $page      = $request->has('page') ? $request->page : 1;
+        $limit     = $request->has('limit') ? $request->limit : 10;
+
+        $betRetries = Order::getBetRetries($searchKey);
+
+        return response()->json([
+          'status'      => true,
+          'status_code' => 200,
+          'total'       => $betRetries->count(),
+          'pageNum'     => $page,
+          'pageData'    => $betRetries->offset(($page - 1) * $limit)->limit($limit)->get()
+      ]);
+    }
 }
 

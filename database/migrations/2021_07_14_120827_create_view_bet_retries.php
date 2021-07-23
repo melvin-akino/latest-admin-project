@@ -17,7 +17,8 @@ class CreateViewBetRetries extends Migration
 
         DB::statement("CREATE VIEW bet_retries AS
             SELECT
-                o.id,
+                ol.id as order_log_id,
+                o.id as order_id,
                 o.ml_bet_identifier,
                 pa.username,
                 p.alias,
@@ -25,7 +26,8 @@ class CreateViewBetRetries extends Migration
                 ol.status,
                 ol.reason,
                 rt.\"type\",
-                u.email
+                u.email,
+                ol.created_at
             FROM orders AS o
             LEFT JOIN order_logs AS ol
                 ON ol.order_id = o.id

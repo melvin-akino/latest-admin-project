@@ -25,4 +25,9 @@ class OrdersController extends Controller
     {
         return OrderFacade::update($request);
     }
+
+    public function getBetRetries(Request $request)
+    {
+        return OrderFacade::getBetRetries($request);
+    }
 }
