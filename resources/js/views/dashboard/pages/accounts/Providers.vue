@@ -239,7 +239,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.errors.message
+          text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.message
         });
       }
     },
