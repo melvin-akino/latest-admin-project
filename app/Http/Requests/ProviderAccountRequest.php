@@ -25,20 +25,19 @@ class ProviderAccountRequest extends FormRequest
      */
     public function rules()
     {
-        $accounts = ProviderAccount::withTrashed()->where('username', $this->input('username'))->where('provider_id', $this->input('provider_id'))->get();
+        $account = ProviderAccount::withTrashed()->where('username', $this->input('username'))->where('provider_id', $this->input('provider_id'));
         $uniqueUsername = "";
-        if (!empty($accounts)) {
-            foreach($accounts as $account) {
-                if ($account->id == $this->input('id')){
-                    $uniqueUsername = "|unique:provider_accounts,username,{$account->id},id,deleted_at,NULL";
-                    break;
-                }
-                elseif (is_null($account->deleted_at) && empty($this->input('id'))) {
+
+        if($account->exists()) {
+            if(empty($this->input('id'))) {
+                $uniqueUsername = "|unique:provider_accounts,username";
+            } else {
+                $account = $account->first();
+                if($account->id != $this->input('id') && $account->username == $this->input('username') && $account->provider_id == $this->input('provider_id')) {
                     $uniqueUsername = "|unique:provider_accounts,username";
-                    break;
                 }
-            }    
-        }      
+            }
+        }
         
         return [
             'line'              => 'required',
@@ -46,6 +45,13 @@ class ProviderAccountRequest extends FormRequest
             'username'          => 'required|max:50'.$uniqueUsername,
             'password'          => 'required',
             'punter_percentage' => 'required|numeric'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'username.unique' => 'A username with that provider already exists.'
         ];
     }
 
