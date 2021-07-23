@@ -148,6 +148,18 @@ const router = new Router({
           ]
         },
         {
+          name: 'User Betting',
+          path: 'user_betting',
+          component: () => import('./views/dashboard/pages/UserBetting'),
+          children: [
+            {
+              name: 'Bet Retries',
+              path: 'retries',
+              component: () => import('./views/dashboard/pages/betting/Retries')
+            }
+          ]
+        },
+        {
           name: 'User Profile',
           path: 'pages/user',
           component: () => import('./views/dashboard/pages/UserProfile'),

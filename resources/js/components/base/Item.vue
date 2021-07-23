@@ -49,11 +49,7 @@
       title: {
         type: String,
         default: '',
-      },
-      hasClickEvent: {
-        type: Boolean,
-        default: false,
-      },
+      }
     },
 
     computed: {

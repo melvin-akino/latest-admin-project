@@ -40,7 +40,6 @@
         :key="`item-${i}`"
         :item="child"
         :title="child.title"
-        :hasClickEvent="child.hasClickEvent"
         text
       />
     </template>

@@ -64,7 +64,7 @@ export default {
         to: "/accounts/users"
       },
       {
-        icon: "mdi-account-cash",
+        icon: "mdi-account-tie",
         title: "Provider Accounts",
         to: "/accounts/providers"
       },
@@ -116,36 +116,42 @@ export default {
           {
             icon: "mdi-trophy",
             title: "Leagues",
-            to: "leagues",
-            hasClickEvent: false
+            to: "leagues"
           },
           {
             icon: "mdi-calendar-blank",
             title: "Events",
-            to: "events",
-            hasClickEvent: false
+            to: "events"
           },
           {
             icon: "mdi-history",
             title: "History",
-            to: "history",
-            hasClickEvent: false
+            to: "history"
           },
           {
             icon: "mdi-alpha-a-box-outline",
             title: "Aliases",
-            to: "aliases",
-            hasClickEvent: false
+            to: "aliases"
           },
           {
             icon: "mdi-refresh-circle",
-            title: "Reprocess Data",
-            hasClickEvent: true
+            title: "Reprocess Data"
           },
           {
             icon: "mdi-delete-variant",
-            title: "Clear Duplicates",
-            hasClickEvent: true
+            title: "Clear Duplicates"
+          }
+        ]
+      },
+      {
+        icon: "mdi-account-cash",
+        title: "User Betting",
+        group: "/user_betting",
+        children: [
+          {
+            icon: "mdi-credit-card-refresh",
+            title: "Retries",
+            to: "retries"
           }
         ]
       }
