@@ -41,11 +41,7 @@ class CreateViewBetRetries extends Migration
                 ON p.id = o.provider_id
             LEFT JOIN users AS u
                 ON u.id = o.user_id
-            WHERE (
-                ol.provider_account_id IS NOT NULL
-                OR
-                ol.settled_date IS NOT NULL
-            )
+            WHERE ol.provider_account_id IS NOT NULL
             ORDER BY ol.id DESC
         ");
     }
