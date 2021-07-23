@@ -23,14 +23,25 @@
         :loading="isLoadingRetries"
         loading-text="Loading bet retries"
       >
-        <template v-slot:[`group.header`]="{ headers, toggle, group, items }">
-          <td :colspan="headers.length" @click="toggle" id="retryHeader">
-            <p class="font-weight-medium">{{group}}</p>
-            <p class="font-italic">{{items.filter(item => item.ml_bet_identifier == group).map(item => item.email)[0]}}</p>
-          </td>
-        </template>
-        <template v-slot:[`item.bet_selection`]="{ item }">
-          <span class="betSelection">{{item.bet_selection}}</span>
+        <template v-slot:group="{ items, group }">
+          <tr class="v-row-group__header">
+            <td colspan="8" id="retryHeader" @click="toggle(group)">
+              <p class="font-weight-medium">{{group}}</p> 
+              <p class="font-italic">{{items.filter(item => item.ml_bet_identifier == group).map(item => item.email)[0]}}</p>
+            </td>
+          </tr>
+          <tr v-for="bet in removeInitialPending(items)" :key="bet.order_log_id" :class="[ hiddenGroups.includes(group) ? 'hidden' : '' ]">
+            <td class="text-start">{{bet.order_log_id}}</td>
+            <td class="text-start">{{bet.created_at}}</td>
+            <td class="text-start">
+              <span class="betSelection">{{bet.bet_selection}}</span>
+            </td>
+            <td class="text-start">{{bet.username}}</td>
+            <td class="text-start">{{bet.alias}}</td>
+            <td class="text-start">{{bet.status}}</td>
+            <td class="text-start">{{bet.reason}}</td>
+            <td class="text-start">{{bet.type}}</td>
+          </tr>
         </template>
       </v-data-table>
     </v-container>
@@ -45,6 +56,7 @@ import bus from '../../../../eventBus'
 export default {
   data: () => ({
     headers: [ 
+      { text: 'ID', value: 'order_log_id', sortable: false },
       { text: 'Transaction Date and Time', value: 'created_at', sortable: false },
       { text: 'Bet Selection', value: 'bet_selection', sortable: false },
       { text: 'Provider Account', value: 'username', sortable: false },
@@ -57,7 +69,8 @@ export default {
     isLoadingRetries: false,
     totalRetries: 0,
     options: {},
-    searchKey: ''
+    searchKey: '',
+    hiddenGroups: []
   }),
   watch: {
     options: {
@@ -81,6 +94,20 @@ export default {
   },
   methods: {
     ...mapActions('auth', ['logoutOnError']),
+    toggle(group) {
+      if(this.hiddenGroups.includes(group)) {
+        this.hiddenGroups = this.hiddenGroups.filter(item => item != group)
+      } else {
+        this.hiddenGroups.push(group)
+      }
+    },
+    removeInitialPending(bets) {
+      if(bets.length > 1 && bets[0].status == 'PENDING' && !bets[0].provider_account_id && bets[1].status == 'PENDING') {
+        bets.shift()
+        return bets
+      }
+      return bets
+    },
     getBetRetries(params) {
       axios.get('orders/bet/retries', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
       .then(response => {
@@ -120,5 +147,9 @@ export default {
 #retryHeader p {
   margin: 0;
   padding: 3px;
+}
+
+.hidden {
+  display: none;
 }
 </style>

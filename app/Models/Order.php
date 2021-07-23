@@ -48,6 +48,7 @@ class Order extends Model
                 ->orWhere('reason', 'ILIKE', '%'.$searchKey.'%')
                 ->orWhere('type', 'ILIKE', '%'.$searchKey.'%')
                 ->orWhere('email', 'ILIKE', '%'.$searchKey.'%')
-                ->orderBy('created_at');
+                ->orderBy('order_id', 'DESC')
+                ->orderBy('order_log_id');
     }
 }

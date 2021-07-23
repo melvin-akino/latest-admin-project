@@ -27,7 +27,8 @@ class CreateViewBetRetries extends Migration
                 ol.reason,
                 rt.\"type\",
                 u.email,
-                ol.created_at
+                ol.created_at,
+                ol.provider_account_id
             FROM orders AS o
             LEFT JOIN order_logs AS ol
                 ON ol.order_id = o.id
