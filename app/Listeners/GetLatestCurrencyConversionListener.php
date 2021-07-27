@@ -77,6 +77,20 @@ class GetLatestCurrencyConversionListener
                         }
 
                         if (!empty($err)) {
+                            $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
+                            $to = explode(',', $to->value);
+
+                            $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
+                            $cc = explode(',', $cc->value);
+
+                            $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
+                            $bcc = explode(',', $bcc->value);
+
+                            Mail::to($to)
+                              ->cc($cc)
+                              ->bcc($bcc)
+                              ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
+
                             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
                         }
 
