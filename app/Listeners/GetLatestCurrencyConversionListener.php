@@ -61,28 +61,24 @@ class GetLatestCurrencyConversionListener
                             'default_amount' => 1,
                             'exchange_rate'  => $response
                         ]);
+
                         echo trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response . "\n";
+
                         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
                     } else {
-                        $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
-                        $to = explode(',', $to->value);
+                        // If $err is empty but $response is not a valid converted amount.
+                        if (!floatval($response)) {
+                            Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
+                            Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
+                        }
 
-                        $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
-                        $cc = explode(',', $cc->value);
-
-                        $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
-                        $bcc = explode(',', $bcc->value);
-
-                        Mail::to($to)
-                          ->cc($cc)
-                          ->bcc($bcc)
-                          ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
+                        echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.\n";
 
                         Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
                     }
                 }
 
-                Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Success!");
+                Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Done!");
             } else {
                 Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : No Currencies found to convert.");
             }
