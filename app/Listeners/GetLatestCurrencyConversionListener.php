@@ -68,7 +68,7 @@ class GetLatestCurrencyConversionListener
                     } else if ($currency->from_id == $currency->to_id) {
                         echo "Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".\n";
 
-                        Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".\n");
+                        Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".");
                     } else {
                         // If $err is empty but $response is not a valid converted amount.
                         if (!empty($response) || !floatval($response)) {
