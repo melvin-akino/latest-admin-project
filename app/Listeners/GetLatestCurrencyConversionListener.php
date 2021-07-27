@@ -29,6 +29,8 @@ class GetLatestCurrencyConversionListener
 
         try {
             if (!empty($event->currencies)) {
+                $hasAPIError = 0;
+
                 foreach ($event->currencies as $currency) {
                     $api  = sprintf($event->conversionApi, trim($currency->from_code), trim($currency->to_code));
                     $curl = curl_init();
@@ -70,32 +72,35 @@ class GetLatestCurrencyConversionListener
 
                         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".");
                     } else {
-                        // If $err is empty but $response is not a valid converted amount.
                         if (!empty($response) || !floatval($response)) {
                             Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
                             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
                         }
 
                         if (!empty($err)) {
-                            $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
-                            $to = explode(',', $to->value);
-
-                            $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
-                            $cc = explode(',', $cc->value);
-
-                            $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
-                            $bcc = explode(',', $bcc->value);
-
-                            Mail::to($to)
-                              ->cc($cc)
-                              ->bcc($bcc)
-                              ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
+                            $hasAPIError += 1;
 
                             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
                         }
 
                         echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.\n";
                     }
+                }
+
+                if ($hasAPIError) {
+                    $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
+                    $to = explode(',', $to->value);
+
+                    $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
+                    $cc = explode(',', $cc->value);
+
+                    $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
+                    $bcc = explode(',', $bcc->value);
+
+                    Mail::to($to)
+                      ->cc($cc)
+                      ->bcc($bcc)
+                      ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
                 }
 
                 Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Done!");
