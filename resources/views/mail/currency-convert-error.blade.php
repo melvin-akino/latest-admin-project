@@ -12,7 +12,7 @@
     <div class="w-full pt-8 pb-2 px-10">
         <p>Greetings!,</p><br>
 
-        <p>Something went wrong.</p>
+        <p>Something went wrong with the <strong>Currency Conversion API</strong>. Please check the logs for more information.</p>
 
         <p>Thank you for using Multiline.</p>
     </div>
