@@ -53,7 +53,7 @@ class GetLatestCurrencyConversionListener
 
                     curl_close($curl);
 
-                    if (empty($err) && !empty($response) && floatval($response)) {
+                    if (empty($err) && !empty($response) && floatval($response) && ($currency->from_id != $currency->to_id)) {
                         ExchangeRate::updateOrCreate([
                             'from_currency_id' => $currency->from_id,
                             'to_currency_id'   => $currency->to_id,
@@ -65,6 +65,10 @@ class GetLatestCurrencyConversionListener
                         echo trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response . "\n";
 
                         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
+                    } else if ($currency->from_id == $currency->to_id) {
+                        echo "Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".\n";
+
+                        Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".\n");
                     } else {
                         // If $err is empty but $response is not a valid converted amount.
                         if (!empty($response) || !floatval($response)) {
