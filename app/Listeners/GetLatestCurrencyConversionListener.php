@@ -67,7 +67,7 @@ class GetLatestCurrencyConversionListener
                         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
                     } else {
                         // If $err is empty but $response is not a valid converted amount.
-                        if (!floatval($response)) {
+                        if (!empty($response) || !floatval($response)) {
                             Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
                             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
                         }
