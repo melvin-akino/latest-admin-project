@@ -87,10 +87,10 @@ class GetLatestCurrencyConversionListener
                 }
 
                 if ($hasAPIError) {
-                    mailNotify();
+                    self::mailNotify();
                 }
 
-                echo "Currency Conversion DONE!";
+                echo "Currency Conversion DONE!\n";
                 Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Done!");
             } else {
                 echo "No Currencies found to convert.";
