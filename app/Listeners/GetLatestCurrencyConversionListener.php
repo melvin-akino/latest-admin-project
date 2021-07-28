@@ -28,7 +28,7 @@ class GetLatestCurrencyConversionListener
         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Running Command...");
 
         try {
-            $this->line('Running Currency Conversion...');
+            echo "Running Currency Conversion...";
 
             if (!empty($event->currencies)) {
                 $hasAPIError = 0;
@@ -58,10 +58,8 @@ class GetLatestCurrencyConversionListener
                     curl_close($curl);
 
                     if (empty($response) || !floatval($response)) {
-                        $this->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
-                        $this->error("Response return invalid amount.");
-                        Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
-                        Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
+                        echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Response return invalid amount.\n";
+                        Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Response return invalid amount.");
 
                         continue;
                     }
@@ -69,7 +67,7 @@ class GetLatestCurrencyConversionListener
                     if (!empty($err)) {
                         $hasAPIError += 1;
 
-                        $this->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
+                        echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.\n";
                         Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
 
                         continue;
@@ -83,7 +81,7 @@ class GetLatestCurrencyConversionListener
                         'exchange_rate'  => $response
                     ]);
 
-                    $this->line(trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
+                    echo trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response . ".\n";
                     Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
                 }
 
@@ -91,14 +89,14 @@ class GetLatestCurrencyConversionListener
                     mailNotify();
                 }
 
-                $this->info('Currency Conversion DONE!');
+                echo "Currency Conversion DONE!";
                 Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Done!");
             } else {
-                $this->line("No Currencies found to convert.");
+                echo "No Currencies found to convert.";
                 Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : No Currencies found to convert.");
             }
         } catch (Exception $e) {
-            $this->line("Something went wrong. Please check the logs.");
+            echo "Something went wrong. Please check the logs.";
             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $e->getMessage());
         }
     }
