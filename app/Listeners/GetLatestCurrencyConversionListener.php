@@ -28,6 +28,8 @@ class GetLatestCurrencyConversionListener
         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Running Command...");
 
         try {
+            $this->line('Running Currency Conversion...');
+
             if (!empty($event->currencies)) {
                 $hasAPIError = 0;
 
@@ -55,60 +57,66 @@ class GetLatestCurrencyConversionListener
 
                     curl_close($curl);
 
-                    if (empty($err) && !empty($response) && floatval($response) && ($currency->from_id != $currency->to_id)) {
-                        ExchangeRate::updateOrCreate([
-                            'from_currency_id' => $currency->from_id,
-                            'to_currency_id'   => $currency->to_id,
-                        ], [
-                            'default_amount' => 1,
-                            'exchange_rate'  => $response
-                        ]);
+                    if (empty($response) || !floatval($response)) {
+                        $this->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
+                        $this->error("Response return invalid amount.");
+                        Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
+                        Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
 
-                        echo trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response . "\n";
-
-                        Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
-                    } else if ($currency->from_id == $currency->to_id) {
-                        echo "Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".\n";
-
-                        Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Skipped converting from " . trim($currency->from_code) . " to " . trim($currency->to_code) . ".");
-                    } else {
-                        if (!empty($response) || !floatval($response)) {
-                            Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
-                            Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : Response return invalid amount.");
-                        }
-
-                        if (!empty($err)) {
-                            $hasAPIError += 1;
-
-                            Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
-                        }
-
-                        echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.\n";
+                        continue;
                     }
+
+                    if (!empty($err)) {
+                        $hasAPIError += 1;
+
+                        $this->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Please check the logs.");
+                        Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $err);
+
+                        continue;
+                    }
+
+                    ExchangeRate::updateOrCreate([
+                        'from_currency_id' => $currency->from_id,
+                        'to_currency_id'   => $currency->to_id,
+                    ], [
+                        'default_amount' => 1,
+                        'exchange_rate'  => $response
+                    ]);
+
+                    $this->line(trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
+                    Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : " . trim($currency->from_code) . " to " . trim($currency->to_code) . " equals " . $response);
                 }
 
                 if ($hasAPIError) {
-                    $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
-                    $to = explode(',', $to->value);
-
-                    $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
-                    $cc = explode(',', $cc->value);
-
-                    $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
-                    $bcc = explode(',', $bcc->value);
-
-                    Mail::to($to)
-                      ->cc($cc)
-                      ->bcc($bcc)
-                      ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
+                    mailNotify();
                 }
 
+                $this->info('Currency Conversion DONE!');
                 Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Done!");
             } else {
+                $this->line("No Currencies found to convert.");
                 Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : No Currencies found to convert.");
             }
         } catch (Exception $e) {
+            $this->line("Something went wrong. Please check the logs.");
             Log::channel($this->channel)->error("[CURRENCY_CONVERSION_ERROR] : " . $e->getMessage());
         }
+    }
+
+    private static function mailNotify()
+    {
+        $to = SC::getSystemConfigurationValue('CSV_EMAIL_TO');
+        $to = explode(',', $to->value);
+
+        $cc = SC::getSystemConfigurationValue('CSV_EMAIL_CC');
+        $cc = explode(',', $cc->value);
+
+        $bcc = SC::getSystemConfigurationValue('CSV_EMAIL_BCC');
+        $bcc = explode(',', $bcc->value);
+
+        Mail::to($to)
+          ->cc($cc)
+          ->bcc($bcc)
+          ->send(new NotifyCurrencyConvertError("Currency Conversion Error"));
     }
 }
