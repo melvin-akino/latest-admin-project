@@ -28,7 +28,7 @@ class GetLatestCurrencyConversionListener
         Log::channel($this->channel)->info("[CURRENCY_CONVERSION] : Running Command...");
 
         try {
-            echo "Running Currency Conversion...";
+            echo "Running Currency Conversion...\n";
 
             if (!empty($event->currencies)) {
                 $hasAPIError = 0;
@@ -57,9 +57,10 @@ class GetLatestCurrencyConversionListener
 
                     curl_close($curl);
 
-                    if (empty($response) || !floatval($response)) {
+                    if (empty($response) || (!empty($response) && !floatval($response))) {
                         echo "Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Response return invalid amount.\n";
                         Log::channel($this->channel)->error("Error Converting " . trim($currency->from_code) . " to " . trim($currency->to_code) . ". Response return invalid amount.");
+                        Log::channel($this->channel)->error("Response: " . json_encode($response));
 
                         continue;
                     }
