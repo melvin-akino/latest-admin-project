@@ -40,7 +40,7 @@ class ProviderAccountTypeCheck extends Command
      */
     public function handle()
     {
-        $types = ['BET_NORMAL', 'BET_VIP', 'SCRAPER', 'SCRAPER_MIN_MAX'];
+        $types = SystemConfiguration::where('module', 'ProviderAccount')->pluck('type')->toArray();
         $allInactiveTypes = [];
 
         foreach($types as $type) {

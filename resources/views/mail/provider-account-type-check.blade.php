@@ -10,7 +10,7 @@
     </div>
 
     <div class="w-full pt-8 pb-2 px-10">
-        <p>Greetings!,</p><br>
+        <p>Greetings!</p><br>
 
         <p>Someone should check the provider accounts now. There are NO ACTIVE accounts for these types: </p>
         <ul>
