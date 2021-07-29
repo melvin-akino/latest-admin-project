@@ -103,4 +103,14 @@ class Team extends Model
     {
         return $this->hasOne(TeamGroup::class, 'team_id', 'id');
     }
+
+    public static function getMatchedTeamsByMasterTeamId(int $masterTeamId)
+    {
+        return self::join('team_groups as tg', 'tg.team_id', 'teams.id')
+                ->join('providers as p', 'p.id', 'teams.provider_id')
+                ->where('tg.master_team_id', $masterTeamId)
+                ->select('teams.id', 'teams.name', 'provider_id', 'p.alias as provider', 'sport_id')
+                ->orderBy('p.id', 'asc')
+                ->get();
+    }
 }

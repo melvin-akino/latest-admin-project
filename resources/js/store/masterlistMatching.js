@@ -106,6 +106,20 @@ const mutations = {
   },
   SET_UNMATCHING_DATA: (state, data) => {
     state.unmatchingData = data
+  },
+  SET_LEAGUE_ALIAS: (state, data) => {
+    state.matchedData.map(item => {
+      if(item.master_league_id == data.master_league_id) {
+        Vue.set(item, 'alias', data.alias)
+      }
+    })
+  },
+  SET_TEAM_ALIAS: (state, data) => {
+    state.matchedData.map(item => {
+      if(item.master_team_id == data.master_team_id) {
+        Vue.set(item, 'alias', data.alias)
+      }
+    })
   }
 }
 
@@ -250,6 +264,25 @@ const actions = {
       }
     })
   },
+  getMatchedTeams({commit, dispatch, state}) {
+    let params = state.matchedDataParams
+    axios.get('teams/matched', { params: params, headers: { 'Authorization': `Bearer ${getToken()}` } })
+    .then(response => {
+      commit('SET_MATCHED_DATA', response.data.pageData)
+      commit('SET_TOTAL_MATCHED_DATA', response.data.total)
+      commit('SET_IS_LOADING_MATCHED_DATA', false)
+    })
+    .catch(err => {
+      commit('SET_MATCHED_DATA', [])
+      if(!axios.isCancel(err)) {
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+        bus.$emit("SHOW_SNACKBAR", {
+          color: "error",
+          text: err.response.data.message
+        });
+      }
+    })
+  },
   matchLeague({dispatch, state}) {
     return new Promise((resolve, reject) => {
       let payload = {
@@ -338,6 +371,40 @@ const actions = {
         dispatch('getPrimaryProviderMatchedLeagues')
         dispatch('getMatchedLeagues')
         resolve()
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  updateLeagueAlias({commit, dispatch}, params) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        master_league_id: params.id,
+        alias: params.alias
+      }
+      axios.post('leagues/alias', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('SET_LEAGUE_ALIAS', payload)
+        resolve(response.data.message)
+      })
+      .catch(err => {
+        reject(err)
+        dispatch('auth/logoutOnError', err.response.status, { root: true })
+      })
+    })
+  },
+  updateTeamAlias({commit, dispatch}, params) {
+    return new Promise((resolve, reject) => {
+      let payload = {
+        master_team_id: params.id,
+        alias: params.alias
+      }
+      axios.post('teams/alias', payload , { headers: { 'Authorization': `Bearer ${getToken()}` } })
+      .then(response => {
+        commit('SET_TEAM_ALIAS', payload)
+        resolve(response.data.message)
       })
       .catch(err => {
         reject(err)

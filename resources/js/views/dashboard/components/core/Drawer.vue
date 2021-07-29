@@ -132,6 +132,12 @@ export default {
             hasClickEvent: false
           },
           {
+            icon: "mdi-alpha-a-box-outline",
+            title: "Aliases",
+            to: "aliases",
+            hasClickEvent: false
+          },
+          {
             icon: "mdi-refresh-circle",
             title: "Reprocess Data",
             hasClickEvent: true

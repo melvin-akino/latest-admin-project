@@ -15,6 +15,20 @@
           <v-row>
             <v-col cols="12" md="6" class="formColumn">
               <v-text-field
+                label="Line"
+                type="text"
+                outlined
+                dense
+                v-model="$v.providerAccount.line.$model"
+                :error-messages="lineErrors"
+                @input="$v.providerAccount.line.$touch()"
+                @blur="$v.providerAccount.line.$touch()"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-text-field
                 label="Username"
                 type="text"
                 outlined
@@ -104,6 +118,18 @@
                 @blur="$v.providerAccount.provider_id.$touch()"
               ></v-select>
             </v-col>
+            <v-col cols="12" md="6" class="formColumn">
+              <v-select
+                :items="providerAccountUsages"
+                label="Usage"
+                outlined
+                dense
+                v-model="$v.providerAccount.usage.$model"
+                :error-messages="usageErrors"
+                @input="$v.providerAccount.usage.$touch()"
+                @blur="$v.providerAccount.usage.$touch()"
+              ></v-select>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -137,18 +163,21 @@ export default {
   data: () => ({
     providerAccount: {
       id: null,
+      line: null,
       username: '',
       password: '',
       punter_percentage: '',
       type: 'BET_NORMAL',
       is_enabled: true,
       is_idle: true,
-      provider_id: 1
+      provider_id: 1,
+      usage: 'OPEN'
     }
   }),
   validations: {
     providerAccount: {
       username: { required, alphaNum },
+      line: { required },
       password: {
         required: requiredIf(function() {
           return !this.update
@@ -159,17 +188,24 @@ export default {
       type: { required },
       is_enabled: { required },
       is_idle: { required },
-      provider_id: { required }
+      provider_id: { required },
+      usage: { required }
     }
   },
   computed: {
-    ...mapState("providerAccounts", ["providerAccountStatus", "providerAccountTypes", "providerAccountIdleOptions"]),
+    ...mapState("providerAccounts", ["providerAccountStatus", "providerAccountTypes", "providerAccountIdleOptions", "providerAccountUsages"]),
     ...mapState("providers", ["providers"]),
     usernameErrors() {
       let errors = []
       if(!this.$v.providerAccount.username.$dirty) return errors
       !this.$v.providerAccount.username.required && errors.push('Username is required.')
       !this.$v.providerAccount.username.alphaNum && errors.push('Username must be alphanumeric.')
+      return errors
+    },
+    lineErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.line.$dirty) return errors
+      !this.$v.providerAccount.line.required && errors.push('Line is required.')
       return errors
     },
     passwordErrors() {
@@ -207,10 +243,15 @@ export default {
     providerErrors() {
       let errors = []
       if(!this.$v.providerAccount.provider_id.$dirty) return errors
-      !this.$v.providerAccount.provider_id.required && errors.push('Idle is required.')
+      !this.$v.providerAccount.provider_id.required && errors.push('Provider is required.')
+      return errors
+    },
+    usageErrors() {
+      let errors = []
+      if(!this.$v.providerAccount.usage.$dirty) return errors
+      !this.$v.providerAccount.usage.required && errors.push('Usage is required.')
       return errors
     }
-
   },
   mounted() {
     this.initializeProviderAccount()
@@ -246,7 +287,7 @@ export default {
         } catch(err) {
           bus.$emit("SHOW_SNACKBAR", {
             color: "error",
-            text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.errors.message
+            text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.message
           });
         }
       } else {

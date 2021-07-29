@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Currency extends Model
 {
@@ -58,5 +59,22 @@ class Currency extends Model
     public function exchange_rate()
     {
         return $this->hasMany(ExchangeRate::class);
+    }
+
+    public static function getCurrenciesForConversion()
+    {
+        return DB::table('currency AS cfrom')
+            ->join('currency AS cto', function ($join) {
+                $join->on('cfrom.id', '=', 'cto.id');
+                $join->orOn('cfrom.id', '!=', 'cto.id');
+            })
+            ->orderBy('cfrom.id', 'asc')
+            ->orderBy('cto.id', 'asc')
+            ->get([
+                'cfrom.id AS from_id',
+                'cfrom.code AS from_code',
+                'cto.id AS to_id',
+                'cto.code AS to_code'
+            ]);
     }
 }

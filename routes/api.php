@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     Route::get('/provider-accounts/orders', 'ProviderTransactionsController@transactions')->name('provider-transactions.api');
     Route::get('/provider-account/{id}', 'ProviderAccountsController@getProviderAccount')->name('get-provider-account-by-id.api');
     Route::get('/provider-account/uuid/{uuid}', 'ProviderAccountsController@getProviderAccountByUuid')->name('get-provider-account-by-uuid.api');
+    Route::get('/provider-accounts/usages', 'ProviderAccountsController@getProviderAccountUsages')->name('get-provider-account-usages.api');
 
     //Providers routes
     Route::get('/providers', 'ProvidersController@index')->name('providers.api');
@@ -53,12 +54,14 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
         Route::get('/unmatched/{providerId?}', 'LeaguesController@getUnmatchedLeagues')->name('unmatched-leagues.api');
         Route::get('/matched/primary', 'LeaguesController@getPrimaryProviderMatchedLeagues')->name('primary-provider-matched-leagues.api');
         Route::get('/matched', 'LeaguesController@getMatchedLeagues')->name('matched-leagues.api');
+        Route::post('/alias', 'LeaguesController@updateAlias')->name('update-leagues-alias.api');
     });
         
     // Teams routes
-    Route::get('/raw-teams', 'TeamsController@getRawTeams')->name('teams.api');
-    Route::get('/matched-teams', 'TeamsController@getTeams')->name('matched-teams.api');
-    Route::post('/teams/match', 'TeamsController@postMatchTeams')->name('match-teams.api');
+    Route::prefix('teams')->group(function() {
+        Route::get('/matched', 'TeamsController@getMatchedTeams')->name('matched-teams.api');
+        Route::post('/alias', 'TeamsController@updateAlias')->name('update-teams-alias.api');
+    });
 
     // Events routes
     Route::prefix('events')->group(function() {
@@ -96,6 +99,7 @@ Route::group(['middleware' => ['auth:api', 'admin.active']], function () {
     //Provider Errors related routes
     Route::get('/provider-errors', 'ProviderErrorMessagesController@index')->name('provider-errors.api');
     Route::post('/provider-errors/manage', 'ProviderErrorMessagesController@manage')->name('provider-errors-manage.api');
+    Route::get('retry-types', 'RetryTypesController@index')->name('retry-types.api');
 
     //Customer related routes
     Route::get('/users', 'UsersController@index')->name('users.api');

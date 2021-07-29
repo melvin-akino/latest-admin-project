@@ -66,7 +66,8 @@ class LeaguesController extends Controller
             $result[] = [
                 'master_league_id' => $data->id,
                 'is_priority' => $data->is_priority,
-                'leagues' => League::getMatchedLeaguesByMasterLeagueId($data->id)->toArray()
+                'alias'   => $data->alias,
+                'leagues' => League::getMatchedLeaguesByMasterLeagueId($data->id)->toArray(),
             ];
         }
 
@@ -136,6 +137,38 @@ class LeaguesController extends Controller
                 'message'     => 'success'
             ], 200);
 
+        } catch (Exception $e) {
+            return response()->json([
+                'status'      => false,
+                'status_code' => 500,
+                'errors'      => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateAlias(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'master_league_id' => 'required|int|exists:master_leagues,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response([
+                    'errors' => $validator->errors()->all()
+                ], 422);
+            }
+
+            $masterLeague = MasterLeague::find($request->master_league_id);
+            $masterLeague->update([
+                'name' => $request->alias
+            ]);
+
+            return response()->json([
+                'status'      => true,
+                'status_code' => 200,
+                'message'     => 'League alias was updated.'
+            ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'status'      => false,

@@ -14,6 +14,7 @@
                 v-model="search.provider"
                 background-color="#fff"
                 @change="setCurrencyFilter(search.provider)"
+                class="filter"
               ></v-select>
             </v-col>
           </v-row>
@@ -26,14 +27,23 @@
                 dense
                 v-model="search.currency"
                 background-color="#fff"
+                class="filter"
               ></v-select>
             </v-col>
           </v-row>
-          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Generate</v-btn>
+          <v-btn type="submit" color="primary" depressed elevation="2" dark height="30">Apply Filters</v-btn>
         </v-form>
       </div>
       <v-toolbar flat color="transparent">
         <v-spacer></v-spacer>
+        <v-text-field
+          v-model="searchKey"
+          append-icon="mdi-magnify"
+          label="Search Accounts"
+          hide-details
+          class="subtitle-1"
+          style="max-width: 200px;"
+        ></v-text-field>
         <button-dialog icon="mdi-plus" label="New Account" width="600" @clearFilters="clearFilters">
           <provider-account-form :update="false"></provider-account-form>
         </button-dialog>
@@ -42,6 +52,8 @@
         :headers="headers"
         :items="filteredProviderAccounts"
         :items-per-page="10"
+        group-by="line"
+        :search="searchKey"
         :loading="isLoadingProviderAccounts"
         loading-text="Loading Provider Accounts"
         :page="page"
@@ -49,8 +61,11 @@
       >
         <template v-slot:top>
           <v-toolbar flat color="primary" height="40px" dark>
-            <p class="subtitle-1">Summary</p>
+            <p class="subtitle-1">Total Accounts: {{ filteredProviderAccounts.length }}</p>
           </v-toolbar>
+        </template>
+        <template v-slot:[`group.header`]="{ headers, toggle, group }">
+          <td :colspan="headers.length" @click="toggle" id="providerGroupHeader">Line: {{group}}</td>
         </template>
         <template v-slot:[`item.credits`]="{ item }">
           <span v-if="!item.hasOwnProperty('credits')">
@@ -86,7 +101,10 @@
           <span v-else>{{ item.open_orders | moneyFormat }}</span>    
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccountStatus(item)"></v-select>
+          <v-select :items="providerAccountStatus" dense v-model="item.is_enabled" @change="updateProviderAccount(item)"></v-select>
+        </template>
+        <template v-slot:[`item.usage`]="{ item }">
+          <v-select :items="providerAccountUsages" dense v-model="item.usage" @change="updateProviderAccount(item)"></v-select>
         </template>
         <template v-slot:[`item.last_bet`]="{ item }">
           <span v-if="!item.hasOwnProperty('last_bet')">
@@ -165,12 +183,14 @@ export default {
   },
   data: () => ({
     headers: [
+      { text: "PROVIDER", value: "provider" },
       { text: "USERNAME", value: "username" },
       { text: "CREDITS", value: "credits" },
       { text: "P/L", value: "pl" },
       { text: "OPEN ORDERS", value: "open_orders" },
       { text: "TYPE", value: "type" },
       { text: "STATUS", value: "status", width: "15%" },
+      { text: "USAGE", value: "usage", width: "15%" },
       { text: "LAST BET", value: "last_bet" },
       { text: "LAST SCRAPE", value: "last_scrape" },
       { text: "LAST SYNC", value: "last_sync" },
@@ -186,10 +206,11 @@ export default {
       provider: 'all',
       currency: 'all'
     },
-    page: null
+    page: null,
+    searchKey: null
   }),
   computed: {
-    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus"]),
+    ...mapState("providerAccounts", ["providerAccounts", "filteredProviderAccounts", "isLoadingProviderAccounts", "providerAccountStatus", "providerAccountUsages"]),
     ...mapState("providers", ["providers"]),
     ...mapGetters("providers", ["providerFilters"]),
     ...mapGetters("currencies", ["currencyFilters"])
@@ -204,7 +225,7 @@ export default {
     ...mapActions("providerAccounts", ["getProviderAccountsList", "manageProviderAccount"]),
     ...mapActions('providers', ['getProviders']),
     ...mapActions('currencies', ['getCurrencies']),
-    async updateProviderAccountStatus(providerAccount) {
+    async updateProviderAccount(providerAccount) {
       try {
         bus.$emit("SHOW_SNACKBAR", {
           color: "success",
@@ -218,7 +239,7 @@ export default {
       } catch(err) {
         bus.$emit("SHOW_SNACKBAR", {
           color: "error",
-          text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.errors.message
+          text: err.response.data.hasOwnProperty('errors') ?  err.response.data.errors[Object.keys(err.response.data.errors)[0]][0] : err.response.data.message
         });
       }
     },
@@ -284,11 +305,16 @@ export default {
   padding: 16px;
 }
 
-.providers .theme--light.v-label {
+.filter .theme--light.v-label {
   color: #000;
 }
 
 .formColumn {
   padding: 0px 10px;
+}
+
+#providerGroupHeader {
+  cursor: pointer;
+  background-color: #EDEDED;
 }
 </style>
