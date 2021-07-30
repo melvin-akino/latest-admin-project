@@ -16,10 +16,10 @@ class ProviderAccountTypeCheckMail extends Mailable
      *
      * @return void
      */
-    public function __construct($subject, $types)
+    public function __construct($subject, $accounts)
     {
         $this->subject = $subject;
-        $this->types = $types;
+        $this->accounts = $accounts;
     }
 
     /**
@@ -29,7 +29,7 @@ class ProviderAccountTypeCheckMail extends Mailable
      */
     public function build()
     {
-        return $this->view('mail.provider-account-type-check', ['types' => $this->types])
+        return $this->view('mail.provider-account-type-check', ['accounts' => $this->accounts])
                     ->subject($this->subject);
     }
 }

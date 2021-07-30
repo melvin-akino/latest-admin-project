@@ -42,6 +42,7 @@ class ProviderAccountTypeCheck extends Command
     {
         $types = SystemConfiguration::where('module', 'ProviderAccount')->pluck('type')->toArray();
         $allInactiveTypes = [];
+        $allInactiveAccounts = [];
 
         foreach($types as $type) {
             $accounts         = ProviderAccount::where('type', $type);
@@ -50,7 +51,8 @@ class ProviderAccountTypeCheck extends Command
             if($accounts->exists()) {
                 if($accounts->count() == $inactiveAccounts->count()) {
                     $this->error($type . ' type HAVE NO active accounts.');
-                    $allInactiveTypes[] = $type;
+                    $allInactiveTypes[] = $type; 
+                    $allInactiveAccounts[$type] = $inactiveAccounts->with('provider')->get(); 
                 } else {
                     $this->info($type . ' type HAVE active accounts.');
                 }
@@ -66,7 +68,7 @@ class ProviderAccountTypeCheck extends Command
             $subject = '[CRITICAL] Provider Account Warning';
 
             Mail::to($to)
-              ->send(new ProviderAccountTypeCheckMail($subject, $allInactiveTypes));
+              ->send(new ProviderAccountTypeCheckMail($subject, $allInactiveAccounts));
         } else {
             $this->line('All types have active accounts.');
         }
