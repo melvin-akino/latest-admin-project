@@ -14,8 +14,15 @@
 
         <p>Someone should check the provider accounts now. There are NO ACTIVE accounts for these types: </p>
         <ul>
-            @foreach ($types as $type)
-                <li>{{$type}}</li>
+            @foreach ($accounts as $type => $account)
+                <li>
+                  {{$type}}
+                  <ul>
+                      @foreach ($account as $account)
+                          <li>{{$account->username}} ({{$account->provider->alias}})</li>
+                      @endforeach  
+                  </ul>              
+              </li>
             @endforeach
         </ul>
     </div>
