@@ -48,9 +48,10 @@ class ProviderAccountTypeCheck extends Command
             $accounts         = ProviderAccount::where('type', $type);
             $inactiveAccounts = ProviderAccount::where('type', $type)->where('is_enabled', false);
             $inactivePercentage = round(($inactiveAccounts->count() * 100) / $accounts->count(), 2);
+            $invalidAccountThreshold = SystemConfiguration::getSystemConfigurationValue('PROVIDER_ACCOUNT_INACTIVE_THRESHOLD')->value;
 
             if($accounts->exists()) {
-                if($inactivePercentage >= 80) {
+                if($inactivePercentage >= $invalidAccountThreshold) {
                     $this->error($type . ' type HAVE TOO MANY inactive accounts.');
                     $allInactiveTypes[] = $type; 
                     $allInactiveAccounts[$type] = $inactiveAccounts->with('provider')->get(); 
