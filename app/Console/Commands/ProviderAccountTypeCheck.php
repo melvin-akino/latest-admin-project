@@ -47,30 +47,33 @@ class ProviderAccountTypeCheck extends Command
         foreach($types as $type) {
             $accounts         = ProviderAccount::where('type', $type);
             $inactiveAccounts = ProviderAccount::where('type', $type)->where('is_enabled', false);
+            $inactivePercentage = round(($inactiveAccounts->count() * 100) / $accounts->count(), 2);
+            $invalidAccountThreshold = SystemConfiguration::getSystemConfigurationValue('PROVIDER_ACCOUNT_INACTIVE_THRESHOLD')->value;
 
             if($accounts->exists()) {
-                if($accounts->count() == $inactiveAccounts->count()) {
-                    $this->error($type . ' type HAVE NO active accounts.');
+                if($inactivePercentage >= $invalidAccountThreshold) {
+                    $this->error($type . ' type HAVE TOO MANY inactive accounts.');
                     $allInactiveTypes[] = $type; 
                     $allInactiveAccounts[$type] = $inactiveAccounts->with('provider')->get(); 
                 } else {
-                    $this->info($type . ' type HAVE active accounts.');
+                    $this->info($type . ' type HAVE enough active accounts.');
                 }
             }
         }
 
         if(!empty($allInactiveTypes)) {
-            $this->line(implode(', ', $allInactiveTypes) . ' accounts are all inactive.');
+            $this->line(implode(', ', $allInactiveTypes) . ' type have too many inactive accounts.');
 
             $to = SystemConfiguration::getSystemConfigurationValue('PROVIDER_ACCOUNT_TYPE_CHECK_EMAIL_TO');
             $to = explode(',', $to->value);
 
             $subject = '[CRITICAL] Provider Account Warning';
+            $env = env('APP_ENV', 'local');
 
             Mail::to($to)
-              ->send(new ProviderAccountTypeCheckMail($subject, $allInactiveAccounts));
+              ->send(new ProviderAccountTypeCheckMail($env, $subject, $allInactiveAccounts));
         } else {
-            $this->line('All types have active accounts.');
+            $this->line('All types have enough active accounts.');
         }
     }
 }
