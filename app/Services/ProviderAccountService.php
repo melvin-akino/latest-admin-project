@@ -165,7 +165,7 @@ class ProviderAccountService
                     $provider = Provider::where('id', $providerAccount->provider_id)->first()->alias;
 
                     if ($providerAccount->is_enabled == false && $data['is_enabled'] == true) {
-                        $srem = self::removeRedisCache(strtolower($provider), $data['username']);
+                        self::removeRedisCache(strtolower($provider), $data['username']);
                     }
 
                     $providerAccount->update($data);
@@ -190,7 +190,6 @@ class ProviderAccountService
                 }
 
                 $providerAccount->provider = Provider::where('id', $request->provider_id)->first()->alias;
-                $providerAccount->srem = !empty($srem) ? $srem : 0;
                 DB::commit();
                 return response()->json([
                     'status'      => true,
@@ -260,6 +259,6 @@ class ProviderAccountService
 
     public static function removeRedisCache($provider,$username) 
     {
-        return Redis::srem("session:$provider:users", "$username");
+        return Redis::srem("session:$provider:users", $username);
     }
 }
