@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Http\Requests\ProviderAccountRequest;
 use App\Models\{Currency, ProviderAccount, SystemConfiguration as SC, Provider };
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{DB, Log};
+use Illuminate\Support\Facades\{DB, Log, Redis};
 use App\Services\WalletService;
 use Carbon\Carbon;
 use Exception;
@@ -162,6 +162,12 @@ class ProviderAccountService
                 }               
 
                 if (!empty($providerAccount)) {
+                    $provider = Provider::where('id', $providerAccount->provider_id)->first()->alias;
+
+                    if ($providerAccount->is_enabled == false && $data['is_enabled'] == true) {
+                        self::removeRedisCache(strtolower($provider), $data['username']);
+                    }
+
                     $providerAccount->update($data);
                     $message  = 'success';   
                 }
@@ -184,7 +190,6 @@ class ProviderAccountService
                 }
 
                 $providerAccount->provider = Provider::where('id', $request->provider_id)->first()->alias;
-            
                 DB::commit();
                 return response()->json([
                     'status'      => true,
@@ -250,5 +255,10 @@ class ProviderAccountService
                 'message'     => trans('generic.internal-server-error')
             ], 500);
         }
+    }
+
+    public static function removeRedisCache($provider,$username) 
+    {
+        return Redis::srem("session:$provider:users", $username);
     }
 }
