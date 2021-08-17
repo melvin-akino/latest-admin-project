@@ -67,8 +67,8 @@ class ProviderAccountTypeCheck extends Command
             $to = SystemConfiguration::getSystemConfigurationValue('PROVIDER_ACCOUNT_TYPE_CHECK_EMAIL_TO');
             $to = explode(',', $to->value);
 
-            $subject = '[CRITICAL] Provider Account Warning';
             $env = env('APP_ENV', 'local');
+            $subject = '[CRITICAL] Provider Account Warning for ' . strtoupper($env) . ' Environment';
 
             Mail::to($to)
               ->send(new ProviderAccountTypeCheckMail($env, $subject, $allInactiveAccounts));
