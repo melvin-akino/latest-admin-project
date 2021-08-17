@@ -12,7 +12,7 @@
     <div class="w-full pt-8 pb-2 px-10">
         <p>Greetings!</p><br>
 
-        <p>Someone should check the provider accounts in the <b>{{$env}}</b> environment. There are too many INACTIVE accounts for these types: </p>
+        <p>Someone should check the provider accounts in the <b style="text-transform:uppercase;">{{$env}}</b> environment. There are too many INACTIVE accounts for these types: </p>
         <ul>
             @foreach ($accounts as $type => $account)
                 <li>
