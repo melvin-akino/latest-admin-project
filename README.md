@@ -54,10 +54,28 @@ Add to supervisor and add
 automatching - php artisan automatching
 sidebarleagues - php artisan sidebar:leagues
 
+Add in crontab
+0 0 * * *  php /var/www/html/artisan currency:convert
+1 6 * * *  /bin/bash -c "/root/reporting.sh" > /var/log/reporting.log 2>&1
+1 7 * * MON  /bin/bash -c "/root/7daysreporting.sh" > /var/log/7daysreporting.log 2>&1
+
+2 Days Reporting
+/root/reporting.sh
+#!/bin/bash
+today=$(date --date="-2 days" +%Y-%m-%d)
+echo "today $today "
+php /var/www/html/artisan bets:extract --dt="$today 03:59:00" --step=2
+ 
+
+Weekly Reporting
+/root/7daysreporting.sh
+#!/bin/bash
+today=$(date --date="-7 days" +%Y-%m-%d)
+echo "today $today "
+php /var/www/html/artisan bets:extract --dt="$today 03:59:00" --step=7
 
 
 Create an HG client in Multiline Admin
-
 https://dev.admin.multiline.io/
 https://uat.admin.multiline.io/
 https://admin.multiline.io/
