@@ -1,78 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Initial setup for ml-admin-v2:
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+Copy the .env.example and create a .env file
 
-## About Laravel
+The .env file must have the following properties:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+APP_URL=[site_url]
+MIX_API_URL=[site_url]/api
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+WALLET_URL=[wallet_url]/api/v1
+WALLET_CLIENT_ID=[wallet_client]
+WALLET_CLIENT_SECRET=[wallet_secret]
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+DB_CONNECTION=pgsql
+DB_HOST=[host]
+DB_PORT=[port]
+DB_DATABASE=[dbname]
+DB_USERNAME=[dbuser]
+DB_PASSWORD=[dbpassword]
 
-## Learning Laravel
+KAFKA_BROKERS=[kafka_broker]
+KAFKA_DEBUG=[true/false]
+KAFKA_GROUP_ID=[kafka_group_id]
+KAFKA_REACTOR=[true/false]
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+REDIS_CLIENT=[redis_client]
+REDIS_CLUSTER=[redis_cluster]
+REDIS_HOST=[redis_host]
+QUEUE_CONNECTION=[queue_connection]
+REDIS_PORT=[redis_port]
+REDIS_DB=[redis_db]
+REDIS_CACHE_DB=[redis_cache]
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+If a key already exists just override its value depending on what you need
 
-## Laravel Sponsors
+Run the following command in order:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+$ git fetch origin
+$ git checkout master
+$ git pull origin master
+$ composer install # only if first time or there is a new PHP package
+$ php artisan key:generate # one time run
+$ php artisan cache:clear
+$ php artisan config:clear
+$ composer dump-autoload
+$ php artisan migrate # only if first time or there is a new migration file (checking can be done using php artisan migrate:status command)
+$ php artisan passport:install # one time run
+$ npm install  # only if first time or there is a new JS package
+$ npm run prod
+$ cd /var/www/html/ && chmod -R 775 storage && chown -R $USER:www-data storage
+$ cp /etc/php/7.3/cli/conf.d/200-rdkafka.ini /etc/php/7.3/fpm/conf.d/200-rdkafka.ini
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-- [Appoly](https://www.appoly.co.uk)
-- [OP.GG](https://op.gg)
+Add to supervisor and add
+automatching - php artisan automatching
+sidebarleagues - php artisan sidebar:leagues
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+Create an HG client in Multiline Admin
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+https://dev.admin.multiline.io/
+https://uat.admin.multiline.io/
+https://admin.multiline.io/
 
-## Security Vulnerabilities
+Login Details
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+email: superadmin@ninepinetech.com
+password: 9pinesecurity@dmin
 
-## License
+Go to Wallet Clients, click New Client and add an HG client with the following parameters:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Example:
+name: HG //ISN //PIN
+client_id: hg //isn //pin
+client_secret: "40fe9ad4949331a12f5f19b477133924" // md5('hg') | md5('isn') | md5('pin')
+
+
+
