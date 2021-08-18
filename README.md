@@ -75,22 +75,5 @@ echo "today $today "
 php /var/www/html/artisan bets:extract --dt="$today 03:59:00" --step=7
 
 
-Create an HG client in Multiline Admin
-https://dev.admin.multiline.io/
-https://uat.admin.multiline.io/
-https://admin.multiline.io/
-
-Login Details
-
-email: superadmin@ninepinetech.com
-password: 9pinesecurity@dmin
-
-Go to Wallet Clients, click New Client and add an HG client with the following parameters:
-
-Example:
-name: HG //ISN //PIN
-client_id: hg //isn //pin
-client_secret: "40fe9ad4949331a12f5f19b477133924" // md5('hg') | md5('isn') | md5('pin')
-
 
 
